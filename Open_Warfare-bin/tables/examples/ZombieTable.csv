@@ -1,0 +1,4 @@
+ID,TEXTURE,SPEED,HP,DAMAGE,ATTACKRATE
+0,graphics/bloater.png,40,100,10,2
+1,graphics/chaser.png,70,75,5,0.5
+2,graphics/crawler.png,20,50,7,1
