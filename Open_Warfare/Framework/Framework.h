@@ -14,8 +14,8 @@ protected:
 
 	sf::Clock clock;
 
-	int screenWidth = 1280;
-	int screenHeight = 720;
+	int screenWidth = 1600;
+	int screenHeight = 900;
 	std::string title = "Open Dungeon Warfare";
 
 public:
