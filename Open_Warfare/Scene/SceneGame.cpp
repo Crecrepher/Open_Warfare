@@ -98,5 +98,4 @@ void SceneGame::MouseMove()
 		}
 		worldView.setCenter((mouseMove - INPUT_MGR.GetMousePos()));
 	}
-	std::cout << worldView.getCenter().x << "   " << worldView.getCenter().y << std::endl;
 }

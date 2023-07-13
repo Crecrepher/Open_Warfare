@@ -95,43 +95,47 @@ void MapToolGo::Draw(sf::RenderWindow& window)
 void MapToolGo::MakeMap()
 {
 	vertexArray.setPrimitiveType(sf::Quads);
-	vertexArray.resize(height * width * 4);
+	vertexArray.resize(height * width * 4 * 2);
+	additionalVAarray = height * width * 4;
 
-    for (unsigned int i = 0; i < width; ++i)
-        for (unsigned int j = 0; j < height; ++j)
-        {
-			int tileNumber = mapInfo[i + j * width];
+	for (unsigned int i = 0; i < width; ++i)
+		for (unsigned int j = 0; j < height; ++j)
+		{
+			int index = i + j * width;
+			int tileNumber = mapInfo[index];
 			int tu = 0;
 			int tv = 0;
-			MapPainter(i + j * width,tileNumber, tu, tv);
+			MapPainter(index, tileNumber, tu, tv);
 
-            sf::Vertex* quad = &vertexArray[(i + j * width) * 4];
+			sf::Vertex* quad = &vertexArray[(i + j * width) * 4];
 
-            quad[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
-            quad[1].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
-            quad[2].position = sf::Vector2f((i + 1) * tileSize.x, (j + 1) * tileSize.y);
-            quad[3].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
+			quad[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
+			quad[1].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
+			quad[2].position = sf::Vector2f((i + 1) * tileSize.x, (j + 1) * tileSize.y);
+			quad[3].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
 
-            quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
-            quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-            quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-            quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
-			
-			if (tv == 0 || tv == 1)
-			{
-				WallRotator(quad,tu, i + j * width);
-			}
-        }
+			quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
+			quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+			quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
+			quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+
+			AfterDrawer(quad,index, tileNumber,tu);
+		}
 }
 
-void MapToolGo::MapPainter(int index, int tileNumber,int& tu, int& tv)
+void MapToolGo::MapPainter(int index, int tileNumber, int& tu, int& tv)
 {
 	switch (tileNumber)
 	{
 	case 0: //wall
-		WallPainter(index,tileNumber, tu, tv);
+		WallPainter(index, tileNumber, tu, tv);
 		break;
 	case 1: //floor
+	case 3: //decoBlock
+	case 41: //Entrance
+	case 42:
+	case 420:
+	case 5: //portal
 		tu = Utils::RandomRange(0, 3);
 		if (tu == 3)
 		{
@@ -159,9 +163,9 @@ void MapToolGo::WallPainter(int index, int tileNumber, int& tu, int& tv)
 			break;
 		case 2:
 			if (((mapInfo[index - width] != 0) &&
-				(mapInfo[index + width] != 0))||
+				(mapInfo[index + width] != 0)) ||
 				((mapInfo[index - 1] != 0) &&
-				(mapInfo[index + 1] != 0)))
+					(mapInfo[index + 1] != 0)))
 			{
 				tu = 3;
 			}
@@ -169,7 +173,7 @@ void MapToolGo::WallPainter(int index, int tileNumber, int& tu, int& tv)
 			{
 				tu = 2;
 			}
-			
+
 			break;
 		case 3:
 			tu = 4;
@@ -184,10 +188,8 @@ void MapToolGo::WallPainter(int index, int tileNumber, int& tu, int& tv)
 	return;
 }
 
-void MapToolGo::WallRotator(sf::Vertex*& quad,int tu, int index)
+void MapToolGo::WallRotator(sf::Vertex*& quad, int tu, int index)
 {
-	sf::Vector2f center = { quad[0].position.x + tileSize.x / 2, quad[0].position.y + tileSize.y / 2 };
-	sf::Transform transform;
 	int rotation = 0;
 	switch (tu)
 	{
@@ -205,13 +207,127 @@ void MapToolGo::WallRotator(sf::Vertex*& quad,int tu, int index)
 		rotation = 90 * Utils::RandomRange(0, 3);
 		break;
 	}
+	VertexRotator(quad, rotation);
+}
+
+void MapToolGo::WallCornerAdder(sf::Vertex*& quad, int index)
+{
+	if (!Outside(index))
+	{
+		if (mapInfo[index - width + 1] != 0 &&
+			mapInfo[index - width] == 0 &&
+			mapInfo[index + 1] == 0)
+		{
+			AddtionalVAarrayMaker(quad, 0,6,0);
+		}
+		if (mapInfo[index + width + 1] != 0 &&
+			mapInfo[index + width] == 0 &&
+			mapInfo[index + 1] == 0)
+		{
+			AddtionalVAarrayMaker(quad, 90, 6, 0);
+		}
+		if (mapInfo[index + width - 1] != 0 &&
+			mapInfo[index + width] == 0 &&
+			mapInfo[index - 1] == 0)
+		{
+			AddtionalVAarrayMaker(quad, 180, 6, 0);
+		}
+		if (mapInfo[index - width - 1] != 0 &&
+			mapInfo[index - width] == 0 &&
+			mapInfo[index - 1] == 0)
+		{
+			AddtionalVAarrayMaker(quad, 270, 6, 0);
+		}
+	}
+}
+
+void MapToolGo::PitMaker(sf::Vertex*& quad, int index)
+{
+	if (mapInfo[index - width] != 2)
+	{
+		AddtionalVAarrayMaker(quad, 0, Utils::RandomRange(0,2), 2);
+	}
+	if (mapInfo[index +1] != 2)
+	{
+		AddtionalVAarrayMaker(quad, 90, Utils::RandomRange(0, 2), 2);
+	}
+	if (mapInfo[index + width] != 2)
+	{
+		AddtionalVAarrayMaker(quad, 180, Utils::RandomRange(0, 2), 2);
+	}
+	if (mapInfo[index - 1] != 2)
+	{
+		AddtionalVAarrayMaker(quad, 270, Utils::RandomRange(0, 2), 2);
+	}
+}
+
+void MapToolGo::AfterDrawer(sf::Vertex*& quad,int index,int tileNumber, int tu)
+{
+	switch (tileNumber)
+	{
+	case 0: //wall
+		WallCornerAdder(quad, index);
+		WallRotator(quad, tu, index);
+		break;
+	case 1: //floor
+		VertexRotator(quad, 90 * Utils::RandomRange(0, 3));
+		break;
+	case 2:	//pit
+		PitMaker(quad, index);
+		break;
+	case 3: //decoBlock
+		AddtionalVAarrayMaker(quad, 90 * Utils::RandomRange(0, 3), Utils::RandomRange(0, 4), 4);
+		break;
+	case 41: //Entrance
+	case 42:
+	case 420:
+		break;
+	case 5: //portal
+		break;
+
 	
+	default:
+		break;
+	}
+	
+}
+
+void MapToolGo::VertexRotator(sf::Vertex*& quad, int rotation)
+{
+	sf::Vector2f center = { quad[0].position.x + tileSize.x / 2, quad[0].position.y + tileSize.y / 2 };
+	sf::Transform transform;
+
 	transform.rotate(rotation, center);
 	for (std::size_t i = 0; i < 4; ++i)
 	{
 		sf::Vertex& vertex = quad[i];
 		vertex.position = transform.transformPoint(vertex.position);
 	}
+}
+
+void MapToolGo::AddtionalVAarrayMaker(sf::Vertex*& quad, int rotation, int tu, int tv)
+{
+	if (additionalVAarray>=(height * width * 4 * 2))
+	{
+		std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
+		return;
+	}
+	sf::Vertex* quad2 = &vertexArray[additionalVAarray];
+	additionalVAarray += 4;
+	for (int i = 0; i < 4; i++)
+	{
+		quad2[i].position = quad[i].position;
+	}
+
+	quad2[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
+	quad2[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
+	quad2[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
+	quad2[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+
+	if (rotation != 0)
+	{
+		VertexRotator(quad2, rotation);
+	}	
 }
 
 void MapToolGo::SetStage(Stages stage)
@@ -226,19 +342,19 @@ void MapToolGo::SetStage(Stages stage)
 	MakeMap();
 }
 
-bool MapToolGo::Outside(int target) 
-{ 
-	return target< width || 
-		target > width * (height - 1)||
-		target % width == 0||
-		target % width == width-1;
+bool MapToolGo::Outside(int index)
+{
+	return index< width ||
+		index > width * (height - 1) ||
+		index % width == 0 ||
+		index % width == width - 1;
 }
 
 int MapToolGo::WallStuckFloor(int index)
 {
-	return (mapInfo[index - width] != 0)+
-		(mapInfo[index + width] != 0)+
-		(mapInfo[index - 1] != 0)+
+	return (mapInfo[index - width] != 0) +
+		(mapInfo[index + width] != 0) +
+		(mapInfo[index - 1] != 0) +
 		(mapInfo[index + 1] != 0);
 }
 
