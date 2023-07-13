@@ -120,7 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>./Animation;./DataTable;./SFML-2.5.1/include;./GameObject/ZSObject;./GameObject;./Universial;./Framework;./Scene;./;./3rd;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./Animation;./DataTable;./SFML-2.5.1/include;./GameObject;./Universial;./Framework;./Scene;./3rd;./;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
@@ -159,6 +159,8 @@
     <ClCompile Include="GameObject\RectGo.cpp" />
     <ClCompile Include="GameObject\SoundGo.cpp" />
     <ClCompile Include="GameObject\TextGo.cpp" />
+    <ClCompile Include="GameObject\MapToolGo.cpp" />
+    <ClCompile Include="DataTable\MapTable.cpp" />
     <ClCompile Include="Scene\SceneGame.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -200,6 +202,8 @@
     <ClInclude Include="GameObject\SpriteEffect.h" />
     <ClInclude Include="DataTable\StringTable.h" />
     <ClInclude Include="GameObject\UiButton.h" />
+    <ClInclude Include="GameObject\MapToolGo.h" />
+    <ClInclude Include="DataTable\MapTable.h" />
     <ClInclude Include="Universial\ObjectPool.h" />
     <ClInclude Include="GameObject\SoundGo.h" />
     <ClInclude Include="GameObject\TextGo.h" />

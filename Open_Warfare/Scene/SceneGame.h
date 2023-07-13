@@ -5,6 +5,7 @@
 class SceneGame : public Scene
 {
 protected:
+	sf::Vector2f mouseMove;
 public:
 	
 
@@ -22,6 +23,8 @@ public:
 
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
+
+	void MouseMove();
 };
 
 template<typename T>

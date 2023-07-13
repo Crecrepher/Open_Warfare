@@ -7,7 +7,7 @@ public:
 	{
 		None = -1,
 		String,
-		Zombie
+		Map,
 	};
 	DataTable(const DataTable& other) = delete;
 	bool operator== (const DataTable& other) const = delete;
