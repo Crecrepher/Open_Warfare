@@ -46,10 +46,16 @@ public:
 	virtual void Draw(sf::RenderWindow& window) override;
 
 	void MakeMap();
+	void MapPainter(int index,int tileNumber, int& tu, int& tv);
+	void WallPainter(int index, int tileNumber, int& tu, int& tv);
+	void WallRotator(sf::Vertex*& quad,int tu, int inedx);
+
+
 	void SetStage(Stages stage);
 
-    bool load(const std::string& tileset, sf::Vector2u tileSize, const int* tiles, unsigned int width, unsigned int height);
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
-
+	bool Outside(int target);
+	int WallStuckFloor(int index);
+	int WallStuckFloorAngle(int index);
+	int WallStuckTwoFloorAngle(int index);
+	int WallStuckWallAngle(int index);
 };
-

@@ -100,28 +100,10 @@ void MapToolGo::MakeMap()
     for (unsigned int i = 0; i < width; ++i)
         for (unsigned int j = 0; j < height; ++j)
         {
-            int tileNumber = mapInfo[i + j * width];
-
-
+			int tileNumber = mapInfo[i + j * width];
 			int tu = 0;
 			int tv = 0;
-			switch (tileNumber)
-			{
-			case 0:
-				tu = 0;
-				tv = 0;
-				break;
-			case 1:
-				tu = Utils::RandomRange(0, 9);
-				tv = 1;
-				break;
-			case 2:
-				tu = 3;
-				tv = 2;
-				break;
-			default:
-				break;
-			}
+			MapPainter(i + j * width,tileNumber, tu, tv);
 
             sf::Vertex* quad = &vertexArray[(i + j * width) * 4];
 
@@ -134,7 +116,102 @@ void MapToolGo::MakeMap()
             quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
             quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
             quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
+			
+			if (tv == 0 || tv == 1)
+			{
+				WallRotator(quad,tu, i + j * width);
+			}
         }
+}
+
+void MapToolGo::MapPainter(int index, int tileNumber,int& tu, int& tv)
+{
+	switch (tileNumber)
+	{
+	case 0: //wall
+		WallPainter(index,tileNumber, tu, tv);
+		break;
+	case 1: //floor
+		tu = Utils::RandomRange(0, 3);
+		if (tu == 3)
+		{
+			tu = Utils::RandomRange(0, 9);
+		}
+		tv = 1;
+		break;
+	case 2:	//pit
+		tu = 3;
+		tv = 2;
+		break;
+	default:
+		break;
+	}
+}
+
+void MapToolGo::WallPainter(int index, int tileNumber, int& tu, int& tv)
+{
+	if (!Outside(index))
+	{
+		switch ((WallStuckFloor(index)))
+		{
+		case 1:
+			tu = 1;
+			break;
+		case 2:
+			if (((mapInfo[index - width] != 0) &&
+				(mapInfo[index + width] != 0))||
+				((mapInfo[index - 1] != 0) &&
+				(mapInfo[index + 1] != 0)))
+			{
+				tu = 3;
+			}
+			else
+			{
+				tu = 2;
+			}
+			
+			break;
+		case 3:
+			tu = 4;
+			break;
+		case 4:
+			tu = 5;
+			break;
+		default:
+			break;
+		}
+	}
+	return;
+}
+
+void MapToolGo::WallRotator(sf::Vertex*& quad,int tu, int index)
+{
+	sf::Vector2f center = { quad[0].position.x + tileSize.x / 2, quad[0].position.y + tileSize.y / 2 };
+	sf::Transform transform;
+	int rotation = 0;
+	switch (tu)
+	{
+	case 1:
+	case 3:
+		rotation = WallStuckFloorAngle(index);
+		break;
+	case 2:
+		rotation = WallStuckTwoFloorAngle(index);
+		break;
+	case 4:
+		rotation = WallStuckWallAngle(index);
+		break;
+	default:
+		rotation = 90 * Utils::RandomRange(0, 3);
+		break;
+	}
+	
+	transform.rotate(rotation, center);
+	for (std::size_t i = 0; i < 4; ++i)
+	{
+		sf::Vertex& vertex = quad[i];
+		vertex.position = transform.transformPoint(vertex.position);
+	}
 }
 
 void MapToolGo::SetStage(Stages stage)
@@ -149,55 +226,82 @@ void MapToolGo::SetStage(Stages stage)
 	MakeMap();
 }
 
-
-inline bool MapToolGo::load(const std::string& tileset, sf::Vector2u tileSize, const int* tiles, unsigned int width, unsigned int height)
-{
-    // load the tileset texture
-    if (!texture->loadFromFile(tileset))
-        return false;
-
-    // resize the vertex array to fit the level size
-	vertexArray.setPrimitiveType(sf::Quads);
-	vertexArray.resize(width * height * 4);
-
-    // populate the vertex array, with one quad per tile
-    for (unsigned int i = 0; i < width; ++i)
-        for (unsigned int j = 0; j < height; ++j)
-        {
-            // get the current tile number
-            int tileNumber = tiles[i + j * width];
-
-            // find its position in the tileset texture
-            int tu = tileNumber % (texture->getSize().x / tileSize.x);
-            int tv = tileNumber / (texture->getSize().x / tileSize.x);
-
-            // get a pointer to the current tile's quad
-            sf::Vertex* quad = &vertexArray[(i + j * width) * 4];
-
-            // define its 4 corners
-            quad[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
-            quad[1].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
-            quad[2].position = sf::Vector2f((i + 1) * tileSize.x, (j + 1) * tileSize.y);
-            quad[3].position = sf::Vector2f(i * tileSize.x, (j + 1) * tileSize.y);
-
-            // define its 4 texture coordinates
-            quad[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
-            quad[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x, tv * tileSize.y);
-            quad[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x, (tv + 1) * tileSize.y);
-            quad[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y);
-        }
-
-    return true;
+bool MapToolGo::Outside(int target) 
+{ 
+	return target< width || 
+		target > width * (height - 1)||
+		target % width == 0||
+		target % width == width-1;
 }
 
-inline void MapToolGo::draw(sf::RenderTarget& target, sf::RenderStates states) const
+int MapToolGo::WallStuckFloor(int index)
 {
-    // apply the transform
-   /* states.transform *= getTransform();*/
+	return (mapInfo[index - width] != 0)+
+		(mapInfo[index + width] != 0)+
+		(mapInfo[index - 1] != 0)+
+		(mapInfo[index + 1] != 0);
+}
 
-    // apply the tileset texture
-    states.texture = texture;
+int MapToolGo::WallStuckFloorAngle(int index)
+{
+	if (mapInfo[index - width] != 0)
+	{
+		return 0;
+	}
+	else if (mapInfo[index + 1] != 0)
+	{
+		return 90;
+	}
+	else if (mapInfo[index + width] != 0)
+	{
+		return 180;
+	}
+	else if (mapInfo[index - 1] != 0)
+	{
+		return 270;
+	}
+	return 0;
+}
 
-    // draw the vertex array
-    target.draw(vertexArray, states);
+int MapToolGo::WallStuckTwoFloorAngle(int index)
+{
+	int rotate;
+	if (mapInfo[index - width] != 0)
+	{
+		if (mapInfo[index - 1] != 0)
+		{
+			return 270;
+		}
+		return 0;
+	}
+	else if (mapInfo[index + width] != 0)
+	{
+		if (mapInfo[index + 1] != 0)
+		{
+			return 90;
+		}
+		return 180;
+	}
+	return 0;
+}
+
+int MapToolGo::WallStuckWallAngle(int index)
+{
+	if (mapInfo[index + width] == 0)
+	{
+		return 0;
+	}
+	else if (mapInfo[index - 1] == 0)
+	{
+		return 90;
+	}
+	else if (mapInfo[index - width] == 0)
+	{
+		return 180;
+	}
+	else if (mapInfo[index + 1] == 0)
+	{
+		return 270;
+	}
+	return 0;
 }
