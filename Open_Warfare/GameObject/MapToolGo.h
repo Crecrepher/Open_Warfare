@@ -52,6 +52,8 @@ public:
 	virtual void Update(float dt) override;
 	virtual void Draw(sf::RenderWindow& window) override;
 
+	sf::Vector2f GetCenter();
+
 	void MakeMap();
 	void MapPainter(int index,int tileNumber, int& tu, int& tv);
 	void WallPainter(int index, int tileNumber, int& tu, int& tv);

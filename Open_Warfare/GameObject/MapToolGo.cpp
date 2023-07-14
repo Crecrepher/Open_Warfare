@@ -108,6 +108,11 @@ void MapToolGo::Draw(sf::RenderWindow& window)
 	window.draw(WallVA.vertexArray, texture);*/
 }
 
+sf::Vector2f MapToolGo::GetCenter()
+{
+	return {(float)width*tileSize.x /2,(float)height*tileSize.y /2};
+}
+
 void MapToolGo::MakeMap()
 {
 	GroundVA.vertexArray.setPrimitiveType(sf::Quads);

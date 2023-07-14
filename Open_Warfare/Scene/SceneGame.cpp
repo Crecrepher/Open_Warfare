@@ -33,7 +33,7 @@ void SceneGame::Init()
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
-	worldView.setSize(windowSize / 2.f);
+	worldView.setSize(windowSize / 3.f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
@@ -63,14 +63,13 @@ void SceneGame::Enter()
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 	map->SetStage(MapToolGo::Stages::Second);
-	
-	map->SetPosition(FRAMEWORK.GetWindowSize().x / 2, FRAMEWORK.GetWindowSize().y / 2);
 	map->WallVA.sortLayer = 10;
-	map->SetOrigin(Origins::MC);
+
 	std::cout << map->WallVA.GetPosition().x << std::endl;
 	std::cout << map->WallVA.GetPosition().y << std::endl;
 	std::cout << map->GetPosition().x << std::endl;
 	std::cout << map->GetPosition().y << std::endl;
+	worldView.setCenter(map->GetCenter());
 }
 
 void SceneGame::Exit()
@@ -81,8 +80,6 @@ void SceneGame::Exit()
 void SceneGame::Update(float dt)
 {
 	MouseMove();
-	MapToolGo* map = (MapToolGo*)FindGo("Map");
-	worldView.setCenter(map->GetPosition());
 
 	//스테이지로 돌아가기
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
@@ -109,16 +106,19 @@ void SceneGame::ReleaseMapVAGo()
 
 void SceneGame::MouseMove()
 {
+	MapToolGo* map = (MapToolGo*)FindGo("Map");
+
 	if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
 	{
 		if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 		{
-			mouseMove = INPUT_MGR.GetMousePos() + worldView.getCenter();
+			mouseMove = INPUT_MGR.GetMousePos()/3.f + worldView.getCenter();
 		}
 		else if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
 		{
 			mouseMove = { 0,0 };
 		}
-		worldView.setCenter((mouseMove - INPUT_MGR.GetMousePos()));
+		worldView.setCenter(
+			Utils::Clamp(mouseMove - INPUT_MGR.GetMousePos() / 3.f, worldView.getSize()/2.f,(map->GetCenter()*2.f)- worldView.getSize()/2.f));
 	}
 }
