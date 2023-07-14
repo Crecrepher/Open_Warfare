@@ -155,12 +155,14 @@
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
     <ClCompile Include="DataTable\DataTable.cpp" />
+    <ClCompile Include="DataTable\UnitTable.cpp" />
     <ClCompile Include="Framework\DataTableMgr.cpp" />
     <ClCompile Include="GameObject\RectGo.cpp" />
     <ClCompile Include="GameObject\SoundGo.cpp" />
     <ClCompile Include="GameObject\TextGo.cpp" />
     <ClCompile Include="GameObject\MapToolGo.cpp" />
     <ClCompile Include="DataTable\MapTable.cpp" />
+    <ClCompile Include="GameObject\UnitGo.cpp" />
     <ClCompile Include="Scene\SceneGame.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
@@ -197,6 +199,7 @@
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
     <ClInclude Include="DataTable\DataTable.h" />
+    <ClInclude Include="DataTable\UnitTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />
     <ClInclude Include="GameObject\RectGo.h" />
     <ClInclude Include="GameObject\SpriteEffect.h" />
@@ -204,6 +207,7 @@
     <ClInclude Include="GameObject\UiButton.h" />
     <ClInclude Include="GameObject\MapToolGo.h" />
     <ClInclude Include="DataTable\MapTable.h" />
+    <ClInclude Include="GameObject\UnitGo.h" />
     <ClInclude Include="Universial\ObjectPool.h" />
     <ClInclude Include="GameObject\SoundGo.h" />
     <ClInclude Include="GameObject\TextGo.h" />

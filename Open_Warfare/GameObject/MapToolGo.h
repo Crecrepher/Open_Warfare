@@ -53,6 +53,8 @@ public:
 	virtual void Draw(sf::RenderWindow& window) override;
 
 	sf::Vector2f GetCenter();
+	sf::Vector2f GetSpawnPoint();
+	/*sf::Vector2f GetPortalPoint();*/
 
 	void MakeMap();
 	void MapPainter(int index,int tileNumber, int& tu, int& tv);
@@ -78,4 +80,6 @@ public:
 	int WallStuckFloorAngle(int index);
 	int WallStuckTwoFloorAngle(int index);
 	int WallStuckWallAngle(int index);
+
+
 };

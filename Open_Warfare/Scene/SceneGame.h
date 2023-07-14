@@ -2,9 +2,12 @@
 #include "Scene.h"
 #include "ObjectPool.h"
 
+class UnitGo;
+
 class SceneGame : public Scene
 {
 protected:
+	ObjectPool<UnitGo> unitPool;
 	sf::Vector2f mouseMove;
 public:
 	
@@ -24,6 +27,8 @@ public:
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
 	void ReleaseMapVAGo();
+
+	void SpawnUnit();
 
 	void MouseMove();
 };

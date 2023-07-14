@@ -113,6 +113,16 @@ sf::Vector2f MapToolGo::GetCenter()
 	return {(float)width*tileSize.x /2,(float)height*tileSize.y /2};
 }
 
+sf::Vector2f MapToolGo::GetSpawnPoint()
+{
+	std::vector<int>::iterator it = std::find(mapInfo.begin(), mapInfo.end(), 42);
+
+	if (it != mapInfo.cend()) {
+		return WallVA.vertexArray[std::distance(mapInfo.begin(), it)].position;
+	}
+	return sf::Vector2f();
+}
+
 void MapToolGo::MakeMap()
 {
 	GroundVA.vertexArray.setPrimitiveType(sf::Quads);
@@ -134,8 +144,9 @@ void MapToolGo::MakeMap()
 			sf::Vertex* quad;
 			switch (tileNumber)
 			{
-			case 1:
+			case 0:
 				quad = &WallVA.vertexArray[(i + j * width) * 4];
+				break;
 			default:
 				quad = &GroundVA.vertexArray[(i + j * width) * 4];
 				break;

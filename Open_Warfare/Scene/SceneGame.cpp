@@ -13,7 +13,7 @@
 #include "SoundGo.h"
 #include "UiButton.h"
 #include "MapToolGo.h"
-
+#include "UnitGo.h"
 
 SceneGame::SceneGame() : Scene(SceneId::Game)
 {
@@ -44,10 +44,17 @@ void SceneGame::Init()
 	{
 		go->Init();
 	}
+
+	unitPool.OnCreate = [this](UnitGo* unit) {
+		UnitGo::Types unitType = (UnitGo::Types)Utils::RandomRange(0, (int)UnitGo::Types::TypeCount- 1);
+		unit->SetType(unitType);
+	};
+	unitPool.Init();
 }
 
 void SceneGame::Release()
 {
+	unitPool.Release();
 	ReleaseMapVAGo();
 	for (auto go : gameObjects)
 	{
@@ -74,11 +81,13 @@ void SceneGame::Enter()
 
 void SceneGame::Exit()
 {
+	ClearObjectPool(unitPool);
 	Scene::Exit();
 }
 
 void SceneGame::Update(float dt)
 {
+	Scene::Update(dt);
 	MouseMove();
 
 	//스테이지로 돌아가기
@@ -86,6 +95,14 @@ void SceneGame::Update(float dt)
 	{
 		SCENE_MGR.ChangeScene(SceneId::Stage);
 		return;
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num1))
+	{
+		SpawnUnit();
+	}
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num2))
+	{
+		ClearObjectPool(unitPool);
 	}
 }
 
@@ -102,6 +119,16 @@ void SceneGame::ReleaseMapVAGo()
 	it = std::find(gameObjects.begin(), gameObjects.end(), FindGo("WallVA"));
 	if (it != gameObjects.end())
 		gameObjects.erase(it);
+}
+
+void SceneGame::SpawnUnit()
+{
+	UnitGo* unit = unitPool.Get();
+	MapToolGo* map = (MapToolGo*)FindGo("Map");
+	unit->SetPosition(map->GetSpawnPoint());
+	sf::Vector2f a = map->GetSpawnPoint();
+	unit->sortLayer = 2;
+	AddGo(unit);
 }
 
 void SceneGame::MouseMove()
