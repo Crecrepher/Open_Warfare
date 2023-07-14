@@ -21,7 +21,8 @@ private:
 	int height;
 	std::vector<int> mapInfo;
 
-	int additionalVAarray;
+	int additionalGroundVAarray;
+	int additionalWallVAarray;
 
 	std::string textureId;
 	sf::Texture* texture;
@@ -57,14 +58,20 @@ public:
 	void WallRotator(sf::Vertex*& quad,int tu, int inedx);
 	void WallCornerAdder(sf::Vertex*& quad, int index);
 	void PitMaker(sf::Vertex*& quad, int index);
+	void AntranceMaker(sf::Vertex*& quad, int index, int tileNumber);
+	void PortalDrawer(sf::Vertex*& quad, int index);
 
 	void AfterDrawer(sf::Vertex*& quad, int index, int tileNumber, int tu);
 	void VertexRotator(sf::Vertex*& quad, int rotation);
-	void AddtionalVAarrayMaker(sf::Vertex*& quad, int rotation,int tu, int tv);
-	
+	void AddtionalVAarrayMaker
+	(sf::Vertex*& quad, int rotation,int tu, int tv, bool isWall = false);
+	void AddtionalVAarrayEntranceMaker
+	(sf::Vertex*& quad, int tileNumber, int rotation);
 	void SetStage(Stages stage);
 
 	bool Outside(int index);
+	bool IsNotWall(int index);
+	bool IsWall(int index);
 	int WallStuckFloor(int index);
 	int WallStuckFloorAngle(int index);
 	int WallStuckTwoFloorAngle(int index);

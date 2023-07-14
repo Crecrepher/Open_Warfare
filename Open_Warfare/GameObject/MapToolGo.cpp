@@ -114,7 +114,8 @@ void MapToolGo::MakeMap()
 	GroundVA.vertexArray.resize(height * width * 4 * 2);
 	WallVA.vertexArray.setPrimitiveType(sf::Quads);
 	WallVA.vertexArray.resize(height * width * 4 * 2);
-	additionalVAarray = height * width * 4;
+	additionalGroundVAarray = height * width * 4;
+	additionalWallVAarray = height * width * 4;
 
 	for (unsigned int i = 0; i < width; ++i)
 		for (unsigned int j = 0; j < height; ++j)
@@ -239,29 +240,29 @@ void MapToolGo::WallCornerAdder(sf::Vertex*& quad, int index)
 {
 	if (!Outside(index))
 	{
-		if (mapInfo[index - width + 1] != 0 &&
-			mapInfo[index - width] == 0 &&
-			mapInfo[index + 1] == 0)
+		if (IsNotWall(index - width + 1) &&
+			IsWall(index - width) &&
+			IsWall(index + 1))
 		{
-			AddtionalVAarrayMaker(quad, 0,6,0);
+			AddtionalVAarrayMaker(quad, 0,6,0,true);
 		}
-		if (mapInfo[index + width + 1] != 0 &&
-			mapInfo[index + width] == 0 &&
-			mapInfo[index + 1] == 0)
+		if (IsNotWall(index + width + 1) &&
+			IsWall(index + width) &&
+			IsWall(index + 1))
 		{
-			AddtionalVAarrayMaker(quad, 90, 6, 0);
+			AddtionalVAarrayMaker(quad, 90, 6, 0, true);
 		}
-		if (mapInfo[index + width - 1] != 0 &&
-			mapInfo[index + width] == 0 &&
-			mapInfo[index - 1] == 0)
+		if (IsNotWall(index + width - 1) &&
+			IsWall(index + width) &&
+			IsWall(index - 1))
 		{
-			AddtionalVAarrayMaker(quad, 180, 6, 0);
+			AddtionalVAarrayMaker(quad, 180, 6, 0, true);
 		}
-		if (mapInfo[index - width - 1] != 0 &&
-			mapInfo[index - width] == 0 &&
-			mapInfo[index - 1] == 0)
+		if (IsNotWall(index - width - 1) &&
+			IsWall(index - width) &&
+			IsWall(index - 1))
 		{
-			AddtionalVAarrayMaker(quad, 270, 6, 0);
+			AddtionalVAarrayMaker(quad, 270, 6, 0, true);
 		}
 	}
 }
@@ -286,6 +287,41 @@ void MapToolGo::PitMaker(sf::Vertex*& quad, int index)
 	}
 }
 
+void MapToolGo::AntranceMaker(sf::Vertex*& quad, int index, int tileNumber)
+{
+	int	rotation = WallStuckFloorAngle(index)+180;
+	AddtionalVAarrayEntranceMaker(quad, tileNumber,rotation);
+}
+
+void MapToolGo::PortalDrawer(sf::Vertex*& quad, int index)
+{
+	if (additionalGroundVAarray >= (height * width * 4 * 2))
+	{
+		std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
+		return;
+	}
+	sf::Vertex* quad2 = &GroundVA.vertexArray[additionalGroundVAarray];
+	additionalGroundVAarray += 4;
+
+	for (int i = 0; i < 4; i++)
+	{
+		quad2[i].position = quad[i].position;
+	}
+	quad2[0].position.x -= tileSize.x;
+	quad2[0].position.y -= tileSize.y;
+	quad2[1].position.x += tileSize.x;
+	quad2[1].position.y -= tileSize.y;
+	quad2[2].position.x += tileSize.x;
+	quad2[2].position.y += tileSize.y;
+	quad2[3].position.x -= tileSize.x;
+	quad2[3].position.y += tileSize.y;
+
+	quad2[0].texCoords = sf::Vector2f(0, 5 * tileSize.y);
+	quad2[1].texCoords = sf::Vector2f(3 * tileSize.x , 5 * tileSize.y);
+	quad2[2].texCoords = sf::Vector2f(3 * tileSize.x , 8 * tileSize.y);
+	quad2[3].texCoords = sf::Vector2f(0, 8 * tileSize.y);
+}
+
 void MapToolGo::AfterDrawer(sf::Vertex*& quad,int index,int tileNumber, int tu)
 {
 	switch (tileNumber)
@@ -305,12 +341,12 @@ void MapToolGo::AfterDrawer(sf::Vertex*& quad,int index,int tileNumber, int tu)
 		break;
 	case 41: //Entrance
 	case 42:
-	case 420:
+	case 43:
+		AntranceMaker(quad,index,tileNumber);
 		break;
 	case 5: //portal
+		PortalDrawer(quad,index);
 		break;
-
-	
 	default:
 		break;
 	}
@@ -330,15 +366,30 @@ void MapToolGo::VertexRotator(sf::Vertex*& quad, int rotation)
 	}
 }
 
-void MapToolGo::AddtionalVAarrayMaker(sf::Vertex*& quad, int rotation, int tu, int tv)
+void MapToolGo::AddtionalVAarrayMaker(sf::Vertex*& quad, int rotation, int tu, int tv ,bool isWall)
 {
-	if (additionalVAarray>=(height * width * 4 * 2))
+	sf::Vertex* quad2;
+	if (isWall)
 	{
-		std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
-		return;
+		if (additionalWallVAarray >= (height * width * 4 * 2))
+		{
+			std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
+			return;
+		}
+		quad2 = &WallVA.vertexArray[additionalWallVAarray];
+		additionalWallVAarray += 4;
 	}
-	sf::Vertex* quad2 = &WallVA.vertexArray[additionalVAarray];
-	additionalVAarray += 4;
+	else
+	{
+		if (additionalGroundVAarray >= (height * width * 4 * 2))
+		{
+			std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
+			return;
+		}
+		quad2 = &GroundVA.vertexArray[additionalGroundVAarray];
+		additionalGroundVAarray += 4;
+	}
+	
 	for (int i = 0; i < 4; i++)
 	{
 		quad2[i].position = quad[i].position;
@@ -353,6 +404,68 @@ void MapToolGo::AddtionalVAarrayMaker(sf::Vertex*& quad, int rotation, int tu, i
 	{
 		VertexRotator(quad2, rotation);
 	}	
+}
+
+void MapToolGo::AddtionalVAarrayEntranceMaker(sf::Vertex*& quad, int tileNumber, int rotation)
+{
+	if (additionalWallVAarray >= (height * width * 4 * 2))
+	{
+		std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
+		return;
+	}
+	sf::Vertex* quad2 = &WallVA.vertexArray[additionalWallVAarray];
+	additionalWallVAarray += 4;
+
+
+	for (int i = 0; i < 4; i++)
+	{
+		quad2[i].position = quad[i].position;
+	}
+
+	int tu = 0;
+	int tv = 0;
+	int length = 0;
+	switch (tileNumber)
+	{
+	case 41:
+		quad2[2].position.y += 4;
+		quad2[3].position.y += 4;
+		tu = 9;
+		tv = 2;
+		break;
+	case 42:
+		quad2[1].position.x += tileSize.x;
+		quad2[2].position.x += tileSize.x;
+		quad2[2].position.y += 6;
+		quad2[3].position.y += 6;
+		tu = 7;
+		tv = 2;
+		length = 1;
+		break;
+	case 43:
+		quad2[0].position.x -= tileSize.x;
+		quad2[1].position.x += tileSize.x;
+		quad2[2].position.x += tileSize.x;
+		quad2[3].position.x -= tileSize.x;
+		quad2[2].position.y += 3;
+		quad2[3].position.y += 6;
+		tu = 4;
+		tv = 2;
+		length = 2;
+		break;
+	default:
+		break;
+	}
+
+	quad2[0].texCoords = sf::Vector2f(tu * tileSize.x, tv * tileSize.y);
+	quad2[1].texCoords = sf::Vector2f((tu + 1) * tileSize.x +length* tileSize.x, tv * tileSize.y);
+	quad2[2].texCoords = sf::Vector2f((tu + 1) * tileSize.x +length* tileSize.x, (tv + 1) * tileSize.y+4);
+	quad2[3].texCoords = sf::Vector2f(tu * tileSize.x, (tv + 1) * tileSize.y+4);
+
+	if (rotation != 0)
+	{
+		VertexRotator(quad2, rotation);
+	}
 }
 
 void MapToolGo::SetStage(Stages stage)
@@ -375,29 +488,50 @@ bool MapToolGo::Outside(int index)
 		index % width == width - 1;
 }
 
+bool MapToolGo::IsNotWall(int index)
+{
+	return mapInfo[index] != 0 &&
+		mapInfo[index] != 41 &&
+		mapInfo[index] != 42 &&
+		mapInfo[index] != 420 &&
+		mapInfo[index] != 43 &&
+		mapInfo[index] != 430;
+}
+
+bool MapToolGo::IsWall(int index)
+{
+	return mapInfo[index] == 0 ||
+		mapInfo[index] == 41 ||
+		mapInfo[index] == 42 ||
+		mapInfo[index] == 420 ||
+		mapInfo[index] == 43 ||
+		mapInfo[index] == 430;
+}
+
+
 int MapToolGo::WallStuckFloor(int index)
 {
-	return (mapInfo[index - width] != 0) +
-		(mapInfo[index + width] != 0) +
-		(mapInfo[index - 1] != 0) +
-		(mapInfo[index + 1] != 0);
+	return IsNotWall(index - width) +
+		IsNotWall(index + width) +
+		IsNotWall(index - 1) +
+		IsNotWall(index + 1);
 }
 
 int MapToolGo::WallStuckFloorAngle(int index)
 {
-	if (mapInfo[index - width] != 0)
+	if (IsNotWall(index - width))
 	{
 		return 0;
 	}
-	else if (mapInfo[index + 1] != 0)
+	else if (IsNotWall(index + 1))
 	{
 		return 90;
 	}
-	else if (mapInfo[index + width] != 0)
+	else if (IsNotWall(index + width))
 	{
 		return 180;
 	}
-	else if (mapInfo[index - 1] != 0)
+	else if (IsNotWall(index - 1))
 	{
 		return 270;
 	}

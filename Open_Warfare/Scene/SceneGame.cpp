@@ -33,12 +33,12 @@ void SceneGame::Init()
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
-
-	MapToolGo* map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
-	worldView.setSize(windowSize/3.f);
-	worldView.setCenter(centerPos);
+	worldView.setSize(windowSize / 2.f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
+
+	MapToolGo* map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
+	
 
 	for (auto go : gameObjects)
 	{
@@ -62,11 +62,15 @@ void SceneGame::Enter()
 
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
-	map->SetStage(MapToolGo::Stages::First);
-	map->SetOrigin(Origins::MC);
+	map->SetStage(MapToolGo::Stages::Second);
+	
 	map->SetPosition(FRAMEWORK.GetWindowSize().x / 2, FRAMEWORK.GetWindowSize().y / 2);
-
-	map->GroundVA.sortLayer = -1;
+	map->WallVA.sortLayer = 10;
+	map->SetOrigin(Origins::MC);
+	std::cout << map->WallVA.GetPosition().x << std::endl;
+	std::cout << map->WallVA.GetPosition().y << std::endl;
+	std::cout << map->GetPosition().x << std::endl;
+	std::cout << map->GetPosition().y << std::endl;
 }
 
 void SceneGame::Exit()
@@ -77,6 +81,9 @@ void SceneGame::Exit()
 void SceneGame::Update(float dt)
 {
 	MouseMove();
+	MapToolGo* map = (MapToolGo*)FindGo("Map");
+	worldView.setCenter(map->GetPosition());
+
 	//스테이지로 돌아가기
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
 	{
