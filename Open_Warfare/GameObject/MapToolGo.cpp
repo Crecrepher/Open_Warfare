@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "MapToolGo.h"
 #include "ResourceMgr.h"
+#include "SceneMgr.h"
+#include "SceneGame.h"
 
 #include "MapTable.h"
 #include "DataTableMgr.h"
@@ -13,6 +15,15 @@ MapToolGo::~MapToolGo()
 {
 }
 
+void MapToolGo::AddVAGo()
+{
+	SceneGame* sceneGame = dynamic_cast<SceneGame*>(SCENE_MGR.GetCurrScene());
+	GroundVA = { textureId,"GroundVA" };
+	WallVA = { textureId,"WallVA" };
+	sceneGame->AddGo(&GroundVA);
+	sceneGame->AddGo(&WallVA);
+}
+
 void MapToolGo::SetPosition(float x, float y)
 {
 	SetPosition({ x,y });
@@ -23,9 +34,10 @@ void MapToolGo::SetPosition(const sf::Vector2f& p)
 	sf::Vector2f diff = p - position;
 	position = p;
 
-	for (int i = 0; i < vertexArray.getVertexCount(); i++)
+	for (int i = 0; i < WallVA.vertexArray.getVertexCount(); i++)
 	{
-		vertexArray[i].position += diff;
+		WallVA.vertexArray[i].position += diff;
+		GroundVA.vertexArray[i].position += diff;
 	}
 }
 
@@ -39,14 +51,15 @@ void MapToolGo::SetOrigin(Origins origin)
 	}
 
 	sf::Vector2f prevOrigin = originPosition;
-	sf::FloatRect bounds = vertexArray.getBounds();
+	sf::FloatRect bounds = WallVA.vertexArray.getBounds();
 	originPosition.x = bounds.width * ((int)origin % 3) * 0.5f;
 	originPosition.y = bounds.height * ((int)origin / 3) * 0.5f;
 
 	sf::Vector2f diff = prevOrigin - originPosition;
-	for (int i = 0; i < vertexArray.getVertexCount(); i++)
+	for (int i = 0; i < WallVA.vertexArray.getVertexCount(); i++)
 	{
-		vertexArray[i].position += diff;
+		WallVA.vertexArray[i].position += diff;
+		GroundVA.vertexArray[i].position += diff;
 	}
 }
 
@@ -64,14 +77,16 @@ void MapToolGo::SetOrigin(float x, float y)
 	originPosition.y = y;
 
 	sf::Vector2f diff = prevOrigin - originPosition;
-	for (int i = 0; i < vertexArray.getVertexCount(); i++)
+	for (int i = 0; i < WallVA.vertexArray.getVertexCount(); i++)
 	{
-		vertexArray[i].position += diff;
+		WallVA.vertexArray[i].position += diff;
+		GroundVA.vertexArray[i].position += diff;
 	}
 }
 
 void MapToolGo::Init()
 {
+	
 }
 
 void MapToolGo::Release()
@@ -89,13 +104,16 @@ void MapToolGo::Update(float dt)
 
 void MapToolGo::Draw(sf::RenderWindow& window)
 {
-	window.draw(vertexArray, texture);
+	/*window.draw(GroundVA.vertexArray, texture);
+	window.draw(WallVA.vertexArray, texture);*/
 }
 
 void MapToolGo::MakeMap()
 {
-	vertexArray.setPrimitiveType(sf::Quads);
-	vertexArray.resize(height * width * 4 * 2);
+	GroundVA.vertexArray.setPrimitiveType(sf::Quads);
+	GroundVA.vertexArray.resize(height * width * 4 * 2);
+	WallVA.vertexArray.setPrimitiveType(sf::Quads);
+	WallVA.vertexArray.resize(height * width * 4 * 2);
 	additionalVAarray = height * width * 4;
 
 	for (unsigned int i = 0; i < width; ++i)
@@ -107,8 +125,15 @@ void MapToolGo::MakeMap()
 			int tv = 0;
 			MapPainter(index, tileNumber, tu, tv);
 
-			sf::Vertex* quad = &vertexArray[(i + j * width) * 4];
-
+			sf::Vertex* quad;
+			switch (tileNumber)
+			{
+			case 1:
+				quad = &WallVA.vertexArray[(i + j * width) * 4];
+			default:
+				quad = &GroundVA.vertexArray[(i + j * width) * 4];
+				break;
+			}
 			quad[0].position = sf::Vector2f(i * tileSize.x, j * tileSize.y);
 			quad[1].position = sf::Vector2f((i + 1) * tileSize.x, j * tileSize.y);
 			quad[2].position = sf::Vector2f((i + 1) * tileSize.x, (j + 1) * tileSize.y);
@@ -312,7 +337,7 @@ void MapToolGo::AddtionalVAarrayMaker(sf::Vertex*& quad, int rotation, int tu, i
 		std::cout << "ERR: NEED MORE VirtexAarray!" << std::endl;
 		return;
 	}
-	sf::Vertex* quad2 = &vertexArray[additionalVAarray];
+	sf::Vertex* quad2 = &WallVA.vertexArray[additionalVAarray];
 	additionalVAarray += 4;
 	for (int i = 0; i < 4; i++)
 	{

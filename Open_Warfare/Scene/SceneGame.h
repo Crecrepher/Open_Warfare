@@ -23,6 +23,7 @@ public:
 
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
+	void ReleaseMapVAGo();
 
 	void MouseMove();
 };

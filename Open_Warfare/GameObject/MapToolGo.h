@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "VertexArrayGo.h"
 
 class MapToolGo : public GameObject
 {
@@ -27,11 +28,14 @@ private:
 	sf::Vector2u tileSize = { 24,24 };
 
 public:
-	sf::VertexArray vertexArray;
+	VertexArrayGo GroundVA;
+	VertexArrayGo WallVA;
 	sf::Vector2f originPosition;
 
 	MapToolGo(const std::string id = "", const std::string n = "");
 	virtual~MapToolGo() override;
+
+	void AddVAGo();
 
 	virtual void SetPosition(float x, float y) override;
 	virtual void SetPosition(const sf::Vector2f& p) override;

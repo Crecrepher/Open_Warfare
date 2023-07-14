@@ -33,7 +33,8 @@ void SceneGame::Init()
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
-	AddGo(new MapToolGo("graphics/tile.png", "Map"));
+
+	MapToolGo* map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
 	worldView.setSize(windowSize/3.f);
 	worldView.setCenter(centerPos);
 	uiView.setSize(windowSize);
@@ -47,6 +48,7 @@ void SceneGame::Init()
 
 void SceneGame::Release()
 {
+	ReleaseMapVAGo();
 	for (auto go : gameObjects)
 	{
 		delete go;
@@ -55,12 +57,16 @@ void SceneGame::Release()
 
 void SceneGame::Enter()
 {
+	MapToolGo* map = (MapToolGo*)FindGo("Map");
+	map->AddVAGo();
+
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
-	MapToolGo* map = (MapToolGo*)FindGo("Map");
 	map->SetStage(MapToolGo::Stages::First);
 	map->SetOrigin(Origins::MC);
 	map->SetPosition(FRAMEWORK.GetWindowSize().x / 2, FRAMEWORK.GetWindowSize().y / 2);
+
+	map->GroundVA.sortLayer = -1;
 }
 
 void SceneGame::Exit()
@@ -82,6 +88,16 @@ void SceneGame::Update(float dt)
 void SceneGame::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+}
+
+void SceneGame::ReleaseMapVAGo()
+{
+	auto it = std::find(gameObjects.begin(), gameObjects.end(), FindGo("GroundVA"));
+	if (it != gameObjects.end())
+		gameObjects.erase(it);
+	it = std::find(gameObjects.begin(), gameObjects.end(), FindGo("WallVA"));
+	if (it != gameObjects.end())
+		gameObjects.erase(it);
 }
 
 void SceneGame::MouseMove()
