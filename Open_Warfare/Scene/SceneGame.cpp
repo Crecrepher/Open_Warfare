@@ -37,7 +37,7 @@ void SceneGame::Init()
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
 
-	MapToolGo* map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
+	map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
 	
 
 	for (auto go : gameObjects)
@@ -48,6 +48,7 @@ void SceneGame::Init()
 	unitPool.OnCreate = [this](UnitGo* unit) {
 		UnitGo::Types unitType = (UnitGo::Types)Utils::RandomRange(0, (int)UnitGo::Types::TypeCount- 1);
 		unit->SetType(unitType);
+		unit->SetMap(map);
 	};
 	unitPool.Init();
 }
@@ -64,13 +65,13 @@ void SceneGame::Release()
 
 void SceneGame::Enter()
 {
-	MapToolGo* map = (MapToolGo*)FindGo("Map");
 	map->AddVAGo();
 
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 	map->SetStage(MapToolGo::Stages::Second);
-	map->WallVA.sortLayer = 10;
+	map->WallVA.sortLayer = -10;
+	map->GroundVA.sortLayer = -11;
 
 	std::cout << map->WallVA.GetPosition().x << std::endl;
 	std::cout << map->WallVA.GetPosition().y << std::endl;
@@ -124,17 +125,20 @@ void SceneGame::ReleaseMapVAGo()
 void SceneGame::SpawnUnit()
 {
 	UnitGo* unit = unitPool.Get();
-	MapToolGo* map = (MapToolGo*)FindGo("Map");
-	unit->SetPosition(map->GetSpawnPoint());
+	unit->SetPosition(Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos())/*map->GetSpawnPoint()*/);
 	sf::Vector2f a = map->GetSpawnPoint();
 	unit->sortLayer = 2;
 	AddGo(unit);
 }
 
+void SceneGame::OnDieUnit(UnitGo* unit)
+{
+	RemoveGo(unit);
+	unitPool.Return(unit);
+}
+
 void SceneGame::MouseMove()
 {
-	MapToolGo* map = (MapToolGo*)FindGo("Map");
-
 	if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
 	{
 		if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))

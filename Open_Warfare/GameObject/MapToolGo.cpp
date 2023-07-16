@@ -6,6 +6,7 @@
 
 #include "MapTable.h"
 #include "DataTableMgr.h"
+#include "UnitGo.h"
 MapToolGo::MapToolGo(const std::string id, const std::string n)
 	:GameObject(n), textureId(id), texture(nullptr)
 {
@@ -91,6 +92,11 @@ void MapToolGo::Init()
 
 void MapToolGo::Release()
 {
+	for (auto wb : wallBounds)
+	{
+		delete wb;
+	}
+	wallBounds.clear();
 }
 
 void MapToolGo::Reset()
@@ -118,7 +124,17 @@ sf::Vector2f MapToolGo::GetSpawnPoint()
 	std::vector<int>::iterator it = std::find(mapInfo.begin(), mapInfo.end(), 42);
 
 	if (it != mapInfo.cend()) {
-		return WallVA.vertexArray[std::distance(mapInfo.begin(), it)].position;
+		return GroundVA.vertexArray[std::distance(mapInfo.begin(), it)*4].position;
+	}
+	return sf::Vector2f();
+}
+
+sf::Vector2f MapToolGo::GetPortalPoint()
+{
+	std::vector<int>::iterator it = std::find(mapInfo.begin(), mapInfo.end(), 5);
+
+	if (it != mapInfo.cend()) {
+		return GroundVA.vertexArray[std::distance(mapInfo.begin(), it) * 4].position + sf::Vector2f{tileSize}/2.f;
 	}
 	return sf::Vector2f();
 }
@@ -283,6 +299,20 @@ void MapToolGo::WallCornerAdder(sf::Vertex*& quad, int index)
 	}
 }
 
+void MapToolGo::WallBoundMaker(sf::Vertex*& quad)
+{
+	sf::Vector2f p1 = quad[0].position;
+	sf::Vector2f p2 = quad[1].position;
+	sf::Vector2f p3 = quad[2].position;
+	sf::Vector2f p4 = quad[3].position;
+	sf::FloatRect* newWBounds = new sf::FloatRect(
+		std::min(std::min(p1.x, p2.x), std::min(p3.x, p4.x)),
+		std::min(std::min(p1.y, p2.y), std::min(p3.y, p4.y)),
+		tileSize.x, tileSize.y
+	);
+	wallBounds.push_back(newWBounds);
+}
+
 void MapToolGo::PitMaker(sf::Vertex*& quad, int index)
 {
 	if (mapInfo[index - width] != 2)
@@ -345,6 +375,8 @@ void MapToolGo::AfterDrawer(sf::Vertex*& quad,int index,int tileNumber, int tu)
 	case 0: //wall
 		WallCornerAdder(quad, index);
 		WallRotator(quad, tu, index);
+		WallBoundMaker(quad);
+		/*WallBoundMaker(quad);*/
 		break;
 	case 1: //floor
 		VertexRotator(quad, 90 * Utils::RandomRange(0, 3));
@@ -353,7 +385,8 @@ void MapToolGo::AfterDrawer(sf::Vertex*& quad,int index,int tileNumber, int tu)
 		PitMaker(quad, index);
 		break;
 	case 3: //decoBlock
-		AddtionalVAarrayMaker(quad, 90 * Utils::RandomRange(0, 3), Utils::RandomRange(0, 4), 4);
+		AddtionalVAarrayMaker(quad, 90 * Utils::RandomRange(0, 3), Utils::RandomRange(0, 4), 4,true);
+		WallBoundMaker(quad);
 		break;
 	case 41: //Entrance
 	case 42:
@@ -463,7 +496,7 @@ void MapToolGo::AddtionalVAarrayEntranceMaker(sf::Vertex*& quad, int tileNumber,
 		quad2[1].position.x += tileSize.x;
 		quad2[2].position.x += tileSize.x;
 		quad2[3].position.x -= tileSize.x;
-		quad2[2].position.y += 3;
+		quad2[2].position.y += 6;
 		quad2[3].position.y += 6;
 		tu = 4;
 		tv = 2;
@@ -494,6 +527,59 @@ void MapToolGo::SetStage(Stages stage)
 	textureId = info.textureId;
 	texture = RESOURCE_MGR.GetTexture(textureId);
 	MakeMap();
+}
+
+bool MapToolGo::WallBoundChecker(UnitGo& unit)
+{
+	sf::Vector2f result = { 1,1 };
+	for (auto rect : wallBounds)
+	{
+		if (rect->intersects(unit.sprite.getGlobalBounds()))
+		{
+			sf::FloatRect uf = unit.sprite.getGlobalBounds();
+			sf::Vector2f rectCenter(rect->left + rect->width / 2.f, rect->top + rect->height / 2.f);
+			sf::Vector2f unitCenter(uf.left + uf.width / 2.f, uf.top + uf.height / 2.f);
+			sf::Vector2f overlap = rectCenter - unitCenter;
+
+			float xOverlap = std::abs(overlap.x) - (rect->width / 2.f + uf.width / 2.f);
+			float yOverlap = std::abs(overlap.y) - (rect->height / 2.f + uf.height / 2.f);
+
+			if ((rect->left < uf.left + uf.width) &&
+				xOverlap > yOverlap&&
+				overlap.x > 0 &&
+				unit.direction.x > 0)
+			{
+				unit.SetPosition(rect->left-unit.GetSize().x/2.f -0.7f, unit.GetPosition().y);
+				unit.direction.x = -0.001f;
+			}
+			else if ((rect->left + rect->width > uf.left) &&
+				xOverlap > yOverlap &&
+				overlap.x < 0 &&
+				unit.direction.x < 0)
+			{
+				unit.SetPosition(rect->left + rect->width + unit.GetSize().x / 2.f+ 0.7f, unit.GetPosition().y);
+				unit.direction.x = 0.001f;
+			}
+			else if ((rect->top < uf.top + uf.height) &&
+				yOverlap > xOverlap &&
+				overlap.y > 0 &&
+				unit.direction.y > 0)
+			{
+				unit.SetPosition(unit.GetPosition().x, rect->top - unit.GetSize().y / 2.f - 0.7f);
+				unit.direction.y = -0.001f;
+			}
+			else if ((rect->top + rect->height > uf.top) &&
+				yOverlap > xOverlap &&
+				overlap.y < 0 &&
+				unit.direction.y < 0)
+			{
+				unit.SetPosition(unit.GetPosition().x, rect->top + rect->height + unit.GetSize().y / 2.f + 0.7f);
+				unit.direction.y = 0.001f;
+			}
+			return true;
+		}
+	}
+	return false;
 }
 
 bool MapToolGo::Outside(int index)

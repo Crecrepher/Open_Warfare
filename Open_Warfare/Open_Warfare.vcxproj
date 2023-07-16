@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3rd\as.cpp" />
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
     <ClCompile Include="DataTable\DataTable.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="GameObject\MapToolGo.h" />
     <ClInclude Include="DataTable\MapTable.h" />
     <ClInclude Include="GameObject\UnitGo.h" />
+    <ClInclude Include="stdc++.h" />
     <ClInclude Include="Universial\ObjectPool.h" />
     <ClInclude Include="GameObject\SoundGo.h" />
     <ClInclude Include="GameObject\TextGo.h" />

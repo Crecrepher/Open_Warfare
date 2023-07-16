@@ -2,6 +2,8 @@
 #include "GameObject.h"
 #include "VertexArrayGo.h"
 
+class UnitGo;
+
 class MapToolGo : public GameObject
 {
 public:
@@ -20,6 +22,7 @@ private:
 	int width;
 	int height;
 	std::vector<int> mapInfo;
+	std::vector<sf::FloatRect*> wallBounds;
 
 	int additionalGroundVAarray;
 	int additionalWallVAarray;
@@ -54,13 +57,14 @@ public:
 
 	sf::Vector2f GetCenter();
 	sf::Vector2f GetSpawnPoint();
-	/*sf::Vector2f GetPortalPoint();*/
+	sf::Vector2f GetPortalPoint();
 
 	void MakeMap();
 	void MapPainter(int index,int tileNumber, int& tu, int& tv);
 	void WallPainter(int index, int tileNumber, int& tu, int& tv);
 	void WallRotator(sf::Vertex*& quad,int tu, int inedx);
 	void WallCornerAdder(sf::Vertex*& quad, int index);
+	void WallBoundMaker(sf::Vertex*& quad);
 	void PitMaker(sf::Vertex*& quad, int index);
 	void AntranceMaker(sf::Vertex*& quad, int index, int tileNumber);
 	void PortalDrawer(sf::Vertex*& quad, int index);
@@ -71,7 +75,9 @@ public:
 	(sf::Vertex*& quad, int rotation,int tu, int tv, bool isWall = false);
 	void AddtionalVAarrayEntranceMaker
 	(sf::Vertex*& quad, int tileNumber, int rotation);
+
 	void SetStage(Stages stage);
+	bool WallBoundChecker(UnitGo& unit);
 
 	bool Outside(int index);
 	bool IsNotWall(int index);

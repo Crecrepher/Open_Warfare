@@ -2,11 +2,13 @@
 #include "Scene.h"
 #include "ObjectPool.h"
 
+class MapToolGo;
 class UnitGo;
 
 class SceneGame : public Scene
 {
 protected:
+	MapToolGo* map;
 	ObjectPool<UnitGo> unitPool;
 	sf::Vector2f mouseMove;
 public:
@@ -29,6 +31,7 @@ public:
 	void ReleaseMapVAGo();
 
 	void SpawnUnit();
+	void OnDieUnit(UnitGo* unit);
 
 	void MouseMove();
 };

@@ -3,6 +3,7 @@
 #include "ObjectPool.h"
 
 class SoundGo;
+class MapToolGo;
 
 class UnitGo : public SpriteGo
 {
@@ -29,13 +30,17 @@ protected:
 	int weight;
 
 	sf::Vector2f look;
-	sf::Vector2f direction = {1,0};
+	
 
 	int hp = 0;
 	float attackRate = 0.f;
 	float attackTimer = 3.f;
 
+	MapToolGo* map = nullptr;
+
 public:
+	sf::Vector2f direction = { 0,0 };
+
 	UnitGo(const std::string n = "");
 	virtual~UnitGo()override;
 
@@ -46,6 +51,7 @@ public:
 	virtual void Update(float dt)override;
 	virtual void Draw(sf::RenderWindow& window)override;
 
+	void SetMap(MapToolGo* map) { this->map = map; }
 	void SetType(Types t);
 	Types GetType() const;
 

@@ -108,6 +108,9 @@
     <ClCompile Include="GameObject\UnitGo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="3rd\as.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Universial\stdafx.h">
@@ -207,6 +210,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="GameObject\UnitGo.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="stdc++.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
