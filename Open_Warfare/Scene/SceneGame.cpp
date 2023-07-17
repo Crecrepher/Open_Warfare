@@ -162,6 +162,7 @@ void SceneGame::BuildTrap()
 			(int)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()).y / 24 * 24.f + 12);
 		trap->sortLayer = 1;
 		trap->SetUnitList(&unitPool.GetUseList());
+		trap->sprite.setTextureRect(sf::IntRect{ 12,12,12,12 });
 		AddGo(trap);
 		std::cout << "Æ®·¦¼³Ä¡" << std::endl;
 	}
