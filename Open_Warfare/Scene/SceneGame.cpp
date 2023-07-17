@@ -69,14 +69,9 @@ void SceneGame::Enter()
 
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
-	map->SetStage(MapToolGo::Stages::Second);
-	map->WallVA.sortLayer = -10;
-	map->GroundVA.sortLayer = -11;
-
-	std::cout << map->WallVA.GetPosition().x << std::endl;
-	std::cout << map->WallVA.GetPosition().y << std::endl;
-	std::cout << map->GetPosition().x << std::endl;
-	std::cout << map->GetPosition().y << std::endl;
+	map->SetStage(MapToolGo::Stages::First);
+	map->WallVA.sortLayer = 10;
+	//map->GroundVA.sortLayer = -11;
 	worldView.setCenter(map->GetCenter());
 }
 
@@ -125,9 +120,9 @@ void SceneGame::ReleaseMapVAGo()
 void SceneGame::SpawnUnit()
 {
 	UnitGo* unit = unitPool.Get();
-	unit->SetPosition(Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos())/*map->GetSpawnPoint()*/);
-	sf::Vector2f a = map->GetSpawnPoint();
+	unit->SetPosition(/*Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos())*/map->GetSpawnPoint());
 	unit->sortLayer = 2;
+	unit->SetLoot();
 	AddGo(unit);
 }
 

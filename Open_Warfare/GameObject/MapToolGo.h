@@ -3,6 +3,7 @@
 #include "VertexArrayGo.h"
 
 class UnitGo;
+class AS;
 
 class MapToolGo : public GameObject
 {
@@ -19,8 +20,7 @@ public:
 private:
 	Stages stageNum;
     int mapcode;
-	int width;
-	int height;
+
 	std::vector<int> mapInfo;
 	std::vector<sf::FloatRect*> wallBounds;
 
@@ -29,12 +29,19 @@ private:
 
 	std::string textureId;
 	sf::Texture* texture;
+	
+
+
+public:	
+	int width;
+	int height;
 	sf::Vector2u tileSize = { 24,24 };
 
-public:
 	VertexArrayGo GroundVA;
 	VertexArrayGo WallVA;
 	sf::Vector2f originPosition;
+	sf::Vector2i start = { 0,0 };
+	sf::Vector2i portal = { 0,0 };
 
 	MapToolGo(const std::string id = "", const std::string n = "");
 	virtual~MapToolGo() override;
@@ -58,6 +65,7 @@ public:
 	sf::Vector2f GetCenter();
 	sf::Vector2f GetSpawnPoint();
 	sf::Vector2f GetPortalPoint();
+
 
 	void MakeMap();
 	void MapPainter(int index,int tileNumber, int& tu, int& tv);
@@ -87,5 +95,5 @@ public:
 	int WallStuckTwoFloorAngle(int index);
 	int WallStuckWallAngle(int index);
 
-
+	std::vector<std::vector<int>> GetLoot();
 };

@@ -42,11 +42,42 @@ void UnitGo::Release()
 void UnitGo::Update(float dt)
 {
 	SpriteGo::Update(dt);
-	direction = Utils::Normalize(map->GetPortalPoint() - GetPosition());
+	boundBox.left = GetPosition().x - 2;
+	boundBox.top = GetPosition().y - 2;
+	if (destination.intersects(boundBox)
+		/*destination.contains(GetPosition())*/)
+	{
+		route[curPos.y][curPos.x] = 3;
+
+		if (route[curPos.y][curPos.x + 1] == 9)
+		{
+			destination.left += mTileSize.x;
+			curPos.x += 1;
+		}
+		else if (route[curPos.y][curPos.x - 1] == 9)
+		{
+			destination.left -= mTileSize.x;
+			curPos.x -= 1;
+		}
+		else if (route[curPos.y + 1][curPos.x] == 9)
+		{
+			destination.top += mTileSize.y;
+			curPos.y += 1;
+		}
+		else if (route[curPos.y - 1][curPos.x] == 9)
+		{
+			destination.top -= mTileSize.y;
+			curPos.y -= 1;
+		}
+		test.setPosition(destination.left, destination.top);
+
+	}
+	direction = Utils::Normalize(sf::Vector2f(destination.left+destination.width/2,destination.top+ destination.height / 2) - GetPosition());
+
 	map->WallBoundChecker(*this);
 	position += direction * (float)speed * dt*10.f;
 	SetPosition(position);
-	if (GetPosition() == map->GetPortalPoint())
+	if (portalEnd.intersects(boundBox)||hp < 0)
 	{
 		Scene* scene = SCENE_MGR.GetCurrScene(); //형변환연산자 쓰기
 		SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
@@ -55,11 +86,15 @@ void UnitGo::Update(float dt)
 			sceneGame->OnDieUnit(this);
 		}
 	}
+
+	//바라보는 각도
+	sprite.setRotation(Utils::Angle(direction)-90);
 }
 
 void UnitGo::Draw(sf::RenderWindow& window)
 {
 	SpriteGo::Draw(window);
+	window.draw(test);
 }
 
 void UnitGo::SetType(Types t)
@@ -84,4 +119,29 @@ UnitGo::Types UnitGo::GetType() const
 void UnitGo::OnHitBullet(int damage)
 {
 	hp -= damage;
+}
+
+void UnitGo::SetLoot()
+{
+	route = map->GetLoot();
+	mTileSize = { (int)map->tileSize.x,(int)map->tileSize.y };
+	route[map->start.y][map->start.x] = 0;
+	curPos = map->start;
+
+	float x1 = map->start.x;
+	float y1 = map->start.y;
+
+	float x2 = map->portal.x;
+	float y2 = map->portal.y;
+
+	destination = { x1 * mTileSize.x,y1* mTileSize.y,
+		(float)mTileSize.x/16,(float)mTileSize.y/16 };
+	destination.left += mTileSize.x /2;
+	destination.top += mTileSize.y /2;
+
+	portalEnd = { x2 * mTileSize.x,y2 * mTileSize.y,
+		(float)mTileSize.x,(float)mTileSize.y };
+	test.setSize({ destination.width, destination.height });
+	test.setFillColor(sf::Color::White);
+	test.setPosition(destination.left, destination.top);
 }

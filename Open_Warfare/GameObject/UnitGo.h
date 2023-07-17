@@ -30,16 +30,22 @@ protected:
 	int weight;
 
 	sf::Vector2f look;
-	
+	sf::FloatRect boundBox = {0,0,5,5};
 
 	int hp = 0;
 	float attackRate = 0.f;
 	float attackTimer = 3.f;
 
 	MapToolGo* map = nullptr;
-
+	sf::Vector2i mTileSize = { 0,0 };
+	std::vector<std::vector<int>> route;
+	sf::Vector2i curPos = { 0,0 };
+	sf::FloatRect destination;
+	sf::FloatRect portalEnd;
+	sf::RectangleShape test;
 public:
 	sf::Vector2f direction = { 0,0 };
+	
 
 	UnitGo(const std::string n = "");
 	virtual~UnitGo()override;
@@ -56,5 +62,6 @@ public:
 	Types GetType() const;
 
 	void OnHitBullet(int damage);
+	void SetLoot();
 };
 

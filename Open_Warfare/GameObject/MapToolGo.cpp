@@ -7,6 +7,8 @@
 #include "MapTable.h"
 #include "DataTableMgr.h"
 #include "UnitGo.h"
+#include "as.h"
+
 MapToolGo::MapToolGo(const std::string id, const std::string n)
 	:GameObject(n), textureId(id), texture(nullptr)
 {
@@ -148,14 +150,23 @@ void MapToolGo::MakeMap()
 	additionalGroundVAarray = height * width * 4;
 	additionalWallVAarray = height * width * 4;
 
-	for (unsigned int i = 0; i < width; ++i)
-		for (unsigned int j = 0; j < height; ++j)
+	for (int i = 0; i < width; ++i)
+		for (int j = 0; j < height; ++j)
 		{
 			int index = i + j * width;
 			int tileNumber = mapInfo[index];
 			int tu = 0;
 			int tv = 0;
 			MapPainter(index, tileNumber, tu, tv);
+
+			if (tileNumber == 42)
+			{
+				start = { i,j };
+			}
+			if (tileNumber == 5)
+			{
+				portal = { i,j };
+			}
 
 			sf::Vertex* quad;
 			switch (tileNumber)
@@ -179,6 +190,7 @@ void MapToolGo::MakeMap()
 
 			AfterDrawer(quad,index, tileNumber,tu);
 		}
+
 }
 
 void MapToolGo::MapPainter(int index, int tileNumber, int& tu, int& tv)
@@ -681,4 +693,47 @@ int MapToolGo::WallStuckWallAngle(int index)
 		return 270;
 	}
 	return 0;
+}
+
+std::vector<std::vector<int>> MapToolGo::GetLoot()
+{
+	std::vector<std::vector<int>> twoDArray;
+	int dataIndex = 0;
+	for (int i = 0; i < width; ++i) {
+		std::vector<int> row;
+		for (int j = 0; j < height; ++j) {
+			if (mapInfo[dataIndex] == 0 ||
+				mapInfo[dataIndex] == 3 ||
+				mapInfo[dataIndex] == 2)
+			{
+				row.push_back(1);
+			}
+			else if (mapInfo[dataIndex] == 1 ||
+				mapInfo[dataIndex] == 41 ||
+				mapInfo[dataIndex] == 42 ||
+				mapInfo[dataIndex] == 420 ||
+				mapInfo[dataIndex] == 43 ||
+				mapInfo[dataIndex] == 430 ||
+				mapInfo[dataIndex] == 5)
+			{
+				row.push_back(0);
+			}
+			else
+			{
+				row.push_back(mapInfo[dataIndex]);
+			}
+			++dataIndex;
+		}
+		twoDArray.push_back(row);
+	}
+
+	AS as;
+	as.ROW = width;
+	as.COL = height;
+	AS::Pair src = { start.y,start.x };
+	AS::Pair dst = { portal.y,portal.x };
+	if (as.aStarSearch(twoDArray, src, dst));
+	else std::cout << "½ÇÆÐ.";
+
+	return twoDArray;
 }

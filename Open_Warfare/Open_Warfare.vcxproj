@@ -152,7 +152,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="3rd\as.cpp" />
     <ClCompile Include="Animation\AnimatioControler.cpp" />
     <ClCompile Include="Animation\AnimatonClip.cpp" />
     <ClCompile Include="DataTable\DataTable.cpp" />
@@ -196,6 +195,7 @@
     <ClCompile Include="GameObject\VertexArrayGo.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3rd\as.h" />
     <ClInclude Include="3rd\rapidcsv.h" />
     <ClInclude Include="Animation\AnimatioControler.h" />
     <ClInclude Include="Animation\AnimatonClip.h" />
