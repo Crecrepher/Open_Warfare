@@ -4,15 +4,24 @@
 
 class MapToolGo;
 class UnitGo;
+class TrapGo;
 
 class SceneGame : public Scene
 {
 protected:
 	MapToolGo* map;
-	ObjectPool<UnitGo> unitPool;
+
+	int maxHp = 20;
+	int hp = 0;
+
+	ObjectPool<TrapGo> trapPool;
 	sf::Vector2f mouseMove;
-public:
+	std::vector<int> mTrapInfo;
+	int mapWidth;
+	int mapHeight;
 	
+public:
+	ObjectPool<UnitGo> unitPool;
 
 	SceneGame();
 	virtual ~SceneGame() override;
@@ -31,7 +40,9 @@ public:
 	void ReleaseMapVAGo();
 
 	void SpawnUnit();
+	void BuildTrap();
 	void OnDieUnit(UnitGo* unit);
+	void PlayerOuch(int damage);
 
 	void MouseMove();
 };

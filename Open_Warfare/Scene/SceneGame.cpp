@@ -14,6 +14,7 @@
 #include "UiButton.h"
 #include "MapToolGo.h"
 #include "UnitGo.h"
+#include "TrapGo.h"
 
 SceneGame::SceneGame() : Scene(SceneId::Game)
 {
@@ -38,7 +39,7 @@ void SceneGame::Init()
 	uiView.setCenter(centerPos);
 
 	map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
-	
+	AddGo(new TextGo("Hp"));
 
 	for (auto go : gameObjects)
 	{
@@ -51,11 +52,20 @@ void SceneGame::Init()
 		unit->SetMap(map);
 	};
 	unitPool.Init();
+
+	trapPool.OnCreate = [this](TrapGo* unit) {
+		TrapGo::Types unitType = TrapGo::Types::Spike;
+		unit->SetType(unitType);
+		unit->SetMap(map);
+	};
+	trapPool.Init();
+
 }
 
 void SceneGame::Release()
 {
 	unitPool.Release();
+	trapPool.Release();
 	ReleaseMapVAGo();
 	for (auto go : gameObjects)
 	{
@@ -72,12 +82,22 @@ void SceneGame::Enter()
 	map->SetStage(MapToolGo::Stages::First);
 	map->WallVA.sortLayer = 10;
 	//map->GroundVA.sortLayer = -11;
+	mTrapInfo = map->GetMap();
+	mapWidth = map->width;
+	mapHeight = map->height;
+
 	worldView.setCenter(map->GetCenter());
+
+	hp = maxHp;
+	TextGo* findTGo = (TextGo*)FindGo("Hp");
+	findTGo->SetOrigin(Origins::TR);
+	findTGo->text.setFont("fonts/TMONBlack")
 }
 
 void SceneGame::Exit()
 {
 	ClearObjectPool(unitPool);
+	ClearObjectPool(trapPool);
 	Scene::Exit();
 }
 
@@ -99,6 +119,10 @@ void SceneGame::Update(float dt)
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num2))
 	{
 		ClearObjectPool(unitPool);
+	}
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	{
+		BuildTrap();
 	}
 }
 
@@ -126,10 +150,46 @@ void SceneGame::SpawnUnit()
 	AddGo(unit);
 }
 
+void SceneGame::BuildTrap()
+{
+	int px = (int)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()).x / 24 ;
+	int py = (int)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()).y / 24 ;
+	if (mTrapInfo[px+py* mapWidth] == 1)
+	{
+		mTrapInfo[px + py * mapWidth] = 10;
+		TrapGo* trap = trapPool.Get();
+		trap->SetPosition((int)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()).x / 24 * 24.f + 12,
+			(int)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()).y / 24 * 24.f + 12);
+		trap->sortLayer = 1;
+		trap->SetUnitList(&unitPool.GetUseList());
+		AddGo(trap);
+		std::cout << "트랩설치" << std::endl;
+	}
+	else
+	{
+		std::cout << "빈 자리여야 합니다" << std::endl;
+	}
+	//for (int i = 0; i < mapWidth; ++i) {
+	//	for (int j = 0; j < mapHeight; ++j) {
+	//		std::cout << mTrapInfo[j + i* mapWidth] << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
+}
+
 void SceneGame::OnDieUnit(UnitGo* unit)
 {
 	RemoveGo(unit);
 	unitPool.Return(unit);
+}
+
+void SceneGame::PlayerOuch(int damage)
+{
+	hp -= damage;
+	if (hp <= 0)
+	{
+		SCENE_MGR.ChangeScene(SceneId::Game);
+	}
 }
 
 void SceneGame::MouseMove()

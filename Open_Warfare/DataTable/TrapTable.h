@@ -1,29 +1,25 @@
 #pragma once
 #include "DataTable.h"
-#include "UnitGo.h"
+#include "TrapGo.h"
 
-struct UnitInfo
+struct TrapInfo
 {
 	std::string textureId;
-	int maxHp;
-	int prize;
-	int xp;
-	int speed;
-	int damage;
-	int weight;
+	float cooldown;
+	int price;
 };
 
-class UnitTable : public DataTable
+class TrapTable : public DataTable
 {
 protected:
-	std::unordered_map<int, UnitInfo> table;
+	std::unordered_map<int, TrapInfo> table;
 public:
-	UnitTable() : DataTable(DataTable::Ids::UnitGo) {};
-	virtual ~UnitTable() override { Release(); }
+	TrapTable() : DataTable(DataTable::Ids::TrapGo) {};
+	virtual ~TrapTable() override { Release(); }
 
 	virtual bool Load() override;
 	virtual void Release() override;
 
-	const UnitInfo& Get(int id);
+	const TrapInfo& Get(int id);
 };
 

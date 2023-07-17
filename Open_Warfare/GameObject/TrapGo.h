@@ -4,51 +4,46 @@
 
 class SoundGo;
 class MapToolGo;
+class UnitGo;
 
-class UnitGo : public SpriteGo
+class TrapGo : public SpriteGo
 {
 public:
 	enum class Types
 	{
 		None = -1,
-		Farmer,
-		Adventurer,
-		Warrior,
-		Knight,
-		Rich,
-		TypeCount
+		Dart,
+		Spike,
+		TypeCount,
 	};
 
 protected:
-	Types unitType;
+	Types trapType = Types::None;
 
-	int maxHp;
-	int prize;
-	int xp;
-	int speed;
-	int damage;
-	int weight;
-
-	sf::Vector2f look;
-	sf::FloatRect boundBox = {0,0,5,5};
-
-	int hp = 0;
+	float maxCooldown = 3.f;
 	float attackRate = 0.f;
-	float attackTimer = 3.f;
+	int price = 100;
+	int upgrade = 0;
 
+	int damage = 2;
+	int weightPower = 0;
+
+	int maxHp = 0;
+	int hp = 0;
+	
 	MapToolGo* map = nullptr;
 	sf::Vector2i mTileSize = { 0,0 };
-	std::vector<std::vector<int>> route;
+
 	sf::Vector2i curPos = { 0,0 };
-	sf::FloatRect destination;
-	sf::FloatRect portalEnd;
-	sf::RectangleShape test;
+
+	const std::list<UnitGo*>* unitList;
+
 public:
 	sf::Vector2f direction = { 0,0 };
 	
 
-	UnitGo(const std::string n = "");
-	virtual~UnitGo()override;
+	TrapGo(const std::string n = "");
+	virtual~TrapGo()override;
 
 	virtual void Init()override;
 	virtual void Reset()override;
@@ -57,11 +52,11 @@ public:
 	virtual void Update(float dt)override;
 	virtual void Draw(sf::RenderWindow& window)override;
 
+	void SetUnitList(const std::list<UnitGo*>* list);
 	void SetMap(MapToolGo* map) { this->map = map; }
 	void SetType(Types t);
 	Types GetType() const;
+	
 
-	void OnHitBullet(int damage);
-	void SetLoot();
 };
 

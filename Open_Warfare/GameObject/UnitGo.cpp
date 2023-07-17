@@ -25,6 +25,13 @@ void UnitGo::Init()
 {
 	SpriteGo::Init();
 	SetOrigin(Origins::MC);
+	
+	maxHpBar.setFillColor(sf::Color(0,0,0,75));
+	maxHpBar.setSize({ 10.f,2.f });
+	Utils::SetOrigin(maxHpBar, Origins::MC);
+
+	hpBar.setFillColor(sf::Color::Red);
+	hpBar.setSize({ 10.f,2.f });
 }
 
 void UnitGo::Reset()
@@ -77,24 +84,37 @@ void UnitGo::Update(float dt)
 	map->WallBoundChecker(*this);
 	position += direction * (float)speed * dt*10.f;
 	SetPosition(position);
-	if (portalEnd.intersects(boundBox)||hp < 0)
+	if (portalEnd.intersects(boundBox)||hp <= 0)
 	{
 		Scene* scene = SCENE_MGR.GetCurrScene(); //형변환연산자 쓰기
 		SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
 		if (sceneGame != nullptr)
 		{
 			sceneGame->OnDieUnit(this);
+			if (portalEnd.intersects(boundBox))
+			{
+				sceneGame->PlayerOuch(1);
+			}
 		}
 	}
 
 	//바라보는 각도
 	sprite.setRotation(Utils::Angle(direction)-90);
+
+	//hp
+	maxHpBar.setPosition(GetPosition().x, GetPosition().y - 7);
+	hpBar.setPosition(maxHpBar.getGlobalBounds().left, maxHpBar.getGlobalBounds().top);
+	hpBar.setSize({ 10.f*((float)hp / (float)maxHp), 1.f});
 }
 
 void UnitGo::Draw(sf::RenderWindow& window)
 {
 	SpriteGo::Draw(window);
-	window.draw(test);
+	if (maxHp != hp)
+	{
+		window.draw(maxHpBar);
+		window.draw(hpBar);
+	}
 }
 
 void UnitGo::SetType(Types t)

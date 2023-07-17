@@ -3,12 +3,14 @@
 #include "StringTable.h"
 #include "MapTable.h"
 #include "UnitTable.h"
+#include "TrapTable.h"
 
 void DataTableMgr::LoadAll()
 {
 	tables.insert({ DataTable::Ids::String, new StringTable()});
 	tables.insert({ DataTable::Ids::Map, new MapTable() });
 	tables.insert({ DataTable::Ids::UnitGo, new UnitTable() });
+	tables.insert({ DataTable::Ids::TrapGo, new TrapTable() });
 	for (auto pair : tables)
 	{
 		if (!pair.second->Load())

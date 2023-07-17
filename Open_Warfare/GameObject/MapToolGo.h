@@ -96,4 +96,5 @@ public:
 	int WallStuckWallAngle(int index);
 
 	std::vector<std::vector<int>> GetLoot();
+	std::vector<int> GetMap() { return mapInfo; }
 };

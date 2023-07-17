@@ -43,6 +43,9 @@ protected:
 	sf::FloatRect destination;
 	sf::FloatRect portalEnd;
 	sf::RectangleShape test;
+
+	sf::RectangleShape maxHpBar;
+	sf::RectangleShape hpBar;
 public:
 	sf::Vector2f direction = { 0,0 };
 	
