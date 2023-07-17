@@ -91,7 +91,7 @@ void SceneGame::Enter()
 	hp = maxHp;
 	TextGo* findTGo = (TextGo*)FindGo("Hp");
 	findTGo->SetOrigin(Origins::TR);
-	findTGo->text.setFont("fonts/TMONBlack")
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/TMONBlack.ttf"));
 }
 
 void SceneGame::Exit()
