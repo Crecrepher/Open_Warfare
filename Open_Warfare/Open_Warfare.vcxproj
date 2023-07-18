@@ -157,6 +157,7 @@
     <ClCompile Include="DataTable\DataTable.cpp" />
     <ClCompile Include="DataTable\TrapTable.cpp" />
     <ClCompile Include="DataTable\UnitTable.cpp" />
+    <ClCompile Include="DataTable\WaveTable.cpp" />
     <ClCompile Include="Framework\DataTableMgr.cpp" />
     <ClCompile Include="GameObject\RectGo.cpp" />
     <ClCompile Include="GameObject\SoundGo.cpp" />
@@ -204,6 +205,7 @@
     <ClInclude Include="DataTable\DataTable.h" />
     <ClInclude Include="DataTable\TrapTable.h" />
     <ClInclude Include="DataTable\UnitTable.h" />
+    <ClInclude Include="DataTable\WaveTable.h" />
     <ClInclude Include="Framework\DataTableMgr.h" />
     <ClInclude Include="GameObject\RectGo.h" />
     <ClInclude Include="GameObject\SpriteEffect.h" />

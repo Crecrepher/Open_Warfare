@@ -9,7 +9,8 @@ public:
 		String,
 		Map,
 		UnitGo,
-		TrapGo
+		TrapGo,
+		Wave
 	};
 	DataTable(const DataTable& other) = delete;
 	bool operator== (const DataTable& other) const = delete;

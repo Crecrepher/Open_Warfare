@@ -7,6 +7,8 @@ struct TrapInfo
 	std::string textureId;
 	float cooldown;
 	int price;
+	int sortlayer;
+	int placeOn;
 };
 
 class TrapTable : public DataTable

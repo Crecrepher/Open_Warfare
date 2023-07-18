@@ -63,6 +63,7 @@ public:
 	void SetMap(MapToolGo* map) { this->map = map; }
 	void SetType(Types t);
 	Types GetType() const;
+	int GetPrize() { return prize; }
 
 	void OnHitBullet(int damage);
 	void SetLoot();

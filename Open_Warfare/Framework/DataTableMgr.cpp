@@ -4,6 +4,7 @@
 #include "MapTable.h"
 #include "UnitTable.h"
 #include "TrapTable.h"
+#include "WaveTable.h"
 
 void DataTableMgr::LoadAll()
 {
@@ -11,6 +12,7 @@ void DataTableMgr::LoadAll()
 	tables.insert({ DataTable::Ids::Map, new MapTable() });
 	tables.insert({ DataTable::Ids::UnitGo, new UnitTable() });
 	tables.insert({ DataTable::Ids::TrapGo, new TrapTable() });
+	tables.insert({ DataTable::Ids::Wave, new WaveTable() });
 	for (auto pair : tables)
 	{
 		if (!pair.second->Load())

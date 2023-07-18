@@ -90,10 +90,13 @@ void UnitGo::Update(float dt)
 		SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
 		if (sceneGame != nullptr)
 		{
-			sceneGame->OnDieUnit(this);
 			if (portalEnd.intersects(boundBox))
 			{
-				sceneGame->PlayerOuch(1);
+				sceneGame->PlayerOuch(1,this);
+			}
+			else
+			{
+				sceneGame->OnDieUnit(this);
 			}
 		}
 	}
@@ -123,6 +126,7 @@ void UnitGo::SetType(Types t)
 	const UnitInfo& info = DATATABLE_MGR.Get<UnitTable>(DataTable::Ids::UnitGo)->Get((int)t);
 	textureId = info.textureId;
 	maxHp = info.maxHp;
+	hp = maxHp;
 	prize = info.prize;
 	xp = info.xp;
 	speed = info.speed;

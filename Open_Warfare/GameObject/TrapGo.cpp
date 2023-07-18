@@ -25,7 +25,7 @@ TrapGo::~TrapGo()
 void TrapGo::Init()
 {
 	SpriteGo::Init();
-	SetOrigin(Origins::MC);
+	SetOrigin(Origins::BC);
 }
 
 void TrapGo::Reset()
@@ -76,8 +76,15 @@ void TrapGo::SetType(Types t)
 	trapType = t;
 	const TrapInfo& info = DATATABLE_MGR.Get<TrapTable>(DataTable::Ids::TrapGo)->Get((int)t);
 	textureId = info.textureId;
+	if (RESOURCE_MGR.GetTexture(textureId) != nullptr)
+	{
+		sprite.setTexture(*RESOURCE_MGR.GetTexture(textureId));
+		sf::IntRect tRect = { 0,0,(int)RESOURCE_MGR.GetTexture(textureId)->getSize().x ,(int)RESOURCE_MGR.GetTexture(textureId)->getSize().y };
+		sprite.setTextureRect(tRect);
+	}
 	maxCooldown = info.cooldown;
 	price = info.price;
+	sortLayer = info.sortlayer;
 }
 
 TrapGo::Types TrapGo::GetType() const

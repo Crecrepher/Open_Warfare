@@ -29,8 +29,6 @@ private:
 
 	std::string textureId;
 	sf::Texture* texture;
-	
-
 
 public:	
 	int width;
