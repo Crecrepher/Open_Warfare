@@ -11,20 +11,39 @@ class TrapGo;
 
 class SceneGame : public Scene
 {
+public:
+	enum class Situation
+	{
+		NONE,
+		SETPOS,
+		SETDIR,
+	};
+
 protected:
 	MapToolGo* map;
+	std::vector<int> mTrapInfo;
+	int mapWidth;
+	int mapHeight;
 
 	int maxHp = 20;
 	int hp = 0;
 	int startMoney = 2200;
 	int money = 0;
 
+	std::unordered_map<int, TrapGo::Types> inTrapPalate;
+	std::vector<int> upgradeInfo;
+	std::vector<int> trapPrice;
+	int availableTraps;
 	ObjectPool<TrapGo> trapPool;
+	TrapGo::Types curType;
+	int curTrapPrice = 0;
+	int availablePlace = 0;
+	int needDir = 0;
+	Situation curSituation;
+
+
 	sf::Vector2f mouseMove;
-	std::vector<int> mTrapInfo;
-	int mapWidth;
-	int mapHeight;
-	
+
 	std::vector<WaveInfo> waveInfo;
 	int curWave = 0;
 	int MaxWave = 0;
@@ -59,10 +78,18 @@ public:
 	void ClearObjectPool(ObjectPool<T>& pool);
 	void ReleaseMapVAGo();
 	void SetWave();
+	void TrapPalateSetting();
 
 	void WaveHandler(float dt);
+	int leftoverCalculator();
 	void SpawnUnit(UnitGo::Types type);
-	void BuildTrap(TrapGo::Types type);
+
+	void TrapHandler();
+	void BuildTrap(sf::Vector2i index, int dir = 0);
+	void ChoiceDir();
+	void MakeGhostTower(TrapGo::Types type,int index);
+	void CancelBuilding();
+
 	void OnDieUnit(UnitGo* unit);
 	void PlayerOuch(int damage, UnitGo* unit);
 

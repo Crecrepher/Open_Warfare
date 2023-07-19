@@ -35,8 +35,8 @@ public:
 	int height;
 	sf::Vector2u tileSize = { 24,24 };
 
-	VertexArrayGo GroundVA;
-	VertexArrayGo WallVA;
+	VertexArrayGo GroundVA = { textureId,"GroundVA" };
+	VertexArrayGo WallVA = { textureId,"WallVA" };;
 	sf::Vector2f originPosition;
 	sf::Vector2i start = { 0,0 };
 	sf::Vector2i portal = { 0,0 };

@@ -17,8 +17,17 @@ public:
 		TypeCount,
 	};
 
+	enum class NeedDirection
+	{
+		None = -1,
+		NO,
+		YES,
+		YES_WALL,
+	};
+
 protected:
 	Types trapType = Types::None;
+	NeedDirection needDir = NeedDirection::NO;
 
 	float maxCooldown = 3.f;
 	float attackRate = 0.f;

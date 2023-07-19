@@ -9,6 +9,7 @@ struct TrapInfo
 	int price;
 	int sortlayer;
 	int placeOn;
+	int needDir;
 };
 
 class TrapTable : public DataTable

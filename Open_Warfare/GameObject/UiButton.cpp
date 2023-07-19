@@ -58,4 +58,12 @@ void UiButton::Update(float dt)
 			OnClick();
 		}
 	}
+	if (sprite.getGlobalBounds().contains(SCENE_MGR.GetCurrScene()->ScreenToWorldPos(INPUT_MGR.GetMousePos()))
+		&& INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
+	{
+		if (OnClickField != nullptr)
+		{
+			OnClickField();
+		}
+	}
 }

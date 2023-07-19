@@ -82,6 +82,8 @@ void TrapGo::SetType(Types t)
 		sf::IntRect tRect = { 0,0,(int)RESOURCE_MGR.GetTexture(textureId)->getSize().x ,(int)RESOURCE_MGR.GetTexture(textureId)->getSize().y };
 		sprite.setTextureRect(tRect);
 	}
+	SetOrigin(Origins::BC);
+	needDir = (NeedDirection)info.needDir;
 	maxCooldown = info.cooldown;
 	price = info.price;
 	sortLayer = info.sortlayer;

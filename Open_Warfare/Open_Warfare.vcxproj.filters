@@ -117,6 +117,9 @@
     <ClCompile Include="DataTable\WaveTable.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\TrapMgr.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Universial\stdafx.h">
@@ -231,6 +234,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="DataTable\WaveTable.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\TrapMgr.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

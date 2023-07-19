@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "ResourceMgr.h"
 #include "DataTableMgr.h"
+#include "TrapMgr.h"
 
 Framework::Framework(int w, int h, const std::string& t)
     :screenWidth(w), screenHeight(h), title(t)
@@ -16,6 +17,7 @@ void Framework::Init(int width, int height, const std::string& title)
 	window.create(sf::VideoMode(width, height), title);
     RESOURCE_MGR.Init();
     DATATABLE_MGR.LoadAll();
+    TRAP_MGR.Init();
     SCENE_MGR.Init();
 }
 
