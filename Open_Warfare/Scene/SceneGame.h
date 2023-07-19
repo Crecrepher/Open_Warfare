@@ -92,6 +92,7 @@ public:
 
 	void OnDieUnit(UnitGo* unit);
 	void PlayerOuch(int damage, UnitGo* unit);
+	const std::list<UnitGo*>* GetUnitList()const;
 
 	void textMoneyUpdate();
 

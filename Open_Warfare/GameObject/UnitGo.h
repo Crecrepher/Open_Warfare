@@ -65,7 +65,7 @@ public:
 	Types GetType() const;
 	int GetPrize() { return prize; }
 
-	void OnHitBullet(int damage);
+	void OnHit(int damage);
 	void SetLoot();
 };
 

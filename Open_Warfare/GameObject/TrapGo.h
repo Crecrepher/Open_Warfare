@@ -5,6 +5,7 @@
 class SoundGo;
 class MapToolGo;
 class UnitGo;
+class Bullet;
 
 class TrapGo : public SpriteGo
 {
@@ -28,12 +29,14 @@ public:
 protected:
 	Types trapType = Types::None;
 	NeedDirection needDir = NeedDirection::NO;
+	ObjectPool<Bullet> poolBullets;
 
 	float maxCooldown = 3.f;
 	float attackRate = 0.f;
 	int price = 100;
 	int upgrade = 0;
-
+	sf::FloatRect rangeRect;
+	sf::RectangleShape test;
 	int damage = 2;
 	int weightPower = 0;
 
@@ -42,11 +45,10 @@ protected:
 	
 	MapToolGo* map = nullptr;
 	sf::Vector2i mTileSize = { 0,0 };
-
 	sf::Vector2i curPos = { 0,0 };
 
 	const std::list<UnitGo*>* unitList;
-
+	
 public:
 	sf::Vector2f direction = { 0,0 };
 	
@@ -61,9 +63,12 @@ public:
 	virtual void Update(float dt)override;
 	virtual void Draw(sf::RenderWindow& window)override;
 
+	void Shoot();
+
 	void SetUnitList(const std::list<UnitGo*>* list);
 	void SetMap(MapToolGo* map) { this->map = map; }
 	void SetType(Types t);
+	void SetRange();
 	Types GetType() const;
 	
 

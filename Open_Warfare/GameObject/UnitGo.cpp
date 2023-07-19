@@ -140,7 +140,7 @@ UnitGo::Types UnitGo::GetType() const
 }
 
 
-void UnitGo::OnHitBullet(int damage)
+void UnitGo::OnHit(int damage)
 {
 	hp -= damage;
 }

@@ -548,6 +548,11 @@ void SceneGame::PlayerOuch(int damage, UnitGo* unit)
 	}
 }
 
+const std::list<UnitGo*>* SceneGame::GetUnitList() const
+{
+	return &unitPool.GetUseList();
+}
+
 void SceneGame::textMoneyUpdate()
 {
 	TextGo* mt = (TextGo*)FindGo("MoneyT");
@@ -632,6 +637,7 @@ void SceneGame::BuildTrap(sf::Vector2i index, int dir)
 		return;
 	}
 	trap->SetType(curType);
+	trap->SetRange();
 	AddGo(trap);
 	money -= curTrapPrice;
 	textMoneyUpdate();

@@ -10,6 +10,7 @@
 
 #include "MapToolGo.h"
 #include "UnitGo.h"
+#include "Bullet.h"
 
 //특징별 성능을 블록처리하듯 모듈러 가능한 디자인을 하기
 
@@ -26,17 +27,32 @@ void TrapGo::Init()
 {
 	SpriteGo::Init();
 	SetOrigin(Origins::BC);
+	rangeRect.height = 24;
+	rangeRect.width = 24;
+	ObjectPool<Bullet>* ptr = &poolBullets;
+	poolBullets.OnCreate = [ptr, this](Bullet* bullet) {
+		bullet->textureId = "graphics/dart.png";
+		bullet->pool = ptr;
+	};
+	poolBullets.Init();
 }
 
 void TrapGo::Reset()
 {
 	SpriteGo::Reset();
+	for (auto bullet : poolBullets.GetUseList())
+	{
+		SCENE_MGR.GetCurrScene()->RemoveGo(bullet);
+	}
+	poolBullets.Clear();
 	hp = maxHp;
+	attackRate = 0.f;
 }
 
 void TrapGo::Release()
 {
 	SpriteGo::Release();
+	poolBullets.Release();
 }
 
 void TrapGo::Update(float dt)
@@ -47,23 +63,55 @@ void TrapGo::Update(float dt)
 	{
 		for (UnitGo* unit : *unitList)
 		{
-			if (sprite.getGlobalBounds().intersects(unit->sprite.getGlobalBounds()))
+			if (rangeRect.intersects(unit->sprite.getGlobalBounds()))
 			{
-				unit->OnHitBullet(damage);
+				switch (trapType)
+				{
+				case TrapGo::Types::None:
+					break;
+				case TrapGo::Types::Dart:
+					Shoot();
+					break;
+				case TrapGo::Types::Spike:
+					unit->OnHit(damage);
+					break;
+				default:
+					break;
+				}
 				attackRate = maxCooldown;
+				return;
 			}
 		}
 	}
 	if (attackRate > 0)
 	{
-		sprite.setColor(sf::Color(255,255- (attackRate / 3 * 255), 255-(attackRate / 3 * 255)));
+		sprite.setColor(sf::Color(255, 255 * (1-attackRate/maxCooldown), 255 * (1 - attackRate / maxCooldown)));
 		attackRate = std::max(attackRate - dt, 0.f);
 	}
+	test.setFillColor(sf::Color::White);
+	test.setPosition({ rangeRect.left,rangeRect.top });
+	test.setSize({ rangeRect.width,rangeRect.height });
 }
 
 void TrapGo::Draw(sf::RenderWindow& window)
 {
 	SpriteGo::Draw(window);
+	//window.draw(test);
+}
+
+void TrapGo::Shoot()
+{
+	Bullet* bullet = poolBullets.Get();
+	bullet->Fire(position, direction, 1000.f,damage,300.f);
+
+	Scene* scene = SCENE_MGR.GetCurrScene();
+	SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
+	if (sceneGame != nullptr)
+	{
+		bullet->SetUnitList(sceneGame->GetUnitList());
+		sceneGame->AddGo(bullet);
+	}
+	std::cout << damage << std::endl;
 }
 
 void TrapGo::SetUnitList(const std::list<UnitGo*>* list)
@@ -87,6 +135,26 @@ void TrapGo::SetType(Types t)
 	maxCooldown = info.cooldown;
 	price = info.price;
 	sortLayer = info.sortlayer;
+}
+
+void TrapGo::SetRange()
+{
+	switch (needDir)
+	{
+	case TrapGo::NeedDirection::YES_WALL:
+		if (trapType == Types::Dart)
+		{
+			rangeRect.width *= 1 + abs(direction.x);
+			rangeRect.height *= 1 + abs(direction.y);
+		}
+		rangeRect.left = ((int)GetPosition().x / 24 * 24) + ((direction.x == 1) ? 24 : ((direction.x == -1) ? -rangeRect.width-24 : 0));
+		rangeRect.top = ((int)GetPosition().y / 24 * 24) + ((direction.y == 1) ? 24 : ((direction.y == -1) ? -rangeRect.height-24 : 0));
+		break;
+	default:
+		rangeRect.left = sprite.getGlobalBounds().left;
+		rangeRect.top = sprite.getGlobalBounds().top;
+		break;
+	}
 }
 
 TrapGo::Types TrapGo::GetType() const
