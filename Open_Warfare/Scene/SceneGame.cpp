@@ -42,6 +42,8 @@ void SceneGame::Init()
 	uiView.setCenter(centerPos);
 
 	map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
+	map->GroundVA.SetName("GroundVA");
+	map->WallVA.SetName("WallVA");
 	AddGo(&map->GroundVA);
 	AddGo(&map->WallVA);
 	AddGo(new SpriteGo("graphics/hp_ui.png", "HpUi"));
@@ -91,11 +93,12 @@ void SceneGame::Release()
 {
 	unitPool.Release();
 	trapPool.Release();
-	ReleaseMapVAGo();
+	ReleaseMapVAGo();//질문 - 맵의 할당과 해제위치 및 총알 해제
 	for (auto go : gameObjects)
 	{
 		delete go;
 	}
+	
 }
 
 void SceneGame::Enter()
@@ -266,6 +269,7 @@ void SceneGame::Update(float dt)
 
 	if (isGameOver)
 	{
+		std::cout << "GAMEOVER" << std::endl;
 		SCENE_MGR.ChangeScene(SceneId::Game);
 	}
 
@@ -568,6 +572,10 @@ void SceneGame::textMoneyUpdate()
 		if (money < trapPrice[i])
 		{
 			tp->sprite.setColor(sf::Color(50, 50, 50));
+		}
+		else
+		{
+			tp->sprite.setColor(sf::Color(255, 255, 255));
 		}
 	}
 }

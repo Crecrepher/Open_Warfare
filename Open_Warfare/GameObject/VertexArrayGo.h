@@ -3,12 +3,13 @@
 class VertexArrayGo : public GameObject
 {
 protected:
-	std::string textureId;
+
 	sf::Texture* texture;
 public:
 	sf::VertexArray vertexArray;
 	sf::Vector2f originPosition;
 
+	std::string textureId;
 	VertexArrayGo(const std::string id = "", const std::string n = "");
 	virtual~VertexArrayGo() override;
 

@@ -11,6 +11,7 @@ Bullet::Bullet(const std::string id, const std::string n)
 
 Bullet::~Bullet()
 {
+	removeGameObjects.
 }
 
 void Bullet::SetUnitList(const std::list<UnitGo*>* list)
@@ -83,4 +84,5 @@ void Bullet::Update(float dt)
 void Bullet::Draw(sf::RenderWindow& window)
 {
 	SpriteGo::Draw(window);
+
 }

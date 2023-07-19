@@ -20,11 +20,8 @@ MapToolGo::~MapToolGo()
 
 void MapToolGo::AddVAGo()
 {
-	SceneGame* sceneGame = dynamic_cast<SceneGame*>(SCENE_MGR.GetCurrScene());
-	GroundVA = { textureId,"GroundVA" };
-	WallVA = { textureId,"WallVA" };
-	sceneGame->AddGo(&GroundVA);
-	sceneGame->AddGo(&WallVA);
+	GroundVA.textureId = textureId;
+	WallVA.textureId = textureId;
 }
 
 void MapToolGo::SetPosition(float x, float y)
