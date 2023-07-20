@@ -105,6 +105,7 @@ void SceneGame::Enter()
 	Scene::Enter();
 	TrapPalateSetting();
 
+	spawnUintNum = std::vector<int>(5);
 	curWave = 0;
 	spawndUnit = 0;
 	curWaveIndex = 0;
@@ -282,10 +283,6 @@ void SceneGame::Update(float dt)
 	//std::cout << INPUT_MGR.GetMousePos().x << "\t" << INPUT_MGR.GetMousePos().y << std::endl;
 	
 	//유닛생성/삭제 테스트코드
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num1))
-	{
-		SpawnUnit(UnitGo::Types::Farmer);
-	}
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num2))
 	{
 		ClearObjectPool(unitPool);
@@ -399,7 +396,7 @@ void SceneGame::WaveHandler(float dt)
 	//스폰
 	if (spawnTimer <= 0.f)
 	{
-		//다음웨이브 시작
+		//다음웨이브 최초호출
 		if (waveTurn)
 		{
 			leftoverUnit = leftoverCalculator();
@@ -413,15 +410,27 @@ void SceneGame::WaveHandler(float dt)
 			waveTurn = false;
 		}
 		spawnTimer = 0.5f;
-		SpawnUnit((UnitGo::Types)waveInfo[curWaveIndex].unitcode);
+		if (spawnUintNum[0] < waveInfo[curWaveIndex].count)
+		{
+			SpawnUnit((UnitGo::Types)waveInfo[curWaveIndex].unitcode, 1);
+			spawnUintNum[0]++;
+		}
+		if (map->startNum >1 && spawnUintNum[1] < waveInfo[curWaveIndex].count2)
+		{
+			SpawnUnit((UnitGo::Types)waveInfo[curWaveIndex].unitcode2,2);
+			spawnUintNum[1]++;
+		}
 		spawndUnit++;
 		curWaveSpawnd++;
 		
 
 		//다음 종류의유닛 스폰
-		if (curWaveSpawnd >= waveInfo[curWaveIndex].count)
+		if (curWaveSpawnd >= std::max(waveInfo[curWaveIndex].count, waveInfo[curWaveIndex].count2))
 		{
 			curWaveSpawnd = 0;
+			spawnUintNum[0] = 0;
+			spawnUintNum[1] = 0;
+
 			if (curWaveIndex+1 < waveInfo.size())
 			{
 				curWaveIndex++;
@@ -452,7 +461,7 @@ int SceneGame::leftoverCalculator()
 	int waveUnit = 0;
 	while (waveInfo[findex].wave == curWave)
 	{
-		waveUnit += waveInfo[findex].count;
+		waveUnit += std::max(waveInfo[findex].count, waveInfo[findex].count2);
 		if (findex + 1 < waveInfo.size())
 		{
 			findex++;
@@ -465,13 +474,17 @@ int SceneGame::leftoverCalculator()
 	return waveUnit;
 }
 
-void SceneGame::SpawnUnit(UnitGo::Types type)
+void SceneGame::SpawnUnit(UnitGo::Types type, int spawnDoor)
 {
+	if (type == UnitGo::Types::None)
+	{
+		return;
+	}
 	UnitGo* unit = unitPool.Get();
 	unit->SetType(type);
-	unit->SetPosition(/*Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos())*/map->GetSpawnPoint());
+	unit->SetPosition(map->GetSpawnPoint(spawnDoor));
 	unit->sortLayer = 2;
-	unit->SetLoot();
+	unit->SetLoot(spawnDoor);
 	AddGo(unit);
 }
 

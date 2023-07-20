@@ -107,7 +107,7 @@ void TrapGo::Draw(sf::RenderWindow& window)
 void TrapGo::Shoot()
 {
 	Bullet* bullet = poolBullets.Get();
-	bullet->Fire(position, direction, 100.f,damage,300.f);
+	bullet->Fire(position, direction, 700.f,damage,300.f);
 
 	Scene* scene = SCENE_MGR.GetCurrScene();
 	SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);

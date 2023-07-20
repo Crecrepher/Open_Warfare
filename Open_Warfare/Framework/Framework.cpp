@@ -53,7 +53,6 @@ void Framework::Run()
     sf::Vector2i prevPos = {0,0};
     while (window.isOpen())
     {
-        
         sf::Time deltaTime = clock.restart();
         float dt = deltaTime.asSeconds();
         if (prevPos != window.getPosition())
@@ -87,7 +86,6 @@ void Framework::Run()
 			Draw();
 			window.display();
         }
-       
     }
     Release();
 }

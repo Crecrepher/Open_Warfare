@@ -38,7 +38,9 @@ public:
 	VertexArrayGo GroundVA = { textureId,"GroundVA" };
 	VertexArrayGo WallVA = { textureId,"WallVA" };;
 	sf::Vector2f originPosition;
-	sf::Vector2i start = { 0,0 };
+	int startNum = 0;
+	sf::Vector2i start1 = { 0,0 };
+	sf::Vector2i start2 = { 0,0 };
 	sf::Vector2i portal = { 0,0 };
 
 	MapToolGo(const std::string id = "", const std::string n = "");
@@ -61,7 +63,7 @@ public:
 	virtual void Draw(sf::RenderWindow& window) override;
 
 	sf::Vector2f GetCenter();
-	sf::Vector2f GetSpawnPoint();
+	sf::Vector2f GetSpawnPoint(int num);
 	sf::Vector2f GetPortalPoint();
 
 
@@ -74,6 +76,7 @@ public:
 	void PitMaker(sf::Vertex*& quad, int index);
 	void AntranceMaker(sf::Vertex*& quad, int index, int tileNumber);
 	void PortalDrawer(sf::Vertex*& quad, int index);
+	void PortalSpreader();
 
 	void AfterDrawer(sf::Vertex*& quad, int index, int tileNumber, int tu);
 	void VertexRotator(sf::Vertex*& quad, int rotation);
@@ -93,6 +96,6 @@ public:
 	int WallStuckTwoFloorAngle(int index);
 	int WallStuckWallAngle(int index);
 
-	std::vector<std::vector<int>> GetLoot();
+	std::vector<std::vector<int>> GetLoot(sf::Vector2i start);
 	std::vector<int> GetMap() { return mapInfo; }
 };

@@ -46,6 +46,9 @@ protected:
 
 	sf::RectangleShape maxHpBar;
 	sf::RectangleShape hpBar;
+
+	int prevRotate = 0;
+
 public:
 	sf::Vector2f direction = { 0,0 };
 	
@@ -66,6 +69,6 @@ public:
 	int GetPrize() { return prize; }
 
 	void OnHit(int damage);
-	void SetLoot();
+	void SetLoot(int lootNum);
 };
 

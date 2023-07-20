@@ -7,6 +7,8 @@ struct WaveInfo
 	int wave;
 	int unitcode;
 	int count;
+	int unitcode2;
+	int count2;
 };
 
 class WaveTable : public DataTable

@@ -13,10 +13,12 @@ bool WaveTable::Load()
 		std::vector<int> wave = doc.GetColumn<int>(0);
 		std::vector<int> unitcode = doc.GetColumn<int>(1);
 		std::vector<int> count = doc.GetColumn<int>(2);
+		std::vector<int> unitcode2 = doc.GetColumn<int>(3);
+		std::vector<int> count2 = doc.GetColumn<int>(4);
 		for (int j = 0; j < wave.size(); ++j)
 		{
 			/*std::cout << wave[j] << " " << unitcode[j] << " " << count[j] << std::endl;*/
-			tables[i].push_back({wave[j],unitcode[j],count[j]});
+			tables[i].push_back({wave[j],unitcode[j],count[j],unitcode2[j],count2[j] });
 		}
 	}
 	return true;

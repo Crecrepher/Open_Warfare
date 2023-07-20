@@ -45,6 +45,7 @@ protected:
 	sf::Vector2f mouseMove;
 
 	std::vector<WaveInfo> waveInfo;
+	std::vector<int> spawnUintNum;
 	int curWave = 0;
 	int MaxWave = 0;
 	int curWaveIndex = 0;
@@ -82,7 +83,7 @@ public:
 
 	void WaveHandler(float dt);
 	int leftoverCalculator();
-	void SpawnUnit(UnitGo::Types type);
+	void SpawnUnit(UnitGo::Types type,int spawnDoor);
 
 	void TrapHandler();
 	void BuildTrap(sf::Vector2i index, int dir = 0);

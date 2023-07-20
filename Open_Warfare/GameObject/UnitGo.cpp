@@ -102,7 +102,9 @@ void UnitGo::Update(float dt)
 	}
 
 	//바라보는 각도
-	sprite.setRotation(Utils::Angle(direction)-90);
+	float angle = Utils::Lerp(prevRotate, Utils::Angle(direction) - 90, 50 * dt);
+	sprite.setRotation(angle);
+	prevRotate = angle;
 
 	//hp
 	maxHpBar.setPosition(GetPosition().x, GetPosition().y - 7);
@@ -118,7 +120,7 @@ void UnitGo::Draw(sf::RenderWindow& window)
 		window.draw(maxHpBar);
 		window.draw(hpBar);
 	}
-	/*window.draw(test);*/
+	window.draw(test);
 }
 
 void UnitGo::SetType(Types t)
@@ -146,15 +148,27 @@ void UnitGo::OnHit(int damage)
 	hp -= damage;
 }
 
-void UnitGo::SetLoot()
+void UnitGo::SetLoot(int lootNum)
 {
-	route = map->GetLoot();
+	sf::Vector2i start;
+	switch (lootNum)
+	{
+	case 1:
+		start = map->start1;
+		break;
+	case 2 :
+		start = map->start2;
+		break;
+	default:
+		break;
+	}
+	route = map->GetLoot(start);
 	mTileSize = { (int)map->tileSize.x,(int)map->tileSize.y };
-	route[map->start.y][map->start.x] = 0;
-	curPos = map->start;
+	route[start.y][start.x] = 0;
+	curPos = start;
 
-	float x1 = map->start.x;
-	float y1 = map->start.y;
+	float x1 = start.x;
+	float y1 = start.y;
 
 	float x2 = map->portal.x;
 	float y2 = map->portal.y;
@@ -166,6 +180,7 @@ void UnitGo::SetLoot()
 
 	portalEnd = { x2 * mTileSize.x,y2 * mTileSize.y,
 		(float)mTileSize.x,(float)mTileSize.y };
+
 	test.setSize({ destination.width, destination.height });
 	test.setFillColor(sf::Color::White);
 	test.setPosition(destination.left, destination.top);

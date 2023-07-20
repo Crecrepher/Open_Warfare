@@ -102,6 +102,7 @@ void MapToolGo::Release()
 
 void MapToolGo::Reset()
 {
+	startNum = 0;
 	/*texture = RESOURCE_MGR.GetTexture(textureId);*/
 }
 
@@ -120,14 +121,20 @@ sf::Vector2f MapToolGo::GetCenter()
 	return {(float)width*tileSize.x /2,(float)height*tileSize.y /2};
 }
 
-sf::Vector2f MapToolGo::GetSpawnPoint()
+sf::Vector2f MapToolGo::GetSpawnPoint(int num)
 {
-	std::vector<int>::iterator it = std::find(mapInfo.begin(), mapInfo.end(), 42);
-
-	if (it != mapInfo.cend()) {
-		return GroundVA.vertexArray[std::distance(mapInfo.begin(), it)*4].position;
+	sf::Vector2f pos;
+	switch (num)
+	{
+	case 1:
+		pos = { ((float)start1.x + 0.5f) * 24,((float)start1.y + 0.5f) * 24 };
+		break;
+	case 2:
+		pos = { ((float)start2.x + 0.5f) * 24,((float)start2.y + 0.5f) * 24 };
+		break;
 	}
-	return sf::Vector2f();
+
+	return pos;
 }
 
 sf::Vector2f MapToolGo::GetPortalPoint()
@@ -158,9 +165,22 @@ void MapToolGo::MakeMap()
 			int tv = 0;
 			MapPainter(index, tileNumber, tu, tv);
 
-			if (tileNumber == 42)
+			if (tileNumber == 41 ||
+				tileNumber == 42 ||
+				tileNumber == 43)
 			{
-				start = { i,j };
+				switch (startNum)
+				{
+				case 0:
+					start1 = { i,j };
+					break;
+				case 1:
+					start2 = { i,j };
+					break;
+				default:
+					break;
+				}
+				startNum++;
 			}
 			if (tileNumber == 5)
 			{
@@ -189,7 +209,7 @@ void MapToolGo::MakeMap()
 
 			AfterDrawer(quad,index, tileNumber,tu);
 		}
-
+	PortalSpreader();
 }
 
 void MapToolGo::MapPainter(int index, int tileNumber, int& tu, int& tv)
@@ -204,6 +224,8 @@ void MapToolGo::MapPainter(int index, int tileNumber, int& tu, int& tv)
 	case 41: //Entrance
 	case 42:
 	case 420:
+	case 43:
+	case 430:
 	case 5: //portal
 		tu = Utils::RandomRange(0, 3);
 		if (tu == 3)
@@ -377,6 +399,18 @@ void MapToolGo::PortalDrawer(sf::Vertex*& quad, int index)
 	quad2[1].texCoords = sf::Vector2f(3 * tileSize.x , 5 * tileSize.y);
 	quad2[2].texCoords = sf::Vector2f(3 * tileSize.x , 8 * tileSize.y);
 	quad2[3].texCoords = sf::Vector2f(0, 8 * tileSize.y);
+
+}
+
+void MapToolGo::PortalSpreader()
+{
+	int index = portal.x + portal.y * width;
+	for (int i = 0; i < 3; i++)
+	{
+		mapInfo[index - width - 1 + i] = 5;
+		mapInfo[index - 1 + i] = 5;
+		mapInfo[index + width - 1 + i] = 5;
+	}
 }
 
 void MapToolGo::AfterDrawer(sf::Vertex*& quad,int index,int tileNumber, int tu)
@@ -694,7 +728,7 @@ int MapToolGo::WallStuckWallAngle(int index)
 	return 0;
 }
 
-std::vector<std::vector<int>> MapToolGo::GetLoot()
+std::vector<std::vector<int>> MapToolGo::GetLoot(sf::Vector2i start)
 {
 	std::vector<std::vector<int>> twoDArray;
 	int dataIndex = 0;
