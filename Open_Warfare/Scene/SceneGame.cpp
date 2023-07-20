@@ -82,7 +82,7 @@ void SceneGame::Init()
 
 	trapPool.OnCreate = [this](TrapGo* trap) {
 		TrapGo::Types trapType = TrapGo::Types::Spike;
-		trap->SetType(trapType);
+		trap->textureId = "graphics/spike_trap.png";
 		trap->SetMap(map);
 	};
 	trapPool.Init();
@@ -98,7 +98,6 @@ void SceneGame::Release()
 	{
 		delete go;
 	}
-	
 }
 
 void SceneGame::Enter()
@@ -234,6 +233,10 @@ void SceneGame::Enter()
 void SceneGame::Exit()
 {
 	ClearObjectPool(unitPool);
+	for (auto it : trapPool.GetUseList())
+	{
+		it->Release();
+	}
 	ClearObjectPool(trapPool);
 	Scene::Exit();
 }
