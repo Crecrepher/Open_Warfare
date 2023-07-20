@@ -42,8 +42,8 @@ void SceneGame::Init()
 	uiView.setCenter(centerPos);
 
 	map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
-	map->GroundVA.SetName("GroundVA");
-	map->WallVA.SetName("WallVA");
+	//map->GroundVA.SetName("GroundVA");
+	//map->WallVA.SetName("WallVA");
 	AddGo(&map->GroundVA);
 	AddGo(&map->WallVA);
 	AddGo(new SpriteGo("graphics/hp_ui.png", "HpUi"));

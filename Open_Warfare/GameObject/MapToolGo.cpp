@@ -22,6 +22,8 @@ void MapToolGo::AddVAGo()
 {
 	GroundVA.textureId = textureId;
 	WallVA.textureId = textureId;
+	SCENE_MGR.GetCurrScene()->AddGo(&GroundVA);
+	SCENE_MGR.GetCurrScene()->AddGo(&WallVA);
 }
 
 void MapToolGo::SetPosition(float x, float y)

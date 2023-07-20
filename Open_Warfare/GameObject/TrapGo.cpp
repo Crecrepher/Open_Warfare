@@ -71,15 +71,16 @@ void TrapGo::Update(float dt)
 					break;
 				case TrapGo::Types::Dart:
 					Shoot();
+					attackRate = maxCooldown;
+					return;
 					break;
 				case TrapGo::Types::Spike:
 					unit->OnHit(damage);
+					attackRate = maxCooldown;
 					break;
 				default:
 					break;
 				}
-				attackRate = maxCooldown;
-				return;
 			}
 		}
 	}
@@ -111,7 +112,6 @@ void TrapGo::Shoot()
 		bullet->SetUnitList(sceneGame->GetUnitList());
 		sceneGame->AddGo(bullet);
 	}
-	std::cout << damage << std::endl;
 }
 
 void TrapGo::SetUnitList(const std::list<UnitGo*>* list)

@@ -9,7 +9,7 @@ private:
 	ErrorPrinter() = default;
 	virtual	~ErrorPrinter() = default;
 
-	bool PrinterOn = true;
+	bool PrinterOn = false;
 //******************************
 //		true to Error check
 //******************************

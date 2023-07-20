@@ -118,6 +118,7 @@ void UnitGo::Draw(sf::RenderWindow& window)
 		window.draw(maxHpBar);
 		window.draw(hpBar);
 	}
+	/*window.draw(test);*/
 }
 
 void UnitGo::SetType(Types t)

@@ -11,7 +11,6 @@ Bullet::Bullet(const std::string id, const std::string n)
 
 Bullet::~Bullet()
 {
-	removeGameObjects.
 }
 
 void Bullet::SetUnitList(const std::list<UnitGo*>* list)
