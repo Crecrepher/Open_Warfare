@@ -50,14 +50,19 @@ void Framework::Run()
     {
         window.setMouseCursor(cursor);
     }
-
+    sf::Vector2i prevPos = {0,0};
     while (window.isOpen())
     {
+        
         sf::Time deltaTime = clock.restart();
         float dt = deltaTime.asSeconds();
-
+        if (prevPos != window.getPosition())
+        {
+            dt = 0;
+        }
         INPUT_MGR.Update(dt);
 
+        prevPos = window.getPosition();
         sf::Event event;
         while (window.pollEvent(event))
         {

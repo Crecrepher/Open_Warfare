@@ -589,11 +589,7 @@ void SceneGame::MouseMove()
 	{
 		if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
 		{
-			mouseMove = INPUT_MGR.GetMousePos()/3.f + worldView.getCenter();
-		}
-		else if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
-		{
-			mouseMove = { 0,0 };
+			mouseMove = INPUT_MGR.GetMousePos() / 3.f + worldView.getCenter();
 		}
 		worldView.setCenter(
 			Utils::Clamp(mouseMove - INPUT_MGR.GetMousePos() / 3.f, worldView.getSize()/2.f,(map->GetCenter()*2.f)- worldView.getSize()/2.f));
