@@ -59,10 +59,12 @@ void InputMgr::UpdateEvent(const sf::Event& ev)
 			downList.push_back(ev.key.code);
 			ingList.push_back(ev.key.code);
 		}
+		keypressed = true;
 		break;
 	case sf::Event::KeyReleased:
 		ingList.remove(ev.key.code);
 		upList.push_back(ev.key.code);
+		keypressed = false;
 		break;
 	case sf::Event::MouseButtonPressed:
 	{
@@ -72,6 +74,7 @@ void InputMgr::UpdateEvent(const sf::Event& ev)
 			downList.push_back(code);
 			ingList.push_back(code);
 		}
+		keypressed = true;
 		break;
 	}
 
@@ -80,6 +83,7 @@ void InputMgr::UpdateEvent(const sf::Event& ev)
 		int code = sf::Keyboard::KeyCount + ev.mouseButton.button;
 		ingList.remove(code);
 		upList.push_back(code);
+		keypressed = false;
 		break;
 	}
 	}

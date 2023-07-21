@@ -513,14 +513,12 @@ void SceneGame::WaveHandler(float dt)
 		//다음 종류의유닛 스폰
 		if (curWaveSpawnd >= std::max(waveInfo[curWaveIndex].count, waveInfo[curWaveIndex].count2))
 		{
-			std::cout << "유닛 " << curWaveSpawnd << " 마리 소환됨. 다음유닛 준비"<<std::endl;
 			curWaveSpawnd = 0;
 			spawnUintNum[0] = 0;
 			spawnUintNum[1] = 0;
 
 			if (curWaveIndex+1 < waveInfo.size())
 			{
-				std::cout << "지금웨이브 인덱스 " << curWaveIndex << std::endl;
 				curWaveIndex++;
 			}
 			else
@@ -535,7 +533,6 @@ void SceneGame::WaveHandler(float dt)
 				waveTurn = true;
 				curWave++;
 				spawnTimer = 10.f;
-				std::cout << "다음웨이브 " << curWave << " 준비.." << std::endl;
 			}
 		}
 	}

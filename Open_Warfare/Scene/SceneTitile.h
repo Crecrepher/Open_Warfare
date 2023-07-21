@@ -7,6 +7,9 @@ class Player2;
 class SceneTitile : public Scene
 {
 protected:
+	float timer = 0;
+	int titleSort = 0;
+	bool sceneChangeStart = false;
 public:
 	SceneTitile();
 	virtual ~SceneTitile() override;

@@ -33,6 +33,8 @@ private:
 
 	std::map<Axis, AxisInfo> axisInfoMap;
 
+	bool keypressed = false;
+
 public:
 	void Update(float dt);
 	void UpdateEvent(const sf::Event& ev);
@@ -51,6 +53,8 @@ public:
 	// Axis
 	float GetAxis(Axis axis);
 	float GetAxisRaw(Axis axis);
+
+	bool SomethingPressed() { return keypressed; }
 };
 
 #define INPUT_MGR (InputMgr::Instance())
