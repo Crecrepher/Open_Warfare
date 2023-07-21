@@ -56,7 +56,11 @@ protected:
 	int spawndUnit = 0;
 	int leftoverUnit = 0;
 	float spawnTimer = 0.f;
-	
+
+	int routeShowerCount = 0;
+	float rsCountTimerMax = 0.1f;
+	float rsLoopTimerMax = 5.f;
+	float rsCurrTimer = 0.f;
 
 	bool isGameOver = false;
 	bool isWaveEnd = false;
@@ -89,6 +93,7 @@ public:
 	void WaveHandler(float dt);
 	int leftoverCalculator();
 	void SpawnUnit(UnitGo::Types type,int spawnDoor);
+	void RouteShower(float dt);
 
 	void TrapHandler();
 	void BuildTrap(sf::Vector2i index, int dir = 0);

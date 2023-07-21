@@ -84,7 +84,20 @@ void UnitGo::Update(float dt)
 	map->WallBoundChecker(*this);
 	position += direction * (float)speed * dt*10.f;
 	SetPosition(position);
-	if (portalEnd.intersects(boundBox)||hp <= 0)
+	if (unitType == Types::RouteShow)
+	{
+		routePicker.setPosition(position);
+		if (portalEnd.intersects(routePicker.getGlobalBounds()))
+		{
+			Scene* scene = SCENE_MGR.GetCurrScene(); //형변환연산자 쓰기
+			SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
+			if (sceneGame != nullptr)
+			{
+				sceneGame->OnDieUnit(this);
+			}
+		}
+	}
+	else if (portalEnd.intersects(boundBox)||hp <= 0)
 	{
 		Scene* scene = SCENE_MGR.GetCurrScene(); //형변환연산자 쓰기
 		SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
@@ -132,7 +145,11 @@ void UnitGo::Update(float dt)
 void UnitGo::Draw(sf::RenderWindow& window)
 {
 	UiButton::Draw(window);
-	if (maxHp != hp)
+	if (unitType == Types::RouteShow)
+	{
+		window.draw(routePicker);
+	}
+	else if (maxHp != hp)
 	{
 		window.draw(maxHpBar);
 		window.draw(hpBar);
@@ -143,6 +160,17 @@ void UnitGo::Draw(sf::RenderWindow& window)
 void UnitGo::SetType(Types t)
 {
 	unitType = t;
+	if (unitType == Types::RouteShow)
+	{
+		hp = 0;
+		prize = 0;
+		speed = 20;
+		sprite.setScale(0.f,0.f);
+		routePicker.setFillColor(sf::Color::White);
+		routePicker.setSize({1.f,1.f});
+		Utils::SetOrigin(routePicker, Origins::MC);
+		return;
+	}
 	const UnitInfo& info = DATATABLE_MGR.Get<UnitTable>(DataTable::Ids::UnitGo)->Get((int)t);
 	textureId = info.textureId;
 	maxHp = info.maxHp;

@@ -10,6 +10,7 @@ class UnitGo : public UiButton
 public:
 	enum class Types
 	{
+		RouteShow = -2,
 		None = -1,
 		Farmer,
 		Adventurer,
@@ -22,12 +23,12 @@ public:
 protected:
 	Types unitType;
 
-	int maxHp;
-	int prize;
-	int xp;
-	int speed;
-	int damage;
-	int weight;
+	int maxHp = 100;
+	int prize = 0;
+	int xp = 0;
+	int speed = 1;
+	int damage = 0;
+	int weight = 1;
 
 	sf::Vector2f look;
 	sf::FloatRect boundBox = {0,0,5,5};
@@ -51,6 +52,7 @@ protected:
 	int prevRotate = 0;
 
 public:
+	sf::RectangleShape routePicker;
 	sf::Vector2f direction = { 0,0 };
 	
 

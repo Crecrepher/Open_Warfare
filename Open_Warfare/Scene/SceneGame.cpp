@@ -308,6 +308,7 @@ void SceneGame::Update(float dt)
 
 	if (isPause)
 	{
+		RouteShower(dt);
 		return;
 	}
 
@@ -851,5 +852,26 @@ void SceneGame::ChoiceDir()
 	}
 
 
+}
+
+void SceneGame::RouteShower(float dt)
+{
+	rsCurrTimer -= dt;
+	if (rsCurrTimer <= 0.f)
+	{
+		SpawnUnit(UnitGo::Types::RouteShow, 1);
+		if (map->startNum > 1)
+		{
+			SpawnUnit(UnitGo::Types::RouteShow, 2);
+		}
+		rsCurrTimer = rsCountTimerMax;
+		routeShowerCount++;
+		if (routeShowerCount>5)
+		{
+			routeShowerCount = 0;
+			rsCurrTimer = rsLoopTimerMax;
+		}
+	}
+	
 }
 
