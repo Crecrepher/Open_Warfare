@@ -8,8 +8,9 @@ class Bullet : public SpriteGo
 {
 protected:
 	sf::Vector2f direction;
+	sf::Vector2f startPos;
 	float speed = 0.f;
-	float range = 0.f;
+	int range = 0;
 	int damage = 0;
 
 	const std::list<UnitGo*>* unitList;

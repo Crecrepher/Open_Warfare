@@ -17,6 +17,7 @@ public:
 		NONE,
 		SETPOS,
 		SETDIR,
+		POPMENU,
 	};
 
 protected:
@@ -31,6 +32,8 @@ protected:
 	int money = 0;
 
 	std::unordered_map<int, TrapGo::Types> inTrapPalate;
+	TrapGo* selectedTrap = nullptr;
+	sf::Vector2i selectPos = { 0,0 };
 	std::vector<int> upgradeInfo;
 	std::vector<int> trapPrice;
 	int availableTraps;
@@ -39,8 +42,8 @@ protected:
 	int curTrapPrice = 0;
 	int availablePlace = 0;
 	int needDir = 0;
-	Situation curSituation;
 
+	Situation curSituation;
 
 	sf::Vector2f mouseMove;
 
@@ -59,6 +62,8 @@ protected:
 	bool isWaveEnd = false;
 	bool isPause = true;
 	bool waveTurn = false;
+	bool clickBlocker = true;
+	bool Pop = true;
 
 public:
 	ObjectPool<UnitGo> unitPool;

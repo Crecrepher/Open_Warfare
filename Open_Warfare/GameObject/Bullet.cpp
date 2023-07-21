@@ -22,6 +22,7 @@ void Bullet::Fire(const sf::Vector2f& pos, const sf::Vector2f& dir, float speed,
 {
 	sprite.setRotation(Utils::Angle(dir)+90);
 	SetPosition(pos);
+	startPos = pos;
 	direction = dir;
 	this->damage = damage;
 	this->range = range;
@@ -53,8 +54,8 @@ void Bullet::Update(float dt)
 {
 	SpriteGo::Update(dt);
 
-	range -= speed * dt;
-	if (range <= 0.f)
+	//range -= speed * dt;
+	if (range * 24 <= Utils::Distance(startPos,GetPosition()))
 	{
 		SCENE_MGR.GetCurrScene()->RemoveGo(this);
 		pool->Return(this);

@@ -1,5 +1,5 @@
 #pragma once
-#include "SpriteGo.h"
+#include "UiButton.h"
 #include "ObjectPool.h"
 
 class SoundGo;
@@ -7,7 +7,7 @@ class MapToolGo;
 class UnitGo;
 class Bullet;
 
-class TrapGo : public SpriteGo
+class TrapGo : public UiButton
 {
 public:
 	enum class Types
@@ -51,7 +51,7 @@ protected:
 	
 public:
 	sf::Vector2f direction = { 0,0 };
-	
+	int range = 0;
 
 	TrapGo(const std::string n = "");
 	virtual~TrapGo()override;

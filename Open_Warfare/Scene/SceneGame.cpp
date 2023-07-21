@@ -51,6 +51,8 @@ void SceneGame::Init()
 	AddGo(new SpriteGo("graphics/wave_meter.png", "WaveUi"));
 	AddGo(new SpriteGo("graphics/spike_trap.png", "GhostTrap"));
 	AddGo(new SpriteGo("graphics/dir_box.png", "DirBox"));
+	AddGo(new SpriteGo("graphics/buildmenu_ring.png", "BuildMenu"));
+	AddGo(new UiButton("graphics/sell.png", "SellBox"));
 	AddGo(new UiButton("graphics/wave_number.png", "StartB"));
 	for (int i = 0; i < 9; i++)
 	{
@@ -66,6 +68,7 @@ void SceneGame::Init()
 	}
 	AddGo(new TextGo("HpT"));
 	AddGo(new TextGo("MoneyT"));
+	AddGo(new TextGo("SellPrice"));
 	SetWave();
 
 	for (auto go : gameObjects)
@@ -84,6 +87,16 @@ void SceneGame::Init()
 		TrapGo::Types trapType = TrapGo::Types::Spike;
 		trap->textureId = "graphics/spike_trap.png";
 		trap->SetMap(map);
+		trap->OnClickField = [this, trap]() {
+			if (clickBlocker)
+			{
+				curSituation = Situation::POPMENU;
+				selectedTrap = trap;
+				sf::Vector2i mouseIndex = (sf::Vector2i)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()) / 24;
+				selectPos = { mouseIndex.x * 24+ 12, mouseIndex.y * 24+ 12 };
+			}
+			
+		};
 	};
 	trapPool.Init();
 
@@ -183,6 +196,11 @@ void SceneGame::Enter()
 	findSGo->sortLayer = 51;
 	findSGo->SetActive(false);
 
+	findSGo = (SpriteGo*)FindGo("BuildMenu");
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->sortLayer = 50;
+	findSGo->SetActive(false);
+
 	UiButton* ui = (UiButton*)FindGo("StartB");
 	ui->SetActive(true);
 	ui->SetOrigin(Origins::MC);
@@ -210,6 +228,29 @@ void SceneGame::Enter()
 		ui->sprite.setColor(sf::Color(255,255,255,200));
 		ui->SetActive(false);
 	}
+
+	ui = (UiButton*)FindGo("SellBox");
+	ui->SetOrigin(Origins::MC);
+	ui->sortLayer = 51;
+	ui->OnClickField = [this]() {
+		int sellPrice = 0;
+		for (auto it : inTrapPalate)
+		{
+			if (it.second == selectedTrap->GetType())
+			{
+				sellPrice = trapPrice[it.first] / 3;
+				break;
+			}
+		}
+		money += sellPrice;
+		textMoneyUpdate();
+		mTrapInfo[selectPos.x/24+selectPos.y/24* mapWidth] = map->GetMap()[selectPos.x / 24 + selectPos.y / 24 * mapWidth];
+		curSituation = Situation::NONE;
+		RemoveGo(selectedTrap);
+		trapPool.Return(selectedTrap);
+	};
+	ui->SetActive(false);
+
 	TextGo* findTGo = (TextGo*)FindGo("HpT");
 	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
 	findTGo->text.setString("20");
@@ -229,6 +270,15 @@ void SceneGame::Enter()
 	findTGo->SetOrigin(Origins::ML);
 	findTGo->SetPosition(1310, 862);
 	findTGo->sortLayer = 101;
+
+	findTGo = (TextGo*)FindGo("SellPrice");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(25);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 100;
+	findTGo->sortOrder = -1;
+	findTGo->SetActive(false);
 }
 
 void SceneGame::Exit()
@@ -248,11 +298,12 @@ void SceneGame::Update(float dt)
 	MouseMove();
 
 	TrapHandler();
+
 	//트랩설치 취소
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape) ||
 		INPUT_MGR.GetMouseButtonDown(sf::Mouse::Right))
 	{
-		CancelBuilding();
+		curSituation = Situation::NONE;
 	}
 
 	if (isPause)
@@ -348,6 +399,7 @@ void SceneGame::TrapPalateSetting()
 		tp->sprite.setScale(3.3f, 3.3f);
 		tp->SetPosition(387+(tp->GetSize().x*3.f+15)*i, 795);
 		tp->sortLayer = 101;
+		tp->sprite.setColor(sf::Color::White);
 		tp->OnClick = [i,this]() {
 			if (money>=trapPrice[i])
 			{
@@ -494,9 +546,15 @@ void SceneGame::TrapHandler()
 	switch (curSituation)
 	{
 	case SceneGame::Situation::NONE:
+		if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
+		{
+			clickBlocker = true;
+		}
+		CancelBuilding();
 		break;
 	case SceneGame::Situation::SETPOS:
 	{
+		CancelBuilding();
 		sf::Vector2i mouseIndex = (sf::Vector2i)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()) / 24;
 		SpriteGo* findSGo = (SpriteGo*)FindGo("GhostTrap");
 		findSGo->SetPosition({ (float)mouseIndex.x * 24 + 12, (float)mouseIndex.y * 24 + 24 });
@@ -514,6 +572,7 @@ void SceneGame::TrapHandler()
 					ChoiceDir();
 					return;
 				}
+				clickBlocker = false;
 				BuildTrap(mouseIndex);
 			}
 		}
@@ -524,6 +583,41 @@ void SceneGame::TrapHandler()
 	}
 		break;
 	case SceneGame::Situation::SETDIR:
+		CancelBuilding();
+		break;
+	case SceneGame::Situation::POPMENU:
+	{
+		CancelBuilding();
+		if (Pop)
+		{
+			SpriteGo* findSGo = (SpriteGo*)FindGo("BuildMenu");
+			findSGo->SetActive(true);
+			findSGo->SetPosition((sf::Vector2f)selectPos);
+			float radius = findSGo->GetSize().y / 2;
+			findSGo = (SpriteGo*)FindGo("SellBox");
+			findSGo->SetActive(true);
+			findSGo->SetPosition(selectPos.x, selectPos.y - radius+5.f);
+			TextGo* findTGo = (TextGo*)FindGo("SellPrice");
+			findTGo->SetActive(true);
+			int sellPrice = 0;
+			for (auto it : inTrapPalate)
+			{
+				if (it.second == selectedTrap->GetType())
+				{
+					sellPrice = trapPrice[it.first] / 3;
+					break;
+				}
+			}
+			std::stringstream ss;
+			ss << sellPrice;
+			findTGo->text.setString(ss.str());
+			findTGo->SetOrigin(Origins::TC);
+			Pop = false;
+		}	
+		TextGo* findTGo = (TextGo*)FindGo("SellPrice");
+		SpriteGo* findSGo = (SpriteGo*)FindGo("SellBox");
+		findTGo->SetPosition(sf::Vector2f(Scene::worldPosToScreen(findSGo->GetPosition()).x, Scene::worldPosToScreen(findSGo->GetPosition()).y + findSGo->GetSize().y *3 / 2.f + 5.f));
+	}
 		break;
 	default:
 		break;
@@ -611,17 +705,33 @@ void SceneGame::MouseMove()
 
 void SceneGame::CancelBuilding()
 {
-	curSituation = Situation::NONE;
-	SpriteGo* findSGo = (SpriteGo*)FindGo("GhostTrap");
-	findSGo->SetActive(false);
-	findSGo = (SpriteGo*)FindGo("DirBox");
-	findSGo->SetActive(false);
-	for (int i = 0; i < 4; i++)
+	Pop = true;
+	SpriteGo* findSGo;
+	if (curSituation != Situation::SETPOS)
 	{
-		std::stringstream ss;
-		ss << "DirSelector" << i;
-		UiButton* ui = (UiButton*)FindGo(ss.str());
-		ui->SetActive(false);
+		findSGo = (SpriteGo*)FindGo("GhostTrap");
+		findSGo->SetActive(false);
+	}
+	if (curSituation != Situation::SETDIR)
+	{
+		findSGo = (SpriteGo*)FindGo("DirBox");
+		findSGo->SetActive(false);
+		for (int i = 0; i < 4; i++)
+		{
+			std::stringstream ss;
+			ss << "DirSelector" << i;
+			UiButton* ui = (UiButton*)FindGo(ss.str());
+			ui->SetActive(false);
+		}
+	}
+	if (curSituation != Situation::POPMENU)
+	{
+		findSGo = (SpriteGo*)FindGo("BuildMenu");
+		findSGo->SetActive(false);
+		findSGo = (SpriteGo*)FindGo("SellBox");
+		findSGo->SetActive(false);
+		TextGo* findSGo = (TextGo*)FindGo("SellPrice");
+		findSGo->SetActive(false);
 	}
 }
 
@@ -631,27 +741,48 @@ void SceneGame::BuildTrap(sf::Vector2i index, int dir)
 	TrapGo* trap = trapPool.Get();
 	trap->SetUnitList(&unitPool.GetUseList());
 	trap->sprite.setRotation(dir);
+	int count = 1;
 	switch (dir)
 	{
 	case 0:
 		trap->SetOrigin(Origins::BC);
 		trap->SetPosition(index.x * 24.f + 12, index.y * 24.f + 24);
 		trap->direction = { 0,-1 };
+		while (map->GetMap()[index.x + (index.y-count) * mapWidth] != 0)
+		{
+			count++;
+		};
+		trap->range = count;
 		break;
 	case 90:
 		trap->SetOrigin(Origins::ML);
 		trap->SetPosition(index.x * 24.f, index.y * 24.f + 12);
 		trap->direction = { 1,0 };
+		while (map->GetMap()[index.x + index.y * mapWidth + count] != 0)
+		{
+			count++;
+		};
+		trap->range = count;
 		break;
 	case 180:
 		trap->SetOrigin(Origins::TC);
 		trap->SetPosition(index.x * 24.f + 12, index.y * 24.f);
 		trap->direction = { 0,1 };
+		while (map->GetMap()[index.x + (index.y + count) * mapWidth] != 0)
+		{
+			count++;
+		};
+		trap->range = count;
 		break;
 	case 270:
 		trap->SetOrigin(Origins::MR);
 		trap->SetPosition(index.x * 24.f + 24, index.y * 24.f + 12);
 		trap->direction = { -1,0 };
+		while (map->GetMap()[index.x + index.y * mapWidth - count] != 0)
+		{
+			count++;
+		};
+		trap->range = count-1;
 		break;
 	default:
 		return;
@@ -661,7 +792,7 @@ void SceneGame::BuildTrap(sf::Vector2i index, int dir)
 	AddGo(trap);
 	money -= curTrapPrice;
 	textMoneyUpdate();
-	CancelBuilding();
+	curSituation = Situation::NONE;
 }
 
 void SceneGame::ChoiceDir()

@@ -1,11 +1,11 @@
 #pragma once
-#include "SpriteGo.h"
+#include "UiButton.h"
 #include "ObjectPool.h"
 
 class SoundGo;
 class MapToolGo;
 
-class UnitGo : public SpriteGo
+class UnitGo : public UiButton
 {
 public:
 	enum class Types
@@ -31,6 +31,7 @@ protected:
 
 	sf::Vector2f look;
 	sf::FloatRect boundBox = {0,0,5,5};
+	float currentAngle = 0.f;
 
 	int hp = 0;
 	float attackRate = 0.f;

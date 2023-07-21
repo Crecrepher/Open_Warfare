@@ -13,7 +13,7 @@
 //특징별 성능을 블록처리하듯 모듈러 가능한 디자인을 하기
 
 UnitGo::UnitGo(const std::string n)
-	:SpriteGo("", n)
+	:UiButton("", n)
 {
 }
 
@@ -23,7 +23,7 @@ UnitGo::~UnitGo()
 
 void UnitGo::Init()
 {
-	SpriteGo::Init();
+	UiButton::Init();
 	SetOrigin(Origins::MC);
 	
 	maxHpBar.setFillColor(sf::Color(0,0,0,75));
@@ -36,19 +36,19 @@ void UnitGo::Init()
 
 void UnitGo::Reset()
 {
-	SpriteGo::Reset();
+	UiButton::Reset();
 	hp = maxHp;
 	attackTimer = attackRate;
 }
 
 void UnitGo::Release()
 {
-	SpriteGo::Release();
+	UiButton::Release();
 }
 
 void UnitGo::Update(float dt)
 {
-	SpriteGo::Update(dt);
+	UiButton::Update(dt);
 	boundBox.left = GetPosition().x - 2;
 	boundBox.top = GetPosition().y - 2;
 	if (destination.intersects(boundBox)
@@ -102,9 +102,26 @@ void UnitGo::Update(float dt)
 	}
 
 	//바라보는 각도
-	float angle = Utils::Lerp(prevRotate, Utils::Angle(direction) - 90, 50 * dt);
-	sprite.setRotation(angle);
-	prevRotate = angle;
+	float targetAngle = Utils::Angle(direction);
+
+	// 현재각도와 목표각도의 차이계산 및 최대/최솟값 고정
+	float angleDiff = targetAngle - currentAngle;
+	if (angleDiff > 180.f)
+		angleDiff -= 360.f;
+	else if (angleDiff < -180.f)
+		angleDiff += 360.f;
+
+	// 초당 회전속도
+	float angleChangePerSecond = 90 * dt;
+
+	// 각도차이 경우에 따른 회전 방향 지정 + 등속도회전 적용
+	if (abs(angleDiff) <= angleChangePerSecond)
+		currentAngle = targetAngle;
+	else if (angleDiff > 0.f)
+		currentAngle += angleChangePerSecond;
+	else
+		currentAngle -= angleChangePerSecond;
+	sprite.setRotation(currentAngle-90);
 
 	//hp
 	maxHpBar.setPosition(GetPosition().x, GetPosition().y - 7);
@@ -114,13 +131,13 @@ void UnitGo::Update(float dt)
 
 void UnitGo::Draw(sf::RenderWindow& window)
 {
-	SpriteGo::Draw(window);
+	UiButton::Draw(window);
 	if (maxHp != hp)
 	{
 		window.draw(maxHpBar);
 		window.draw(hpBar);
 	}
-	window.draw(test);
+	/*window.draw(test);*/
 }
 
 void UnitGo::SetType(Types t)

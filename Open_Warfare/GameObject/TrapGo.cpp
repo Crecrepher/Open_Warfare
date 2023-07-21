@@ -15,7 +15,7 @@
 //특징별 성능을 블록처리하듯 모듈러 가능한 디자인을 하기
 
 TrapGo::TrapGo(const std::string n)
-	:SpriteGo("", n)
+	:UiButton("", n)
 {
 }
 
@@ -25,7 +25,7 @@ TrapGo::~TrapGo()
 
 void TrapGo::Init()
 {
-	SpriteGo::Init();
+	UiButton::Init();
 	SetOrigin(Origins::BC);
 	rangeRect.height = 24;
 	rangeRect.width = 24;
@@ -39,7 +39,7 @@ void TrapGo::Init()
 
 void TrapGo::Reset()
 {
-	SpriteGo::Reset();
+	UiButton::Reset();
 	for (auto bullet : poolBullets.GetUseList())
 	{
 		SCENE_MGR.GetCurrScene()->RemoveGo(bullet);
@@ -51,7 +51,7 @@ void TrapGo::Reset()
 
 void TrapGo::Release()
 {
-	SpriteGo::Release();
+	UiButton::Release();
 	for (auto bullet : poolBullets.GetUseList())
 	{
 		SCENE_MGR.GetCurrScene()->RemoveGo(bullet);
@@ -61,7 +61,7 @@ void TrapGo::Release()
 
 void TrapGo::Update(float dt)
 {
-	SpriteGo::Update(dt);
+	UiButton::Update(dt);
 	
 	if (unitList != nullptr && attackRate <=0)
 	{
@@ -100,14 +100,14 @@ void TrapGo::Update(float dt)
 
 void TrapGo::Draw(sf::RenderWindow& window)
 {
-	SpriteGo::Draw(window);
+	UiButton::Draw(window);
 	//window.draw(test);
 }
 
 void TrapGo::Shoot()
 {
 	Bullet* bullet = poolBullets.Get();
-	bullet->Fire(position, direction, 700.f,damage,300.f);
+	bullet->Fire({ position.x+(Utils::RandomRange(-3,3)*direction.y),position.y + (Utils::RandomRange(-3,3) * direction.x) }, direction, 500.f, damage, range);
 
 	Scene* scene = SCENE_MGR.GetCurrScene();
 	SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
