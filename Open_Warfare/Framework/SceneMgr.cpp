@@ -60,7 +60,7 @@ void SceneMgr::Release()
 
 void SceneMgr::Update(float dt)
 {
-	currentScene->Update(dt);
+	currentScene->Update(dt * dtSpeed);
 }
 
 void SceneMgr::Draw(sf::RenderWindow& window)

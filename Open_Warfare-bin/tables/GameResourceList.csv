@@ -13,3 +13,5 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/dir_box.png
 0,graphics/buildmenu_ring.png
 0,graphics/sell.png
+0,graphics/1x.png
+0,graphics/2x.png

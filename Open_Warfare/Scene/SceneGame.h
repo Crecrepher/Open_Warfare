@@ -44,7 +44,7 @@ protected:
 	int needDir = 0;
 
 	Situation curSituation;
-
+	float currSpeed;
 	sf::Vector2f mouseMove;
 
 	std::vector<WaveInfo> waveInfo;
@@ -68,6 +68,7 @@ protected:
 	bool waveTurn = false;
 	bool clickBlocker = true;
 	bool Pop = true;
+	float popAnimate = 0;
 
 public:
 	ObjectPool<UnitGo> unitPool;
@@ -95,7 +96,7 @@ public:
 	void SpawnUnit(UnitGo::Types type,int spawnDoor);
 	void RouteShower(float dt);
 
-	void TrapHandler();
+	void TrapHandler(float dt);
 	void BuildTrap(sf::Vector2i index, int dir = 0);
 	void ChoiceDir();
 	void MakeGhostTower(TrapGo::Types type,int index);

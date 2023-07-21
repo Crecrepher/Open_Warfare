@@ -39,6 +39,9 @@ void UnitGo::Reset()
 	UiButton::Reset();
 	hp = maxHp;
 	attackTimer = attackRate;
+	boundBox = { 0,0,5,5 };
+	mTileSize = { 0,0 };
+	curPos = { 0,0 };
 }
 
 void UnitGo::Release()
@@ -96,8 +99,10 @@ void UnitGo::Update(float dt)
 				sceneGame->OnDieUnit(this);
 			}
 		}
+		return;
 	}
-	else if (portalEnd.intersects(boundBox)||hp <= 0)
+	
+	if (portalEnd.intersects(boundBox)||hp <= 0)
 	{
 		Scene* scene = SCENE_MGR.GetCurrScene(); //형변환연산자 쓰기
 		SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
@@ -171,6 +176,8 @@ void UnitGo::SetType(Types t)
 		Utils::SetOrigin(routePicker, Origins::MC);
 		return;
 	}
+	sprite.setScale(1.f, 1.f);
+	boundBox = { 0,0,5,5 };
 	const UnitInfo& info = DATATABLE_MGR.Get<UnitTable>(DataTable::Ids::UnitGo)->Get((int)t);
 	textureId = info.textureId;
 	maxHp = info.maxHp;

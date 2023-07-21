@@ -66,6 +66,8 @@ void SceneGame::Init()
 		ss << "DirSelector" << i;
 		AddGo(new UiButton("graphics/dir_arrow.png", ss.str()));
 	}
+	AddGo(new UiButton("graphics/1x.png", "Speed1x"));
+	AddGo(new UiButton("graphics/2x.png", "Speed2x"));
 	AddGo(new TextGo("HpT"));
 	AddGo(new TextGo("MoneyT"));
 	AddGo(new TextGo("SellPrice"));
@@ -90,6 +92,7 @@ void SceneGame::Init()
 		trap->OnClickField = [this, trap]() {
 			if (clickBlocker)
 			{
+				Pop = true;
 				curSituation = Situation::POPMENU;
 				selectedTrap = trap;
 				sf::Vector2i mouseIndex = (sf::Vector2i)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()) / 24;
@@ -126,6 +129,7 @@ void SceneGame::Enter()
 	leftoverUnit = leftoverCalculator();
 
 	curSituation = Situation::NONE;
+	currSpeed = 1;
 
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
 	map->SetStage(MapToolGo::Stages::First);
@@ -228,7 +232,6 @@ void SceneGame::Enter()
 		ui->sprite.setColor(sf::Color(255,255,255,200));
 		ui->SetActive(false);
 	}
-
 	ui = (UiButton*)FindGo("SellBox");
 	ui->SetOrigin(Origins::MC);
 	ui->sortLayer = 51;
@@ -244,12 +247,41 @@ void SceneGame::Enter()
 		}
 		money += sellPrice;
 		textMoneyUpdate();
-		mTrapInfo[selectPos.x/24+selectPos.y/24* mapWidth] = map->GetMap()[selectPos.x / 24 + selectPos.y / 24 * mapWidth];
+		mTrapInfo[selectPos.x / 24 + selectPos.y / 24 * mapWidth] = map->GetMap()[selectPos.x / 24 + selectPos.y / 24 * mapWidth];
 		curSituation = Situation::NONE;
 		RemoveGo(selectedTrap);
 		trapPool.Return(selectedTrap);
 	};
 	ui->SetActive(false);
+
+	ui = (UiButton*)FindGo("Speed1x");
+	ui->SetOrigin(Origins::BL);
+	ui->sprite.setScale(3.f, 3.f);
+	ui->SetPosition(110, 890);
+	ui->sortLayer = 101;
+	ui->OnClick = [ui,this]() {
+		ui->sprite.setColor(sf::Color::White);
+		SCENE_MGR.SetDtSpeed(1);
+		UiButton* ui2 = (UiButton*)FindGo("Speed2x");
+		ui2->sprite.setColor(sf::Color(0, 0, 0, 0));
+		currSpeed = 1;
+	};
+	ui->SetActive(true);
+
+	ui = (UiButton*)FindGo("Speed2x");
+	ui->SetOrigin(Origins::BL);
+	ui->sprite.setScale(3.f, 3.f);
+	ui->SetPosition(170, 890);
+	ui->sortLayer = 101;
+	ui->sprite.setColor(sf::Color(0, 0, 0, 0));
+	ui->OnClick = [ui, this]() {
+		ui->sprite.setColor(sf::Color::White);
+		SCENE_MGR.SetDtSpeed(2.5);
+		UiButton* ui2 = (UiButton*)FindGo("Speed1x");
+		ui2->sprite.setColor(sf::Color(0,0,0,0));
+		currSpeed = 2.5;
+	};
+	ui->SetActive(true);
 
 	TextGo* findTGo = (TextGo*)FindGo("HpT");
 	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
@@ -289,6 +321,7 @@ void SceneGame::Exit()
 		it->Release();
 	}
 	ClearObjectPool(trapPool);
+	SCENE_MGR.SetDtSpeed(1);
 	Scene::Exit();
 }
 
@@ -297,7 +330,7 @@ void SceneGame::Update(float dt)
 	Scene::Update(dt);
 	MouseMove();
 
-	TrapHandler();
+	TrapHandler(dt);
 
 	//트랩설치 취소
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape) ||
@@ -480,12 +513,14 @@ void SceneGame::WaveHandler(float dt)
 		//다음 종류의유닛 스폰
 		if (curWaveSpawnd >= std::max(waveInfo[curWaveIndex].count, waveInfo[curWaveIndex].count2))
 		{
+			std::cout << "유닛 " << curWaveSpawnd << " 마리 소환됨. 다음유닛 준비"<<std::endl;
 			curWaveSpawnd = 0;
 			spawnUintNum[0] = 0;
 			spawnUintNum[1] = 0;
 
 			if (curWaveIndex+1 < waveInfo.size())
 			{
+				std::cout << "지금웨이브 인덱스 " << curWaveIndex << std::endl;
 				curWaveIndex++;
 			}
 			else
@@ -498,11 +533,9 @@ void SceneGame::WaveHandler(float dt)
 			if (waveInfo[curWaveIndex].wave != curWave)
 			{
 				waveTurn = true;
-
 				curWave++;
 				spawnTimer = 10.f;
-
-				
+				std::cout << "다음웨이브 " << curWave << " 준비.." << std::endl;
 			}
 		}
 	}
@@ -542,7 +575,7 @@ void SceneGame::SpawnUnit(UnitGo::Types type, int spawnDoor)
 }
 
 
-void SceneGame::TrapHandler()
+void SceneGame::TrapHandler(float dt)
 {
 	switch (curSituation)
 	{
@@ -591,6 +624,8 @@ void SceneGame::TrapHandler()
 		CancelBuilding();
 		if (Pop)
 		{
+			popAnimate = 0;
+			SCENE_MGR.SetDtSpeed(0.2);
 			SpriteGo* findSGo = (SpriteGo*)FindGo("BuildMenu");
 			findSGo->SetActive(true);
 			findSGo->SetPosition((sf::Vector2f)selectPos);
@@ -615,6 +650,13 @@ void SceneGame::TrapHandler()
 			findTGo->SetOrigin(Origins::TC);
 			Pop = false;
 		}	
+		if (popAnimate < 1)
+		{
+			popAnimate = std::min(popAnimate+dt*30,1.f);
+			SpriteGo* findSGo = (SpriteGo*)FindGo("BuildMenu");
+			findSGo->SetSize(popAnimate, popAnimate);
+		}
+		
 		TextGo* findTGo = (TextGo*)FindGo("SellPrice");
 		SpriteGo* findSGo = (SpriteGo*)FindGo("SellBox");
 		findTGo->SetPosition(sf::Vector2f(Scene::worldPosToScreen(findSGo->GetPosition()).x, Scene::worldPosToScreen(findSGo->GetPosition()).y + findSGo->GetSize().y *3 / 2.f + 5.f));
@@ -706,7 +748,6 @@ void SceneGame::MouseMove()
 
 void SceneGame::CancelBuilding()
 {
-	Pop = true;
 	SpriteGo* findSGo;
 	if (curSituation != Situation::SETPOS)
 	{
@@ -733,6 +774,8 @@ void SceneGame::CancelBuilding()
 		findSGo->SetActive(false);
 		TextGo* findSGo = (TextGo*)FindGo("SellPrice");
 		findSGo->SetActive(false);
+		SCENE_MGR.SetDtSpeed(currSpeed);
+		Pop = true;
 	}
 }
 

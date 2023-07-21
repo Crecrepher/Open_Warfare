@@ -18,6 +18,7 @@ protected:
 	Scene* currentScene = nullptr;
 
 	SceneId startSceneId = SceneId::Game;
+	float dtSpeed = 1.f;
 public:
 	int hiScore = 0;
 
@@ -32,6 +33,7 @@ public:
 	Scene* GetCurrScene()const;
 
 	void SaveLoad();
+	void SetDtSpeed(float doubleSpeed) { dtSpeed = doubleSpeed; }
 };
 
 #define SCENE_MGR (SceneMgr::Instance())
