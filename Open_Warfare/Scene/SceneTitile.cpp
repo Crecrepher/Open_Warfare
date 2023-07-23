@@ -60,10 +60,6 @@ void SceneTitile::Enter()
 	RESOURCE_MGR.LoadFromCsv("tables/TitleResourceList.csv");
 	timer = 0;
 	titleSort = 0;
-	//AddGo(new SpriteGo("graphics/developer.png", "Developer"));
-	//AddGo(new SpriteGo("graphics/title.png", "Title"));
-	//AddGo(new RectGo("MBox"));
-	//AddGo(new TextGo("PressStart"));
 
 	SpriteGo* findSGo = (SpriteGo*)FindGo("Developer");
 	findSGo->SetOrigin(Origins::MC);

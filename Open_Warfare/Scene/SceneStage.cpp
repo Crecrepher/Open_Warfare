@@ -42,12 +42,20 @@ void SceneStage::Init()
 	AddGo(new SpriteGo("graphics/xp_liquid.png", "XpLiquid"));
 	AddGo(new SpriteGo("graphics/level_cir.png", "LevelBack"));
 	AddGo(new SpriteGo("graphics/stage_palate.png", "OptionCase"));
+	AddGo(new SpriteGo("graphics/stage_door.png", "SceneDoorLeft"));
+	AddGo(new SpriteGo("graphics/stage_door.png", "SceneDoorRight"));
+	AddGo(new SpriteGo("graphics/msg_box_big.png", "MsgBox"));
 	AddGo(new UiButton("graphics/exit_box.png", "ExitGame"));
 	AddGo(new UiButton("graphics/option.png", "OptionB"));
 	AddGo(new UiButton("graphics/upgrade.png", "UpgradeB"));
 	AddGo(new UiButton("graphics/stage_tower.png", "Stower0"));
 	AddGo(new UiButton("graphics/stage_tower.png", "Stower1"));
+	AddGo(new UiButton("graphics/bt_thick.png", "YesB"));
+	AddGo(new UiButton("graphics/bt_thick.png", "NoB"));
 	AddGo(new TextGo("PlayerLevel"));
+	AddGo(new TextGo("EndGame"));
+	AddGo(new TextGo("YesT"));
+	AddGo(new TextGo("NoT"));
 	worldView.setSize(windowSize / 3.5f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
@@ -75,6 +83,10 @@ void SceneStage::Enter()
 {
 	Scene::Enter();
 	RESOURCE_MGR.LoadFromCsv("tables/StageResourceList.csv");
+	doorDir = 4.f;
+	blindTimer = 0;
+	stageIn = false;
+	bounce = 0;
 
 	RectGo* fRectGo = (RectGo*)FindGo("Blind");
 	fRectGo->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
@@ -135,11 +147,25 @@ void SceneStage::Enter()
 	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x, FRAMEWORK.GetWindowSize().y);
 	fSpriteGo->sortLayer = 102;
 
-	/*	AddGo(new UiButton("graphics/exit_box.png", "ExitGame"));
-	AddGo(new UiButton("graphics/option.png", "OptionB"));
-	AddGo(new UiButton("graphics/upgrade.png", "UpgradeB"));
-	AddGo(new UiButton("graphics/stage_tower.png", "Stower0"));
-	AddGo(new UiButton("graphics/stage_tower.png", "Stower1"));*/
+	fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
+	fSpriteGo->SetOrigin(Origins::TR);
+	fSpriteGo->SetSize(FRAMEWORK.GetWindowSize().y / fSpriteGo->GetSize().y, FRAMEWORK.GetWindowSize().y / fSpriteGo->GetSize().y);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, 0);
+	fSpriteGo->sortLayer = 105;
+
+	fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
+	fSpriteGo->SetOrigin(Origins::TR);
+	fSpriteGo->SetSize(-FRAMEWORK.GetWindowSize().y / fSpriteGo->GetSize().y, FRAMEWORK.GetWindowSize().y / fSpriteGo->GetSize().y);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, 0);
+	fSpriteGo->sortLayer = 105;
+
+	fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+	fSpriteGo->SetOrigin(Origins::MC);
+	fSpriteGo->SetSize(2.5f, 2.5f);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2+10.f, FRAMEWORK.GetWindowSize().y / 2);
+	fSpriteGo->sortLayer = 106;
+
+
 	UiButton* fUiButton = (UiButton*)FindGo("ExitGame");
 	fUiButton->SetOrigin(Origins::TR);
 	fUiButton->SetSize(3, 3);
@@ -185,18 +211,18 @@ void SceneStage::Enter()
 	fUiButton->SetOrigin(Origins::BC);
 	fUiButton->SetPosition(100, 100);
 	fUiButton->sortLayer = 1;
-	fUiButton->OnClickField = []() {
+	fUiButton->OnClickField = [this]() {
 		SCENE_MGR.SetStage(0);
-		SCENE_MGR.ChangeScene(SceneId::Game);
+		stageIn = true;
 	};
 
 	fUiButton = (UiButton*)FindGo("Stower1");
 	fUiButton->SetOrigin(Origins::BC);
 	fUiButton->SetPosition(200, 100);
 	fUiButton->sortLayer = 1;
-	fUiButton->OnClickField = []() {
+	fUiButton->OnClickField = [this]() {
 		SCENE_MGR.SetStage(1);
-		SCENE_MGR.ChangeScene(SceneId::Game);
+		stageIn = true;
 	};
 
 	fUiButton = (UiButton*)FindGo("OptionB");
@@ -218,13 +244,22 @@ void SceneStage::Enter()
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 	};
 
-	fUiButton = (UiButton*)FindGo("OptionB");
-	fUiButton->SetOrigin(Origins::BR);
-	fUiButton->SetSize(3, 3);
-	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x - 20.f, FRAMEWORK.GetWindowSize().y - 17.f);
-	fUiButton->sortLayer = 103;
+	fUiButton = (UiButton*)FindGo("YesB");
+	fUiButton->SetOrigin(Origins::MC);
+	fUiButton->SetSize(2.5f, 2.5f);
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x /2-250, FRAMEWORK.GetWindowSize().y / 2+70);
+	fUiButton->sortLayer = 111;
 	fUiButton->OnClick = []() {
-		
+
+	};
+
+	fUiButton = (UiButton*)FindGo("NoB");
+	fUiButton->SetOrigin(Origins::MC);
+	fUiButton->SetSize(2.5f, 2.5f);
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 70);
+	fUiButton->sortLayer = 111;
+	fUiButton->OnClick = []() {
+
 	};
 
 
@@ -237,6 +272,38 @@ void SceneStage::Enter()
 	fTextGo->SetOrigin(Origins::TC);
 	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y - 120.f);
 	fTextGo->sortLayer = 102;
+
+	fTextGo = (TextGo*)FindGo("EndGame");
+	fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	fTextGo->text.setString(stringtable->GetW("CLOSE_GAME"));
+	fTextGo->text.setFillColor(sf::Color::White);
+	fTextGo->text.setOutlineColor(sf::Color::Black);
+	fTextGo->text.setOutlineThickness(5.f);
+	fTextGo->text.setCharacterSize(50);
+	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f + 10.f, FRAMEWORK.GetWindowSize().y * 0.4f);
+	fTextGo->SetOrigin(Origins::MC);
+	fTextGo->sortLayer = 110;
+
+	fTextGo = (TextGo*)FindGo("YesT");
+	fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	fTextGo->text.setString(stringtable->GetW("YES"));
+	fTextGo->text.setFillColor(sf::Color::White);
+	fTextGo->text.setCharacterSize(40);
+	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 - 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
+	fTextGo->SetOrigin(Origins::MC);
+	fTextGo->sortLayer = 111;
+
+	fTextGo = (TextGo*)FindGo("NoT");
+	fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	fTextGo->text.setString(stringtable->GetW("NO"));
+	fTextGo->text.setFillColor(sf::Color::White);
+	fTextGo->text.setCharacterSize(40);
+	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
+	fTextGo->SetOrigin(Origins::MC);
+	fTextGo->sortLayer = 111;
 }
 
 void SceneStage::Exit()
@@ -247,17 +314,7 @@ void SceneStage::Exit()
 void SceneStage::Update(float dt)
 {
 	Scene::Update(dt);
-	if (firstIn)
-	{
-		blindTimer = std::min(blindTimer + dt * 2, 1.f);
-		RectGo* fRectGo = (RectGo*)FindGo("Blind");
-		fRectGo->rectangle.setFillColor(sf::Color(0,0,0, 255 * (1 - blindTimer)));
-		if (blindTimer>= 1)
-		{
-			blindTimer = 0;
-			firstIn = false;
-		}
-	}
+	SceneChange(dt);
 
 	// Title Back
 	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
@@ -275,6 +332,58 @@ void SceneStage::Update(float dt)
 void SceneStage::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+}
+
+void SceneStage::SceneChange(float dt)
+{
+	if (firstIn)
+	{
+		blindTimer = std::min(blindTimer + dt * 2, 1.f);
+		RectGo* fRectGo = (RectGo*)FindGo("Blind");
+		fRectGo->rectangle.setFillColor(sf::Color(0, 0, 0, 255 * (1 - blindTimer)));
+
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
+		fSpriteGo->SetPosition(0, 0);
+		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x, 0.f);
+		if (blindTimer >= 1)
+		{
+			firstIn = false;
+		}
+	}
+	else if (stageIn)
+	{
+		switch (bounce)
+		{
+		case 0:
+			blindTimer = std::max(blindTimer - dt * 4, 0.f);
+			if (blindTimer <= 0)
+			{
+				bounce++;
+			}
+			break;
+		default:
+			doorDir -= dt*70;
+			blindTimer = std::max(blindTimer + dt * doorDir, 0.f);
+			if (blindTimer <= 0.f)
+			{
+				SCENE_MGR.ChangeScene(SceneId::Game);
+			}
+			break;
+		}
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 * (1 - blindTimer), 0);
+		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + FRAMEWORK.GetWindowSize().x / 2 * (blindTimer / 1), 0);
+	}
+	else if (blindTimer < 1.f)
+	{
+		blindTimer = std::min(blindTimer + dt * 3, 1.f);
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 * (1 - blindTimer), 0);
+		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + FRAMEWORK.GetWindowSize().x / 2 * (blindTimer / 1), 0);
+	}
 }
 
 void SceneStage::MouseMove()
