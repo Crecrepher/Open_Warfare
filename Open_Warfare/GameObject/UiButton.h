@@ -19,6 +19,7 @@ public:
     std::function<void()> OnClick;
     std::function<void()> OnClickField;
     std::function<void()> OnEnter;
+    std::function<void()> OnStay;
     std::function<void()> OnExit;
 };
 

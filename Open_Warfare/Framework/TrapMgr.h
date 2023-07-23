@@ -16,11 +16,13 @@ protected:
 	std::unordered_map<int, TrapGo::Types> trapPalate;
 	std::vector<int> upgrade;
 	int availableNum = 2;
+	int playerLevel = 1;
 public:
 	void Init();
 	std::unordered_map<int, TrapGo::Types> GetTrapPalate() { return trapPalate; }
 	std::vector<int> GetUpgrade();
 	int GetAvailable() { return availableNum; }
+	int GetPlayerLevel() { return playerLevel; }
 };
 
 #define TRAP_MGR (TrapMgr::Instance())

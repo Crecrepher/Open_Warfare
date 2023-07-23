@@ -1,3 +1,4 @@
 RESOURCE_TYPES 1.TEX 2.FONT 3.SOUND 4.ANI,RESOURCE_PATH
 0,graphics/title.png
 0,graphics/developer.png
+0,graphics/title_back.png

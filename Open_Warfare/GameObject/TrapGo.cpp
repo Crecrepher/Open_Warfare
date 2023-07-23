@@ -52,6 +52,7 @@ void TrapGo::Reset()
 void TrapGo::Release()
 {
 	UiButton::Release();
+
 	for (auto bullet : poolBullets.GetUseList())
 	{
 		SCENE_MGR.GetCurrScene()->RemoveGo(bullet);

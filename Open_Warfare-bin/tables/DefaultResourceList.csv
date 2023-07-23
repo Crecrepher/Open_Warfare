@@ -4,3 +4,11 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 1,fonts/TMONBlack.ttf
 1,fonts/BMDOHYEON.ttf
 1,fonts/Galmuri7.ttf
+0,graphics/msg_box_big.png
+0,graphics/cancel.png
+0,graphics/replay.png
+0,graphics/bt_thick.png
+0,graphics/bt_thickp.png
+0,graphics/stage_door.png
+0,graphics/upgrade.png
+0,graphics/option.png

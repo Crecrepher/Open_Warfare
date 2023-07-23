@@ -88,7 +88,7 @@ public:
 	template <typename T>
 	void ClearObjectPool(ObjectPool<T>& pool);
 	void ReleaseMapVAGo();
-	void SetWave();
+	void SetWave(MapToolGo::Stages stage);
 	void TrapPalateSetting();
 
 	void WaveHandler(float dt);

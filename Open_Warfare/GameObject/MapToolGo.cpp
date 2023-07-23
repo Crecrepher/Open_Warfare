@@ -103,6 +103,11 @@ void MapToolGo::Release()
 void MapToolGo::Reset()
 {
 	startNum = 0;
+	GroundVA.Reset();
+	WallVA.Reset();
+	GroundVA.vertexArray.clear();
+	WallVA.vertexArray.clear();
+	wallBounds.clear();
 	/*texture = RESOURCE_MGR.GetTexture(textureId);*/
 }
 

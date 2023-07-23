@@ -71,7 +71,6 @@ void SceneGame::Init()
 	AddGo(new TextGo("HpT"));
 	AddGo(new TextGo("MoneyT"));
 	AddGo(new TextGo("SellPrice"));
-	SetWave();
 
 	for (auto go : gameObjects)
 	{
@@ -124,15 +123,17 @@ void SceneGame::Enter()
 	spawnUintNum = std::vector<int>(5);
 	curWave = 0;
 	spawndUnit = 0;
+	spawnTimer = 0;
 	curWaveIndex = 0;
 	curWaveSpawnd = 0;
-	leftoverUnit = leftoverCalculator();
+	SetWave(SCENE_MGR.GetStage());
 
 	curSituation = Situation::NONE;
 	currSpeed = 1;
 
 	RESOURCE_MGR.LoadFromCsv("tables/GameResourceList.csv");
-	map->SetStage(MapToolGo::Stages::First);
+	map->SetStage(SCENE_MGR.GetStage());
+	leftoverUnit = leftoverCalculator();
 	
 	map->WallVA.sortLayer = 10;
 	//map->GroundVA.sortLayer = -11;
@@ -174,7 +175,7 @@ void SceneGame::Enter()
 		ss << "Wave_Counter" << i;
 		findSGo = (SpriteGo*)FindGo(ss.str());
 		findSGo->SetOrigin(Origins::BL);
-		findSGo->SetPosition(5.f, FRAMEWORK.GetWindowSize().y-9.f-(i* findSGo->GetSize().y*3.5f-4*i));
+		findSGo->SetPosition(10.f, FRAMEWORK.GetWindowSize().y-10.f-(i* findSGo->GetSize().y*3.5f-4*i));
 		findSGo->sprite.setScale(3.5f, 3.5f);
 		findSGo->sortLayer = 101;
 		findSGo->SetActive(true);
@@ -322,6 +323,20 @@ void SceneGame::Exit()
 	}
 	ClearObjectPool(trapPool);
 	SCENE_MGR.SetDtSpeed(1);
+
+	for (int i = 0; i < MaxWave + 1; i++)
+	{
+		std::stringstream ss;
+		ss << "Wave_Counter" << i;
+		if ((SpriteGo*)FindGo(ss.str()) != nullptr)
+		{
+			SpriteGo* thisCounter = (SpriteGo*)FindGo(ss.str());
+			thisCounter->SetActive(false);
+			ss << "t";
+			TextGo* thisCounterT = (TextGo*)FindGo(ss.str());
+			thisCounterT->SetActive(false);
+		}
+	}
 	Scene::Exit();
 }
 
@@ -396,9 +411,9 @@ void SceneGame::ReleaseMapVAGo()
 		gameObjects.erase(it);
 }
 
-void SceneGame::SetWave()
+void SceneGame::SetWave(MapToolGo::Stages stage)
 {
-	waveInfo = DATATABLE_MGR.Get<WaveTable>(DataTable::Ids::Wave)->Get(MapToolGo::Stages::First);
+	waveInfo = DATATABLE_MGR.Get<WaveTable>(DataTable::Ids::Wave)->Get(stage);
 	if (waveInfo.begin() == waveInfo.end())
 	{
 		std::cout << "ERROR: wave is NULL" << std::endl;
@@ -410,9 +425,20 @@ void SceneGame::SetWave()
 	{
 		std::stringstream ss;
 		ss << "Wave_Counter" << i;
-		AddGo(new SpriteGo("graphics/wave_number.png", ss.str()));
-		ss << "t";
-		AddGo(new TextGo(ss.str()));
+		if ((SpriteGo*)FindGo(ss.str()) == nullptr)
+		{
+			AddGo(new SpriteGo("graphics/wave_number.png", ss.str()));
+			SpriteGo* thisCounter = (SpriteGo*)FindGo(ss.str());
+			thisCounter->Init();
+			thisCounter->Reset();
+			thisCounter->SetActive(true);
+			ss << "t";
+			AddGo(new TextGo(ss.str()));
+			TextGo* thisCounterT = (TextGo*)FindGo(ss.str());
+			thisCounterT->Init();
+			thisCounterT->Reset();
+			thisCounter->SetActive(false);
+		}
 	}
 }
 
@@ -428,10 +454,10 @@ void SceneGame::TrapPalateSetting()
 		ss << "Trap_Palate" << i;
 		UiButton* tp = (UiButton*)FindGo(ss.str());
 		tp->SetActive(true);
-		tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 27,0,27,27});
+		tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 26,0,26,26});
 		tp->SetOrigin(Origins::TL);
 		tp->sprite.setScale(3.3f, 3.3f);
-		tp->SetPosition(387+(tp->GetSize().x*3.f+15)*i, 795);
+		tp->SetPosition(391+(tp->GetSize().x*3.f+15)*i, 796);
 		tp->sortLayer = 101;
 		tp->sprite.setColor(sf::Color::White);
 		tp->OnClick = [i,this]() {

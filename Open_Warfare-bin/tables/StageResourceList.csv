@@ -1,1 +1,12 @@
 RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
+0,graphics/stage_tower_cleared.png
+0,graphics/stage_palate.png
+0,graphics/stage_tower.png
+0,graphics/exit_box.png
+0,graphics/stage_name.png
+0,graphics/level_cir.png
+0,graphics/xp_liquid.png
+0,graphics/xp_bar.png
+0,graphics/stage_edge.png
+0,graphics/stage_back.png
+0,graphics/xp_bar_f.png

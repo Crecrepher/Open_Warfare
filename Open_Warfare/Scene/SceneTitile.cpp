@@ -87,7 +87,7 @@ void SceneTitile::Enter()
 	mBox->sortLayer = 111;
 
 	mBox = (RectGo*)FindGo("Back");
-	mBox->rectangle.setFillColor(sf::Color::Green);
+	mBox->rectangle.setTexture(RESOURCE_MGR.GetTexture("graphics/title_back.png"));
 	mBox->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
 	mBox->SetSize(FRAMEWORK.GetWindowSize());
 	mBox->SetOrigin(Origins::MC);
@@ -105,6 +105,8 @@ void SceneTitile::Enter()
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 	tx->text.setString(stringtable->GetW("PRESS_START"));
 	tx->text.setFillColor(sf::Color::White);
+	tx->text.setOutlineColor(sf::Color::Black);
+	tx->text.setOutlineThickness(5.f);
 	tx->text.setCharacterSize(70);
 	tx->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.78f);
 	tx->SetOrigin(Origins::MC);
@@ -212,4 +214,13 @@ void SceneTitile::Update(float dt)
 void SceneTitile::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+	if (titleSort < 4)
+	{
+		window.setMouseCursorVisible(false);
+	}
+	else
+	{
+		window.setMouseCursorVisible(true);
+	}
+	
 }
