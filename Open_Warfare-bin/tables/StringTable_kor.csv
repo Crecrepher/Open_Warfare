@@ -3,3 +3,9 @@ PRESS_START,누르면 시작됩니다
 CLOSE_GAME,게임을 종료하시겠습니까?
 YES,네
 NO,취소
+START,게임 시작
+PAUSE,일시정지
+EXIT_CHECK,현재 진행정보를 잃게됩니다.
+STAGE0,첫번째 전투
+STAGE1,교차로
+STAGE2,길 잃은 귀족

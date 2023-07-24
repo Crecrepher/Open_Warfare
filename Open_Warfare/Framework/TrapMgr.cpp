@@ -3,9 +3,11 @@
 
 #include "InputMgr.h"
 
+#include "MapToolGo.h"
 void TrapMgr::Init()
 {
 	upgrade = std::vector<int>((int)TrapGo::Types::TypeCount);
+	clearMap = std::vector<int>((int)MapToolGo::Stages::MapCount);
 	trapPalate.insert({ 0, TrapGo::Types::Dart });
 	trapPalate.insert({ 1, TrapGo::Types::Spike });
 }
@@ -23,4 +25,26 @@ std::vector<int> TrapMgr::GetUpgrade()
 		palateUpgradeInfo.push_back(upgrade[findUpVal]);
 	}
 	return palateUpgradeInfo;
+}
+
+void TrapMgr::BonusJewel(int jewelNum,int stageNum)
+{
+	jewel += jewelNum - clearMap[stageNum];
+	clearMap[stageNum] = jewelNum;
+}
+
+void TrapMgr::XpCalculate()
+{
+	while (xpCur > xpNeed)
+	{
+		xpCur -= xpNeed;
+		playerLevel++;
+		xpNeed += 1000;
+		jewel++;
+	}
+}
+
+float TrapMgr::GetXpValue() 
+{ 
+	return (float)xpCur / xpNeed; 
 }

@@ -4,6 +4,7 @@ class UiButton : public SpriteGo
 {
 protected:
     bool isHover = false;
+    bool isHoverF = false;
 public:
 	UiButton(const std::string id = "", const std::string n = "") :SpriteGo(id,n) {}
     virtual ~UiButton() override;
@@ -19,7 +20,9 @@ public:
     std::function<void()> OnClick;
     std::function<void()> OnClickField;
     std::function<void()> OnEnter;
+    std::function<void()> OnEnterField;
     std::function<void()> OnStay;
     std::function<void()> OnExit;
+    std::function<void()> OnExitField;
 };
 

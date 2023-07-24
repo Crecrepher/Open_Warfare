@@ -2,11 +2,11 @@
 #include "AnimatioControler.h"
 #include "ResourceMgr.h"
 
-void AnimatioControler::AddClip(const AnimationClip& newClip)
+void AnimatioControler::AddClip(AnimationClip& newClip)
 {
 	if (clips.find(newClip.id) == clips.end())
 	{
-		clips.insert({ newClip.id, newClip });
+		clips.insert({ newClip.id, &newClip });
 	}
 }
 
@@ -59,10 +59,10 @@ void AnimatioControler::Update(float dt)
 		}
 	}
 
-	if (currentClip->frames[currentFrame].action != nullptr)
-	{
-		currentClip->frames[currentFrame].action();
-	}
+	//if (currentClip->frames[currentFrame].action != nullptr)
+	//{
+	//	currentClip->frames[currentFrame].action();
+	//}
 
 	if (target != nullptr)
 	{
@@ -94,7 +94,7 @@ void AnimatioControler::Play(const std::string& clipid, bool clearQueue)
 	}
 
 	isPlaying = true;
-	currentClip = &find->second;
+	currentClip = find->second;
 	currentFrame = 0;
 	totalFrame = (int)currentClip->frames.size();
 	clipDuration = 1.f / currentClip->fps;

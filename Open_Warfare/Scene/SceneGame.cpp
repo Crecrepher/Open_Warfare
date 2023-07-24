@@ -17,6 +17,7 @@
 #include "MapToolGo.h"
 #include "UnitGo.h"
 #include "TrapGo.h"
+#include "RectGo.h"
 
 
 SceneGame::SceneGame() : Scene(SceneId::Game)
@@ -52,13 +53,22 @@ void SceneGame::Init()
 	AddGo(new SpriteGo("graphics/spike_trap.png", "GhostTrap"));
 	AddGo(new SpriteGo("graphics/dir_box.png", "DirBox"));
 	AddGo(new SpriteGo("graphics/buildmenu_ring.png", "BuildMenu"));
+	AddGo(new SpriteGo("graphics/stage_door.png", "SceneDoorLeft"));
+	AddGo(new SpriteGo("graphics/stage_door.png", "SceneDoorRight"));
+	AddGo(new SpriteGo("graphics/pause_back.png", "PauseBack"));
+	AddGo(new SpriteGo("graphics/msg_box_big.png", "MsgBox"));
+	AddGo(new SpriteGo("graphics/blocked_one_trap.png", "OneTrapFix"));
+	AddGo(new SpriteGo("graphics/victory.png", "WinTitle"));
+	AddGo(new SpriteGo("graphics/msg_box.png", "WinMsgBox"));
 	AddGo(new UiButton("graphics/sell.png", "SellBox"));
-	AddGo(new UiButton("graphics/wave_number.png", "StartB"));
+	AddGo(new UiButton("graphics/bt_long.png", "StartB"));
 	for (int i = 0; i < 9; i++)
 	{
 		std::stringstream ss;
 		ss << "Trap_Palate" << i;
 		AddGo(new UiButton("graphics/trap_icon.png", ss.str()));
+		ss << "Null";
+		AddGo(new SpriteGo("graphics/blocked_trap.png", ss.str()));
 	}
 	for (int i = 0; i < 4; i++)
 	{
@@ -68,10 +78,23 @@ void SceneGame::Init()
 	}
 	AddGo(new UiButton("graphics/1x.png", "Speed1x"));
 	AddGo(new UiButton("graphics/2x.png", "Speed2x"));
+	AddGo(new UiButton("graphics/game_pause.png", "PauseB"));
+	AddGo(new UiButton("graphics/option.png", "OptionB"));
+	AddGo(new UiButton("graphics/replay.png", "ReplayB"));
+	AddGo(new UiButton("graphics/cancel.png", "ExitB"));
+	AddGo(new UiButton("graphics/bt_thick.png", "YesB"));
+	AddGo(new UiButton("graphics/bt_thick.png", "NoB"));
 	AddGo(new TextGo("HpT"));
 	AddGo(new TextGo("MoneyT"));
+	AddGo(new TextGo("XpT"));
 	AddGo(new TextGo("SellPrice"));
-
+	AddGo(new TextGo("GameStart"));
+	AddGo(new TextGo("PauseT"));
+	AddGo(new TextGo("YesT"));
+	AddGo(new TextGo("NoT"));
+	AddGo(new TextGo("EndGame"));
+	AddGo(new RectGo("Blind"));
+	AddGo(new RectGo("OuchBlind"));
 	for (auto go : gameObjects)
 	{
 		go->Init();
@@ -120,6 +143,16 @@ void SceneGame::Enter()
 	Scene::Enter();
 	TrapPalateSetting();
 
+	stageOut = false;
+	bounce = true;
+	isReplay = false;
+	blindTimer = 0.f;
+	doorDir = 4.f;
+	isDefeat = false;
+
+	isExit = false;
+	msgBoxTimer = 0.f;
+
 	spawnUintNum = std::vector<int>(5);
 	curWave = 0;
 	spawndUnit = 0;
@@ -143,13 +176,28 @@ void SceneGame::Enter()
 
 	worldView.setCenter(map->GetCenter());
 
+	xp = 0;
 	hp = maxHp;
 	isGameOver = false;
-	isPause = true;
+	isReady = true;
 	isWaveEnd = false;
 	waveTurn = false;
 	money = startMoney;
 	
+	RectGo* blind = (RectGo*)FindGo("Blind");
+	blind->rectangle.setFillColor(sf::Color(0, 0, 0, 0));
+	blind->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+	blind->SetSize(FRAMEWORK.GetWindowSize());
+	blind->SetOrigin(Origins::MC);
+	blind->sortLayer = 104;
+
+	blind = (RectGo*)FindGo("OuchBlind");
+	blind->rectangle.setFillColor(sf::Color(255, 0, 0, 0));
+	blind->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+	blind->SetSize(FRAMEWORK.GetWindowSize());
+	blind->SetOrigin(Origins::MC);
+	blind->sortLayer = 100;
+	blind->sortOrder = -2;
 
 	SpriteGo* findSGo = (SpriteGo*)FindGo("HpUi");
 	findSGo->SetOrigin(Origins::TR);
@@ -206,20 +254,80 @@ void SceneGame::Enter()
 	findSGo->sortLayer = 50;
 	findSGo->SetActive(false);
 
+	findSGo = (SpriteGo*)FindGo("SceneDoorLeft");
+	findSGo->SetOrigin(Origins::TR);
+	findSGo->SetSize(FRAMEWORK.GetWindowSize().y / findSGo->GetSize().y, FRAMEWORK.GetWindowSize().y / findSGo->GetSize().y);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, 0);
+	findSGo->sortLayer = 115;
+
+	findSGo = (SpriteGo*)FindGo("SceneDoorRight");
+	findSGo->SetOrigin(Origins::TR);
+	findSGo->SetSize(-FRAMEWORK.GetWindowSize().y / findSGo->GetSize().y, FRAMEWORK.GetWindowSize().y / findSGo->GetSize().y);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, 0);
+	findSGo->sortLayer = 115;
+
+	findSGo = (SpriteGo*)FindGo("PauseBack");
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->SetSize(5.f, 4.f);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 25.f, FRAMEWORK.GetWindowSize().y / 2 -30.f);
+	findSGo->sortLayer = 105;
+	findSGo->SetActive(false);
+
+	findSGo = (SpriteGo*)FindGo("MsgBox");
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->SetSize(2.5f, 2.5f);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 10.f, FRAMEWORK.GetWindowSize().y / 2);
+	findSGo->sortLayer = 107;
+	findSGo->SetActive(false);
+
+	findSGo = (SpriteGo*)FindGo("OneTrapFix");
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->SetSize(3.3f, 3.3f);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x *0.185f, FRAMEWORK.GetWindowSize().y *0.932f);
+	findSGo->sortLayer = 106;
+
+	findSGo = (SpriteGo*)FindGo("WinTitle");
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->SetSize(3.3f, 3.3f);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x/2 + 15.f, FRAMEWORK.GetWindowSize().y * 0.2);
+	findSGo->sortLayer = 110;
+	findSGo->SetActive(false);
+
+	findSGo = (SpriteGo*)FindGo("WinMsgBox");
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->SetSize(3.3f, 3.3f);
+	findSGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 10.f, FRAMEWORK.GetWindowSize().y * 0.5);
+	findSGo->sortLayer = 110;
+	findSGo->SetActive(false);
+
 	UiButton* ui = (UiButton*)FindGo("StartB");
 	ui->SetActive(true);
 	ui->SetOrigin(Origins::MC);
-	ui->sprite.setScale(3.f,3.f);
+	ui->sprite.setScale(4.f,4.f);
 	ui->SetPosition(FRAMEWORK.GetWindowSize().x/2.f, FRAMEWORK.GetWindowSize().y * 0.8);
 	ui->sortLayer = 100;
-	ui->sprite.setRotation(90);
+	ui->OnStay = [ui]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			ui->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_longp.png"));
+		}
+		else
+		{
+			ui->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_long.png"));
+		}
+	};
+	ui->OnExit = [ui]() {
+		ui->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_long.png"));
+	};
 	ui->OnClick = [ui,this]() {
-		isPause = false;
+		isReady = false;
 		ui->SetActive(false);
 		SpriteGo* firstB = (SpriteGo*)FindGo("Wave_Counter0");
 		firstB->SetActive(false);
-		TextGo* ui = (TextGo*)FindGo("Wave_Counter0t");
-		ui->SetActive(false);
+		TextGo* findTGo = (TextGo*)FindGo("Wave_Counter0t");
+		findTGo->SetActive(false);
+		findTGo = (TextGo*)FindGo("GameStart");
+		findTGo->SetActive(false);
 	};
 
 	for (int i = 0; i < 4; i++)
@@ -284,6 +392,214 @@ void SceneGame::Enter()
 	};
 	ui->SetActive(true);
 
+	ui = (UiButton*)FindGo("PauseB");
+	ui->SetOrigin(Origins::MC);
+	ui->sprite.setScale(3.f, 3.f);
+	ui->SetPosition(FRAMEWORK.GetWindowSize().x - 40.f, FRAMEWORK.GetWindowSize().y - 40.f);
+	ui->sortLayer = 101;
+	ui->OnStay = [ui]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			ui->sprite.setScale(2.5f, 2.5f);
+		}
+		else
+		{
+			ui->sprite.setScale(3.f, 3.f);
+		}
+	};
+	ui->OnExit = [ui]() {
+		ui->sprite.setScale(3.f, 3.f);
+	};
+	ui->OnClick = [this]() {
+		if (hp <= 0)
+		{
+			return;
+		}
+		RectGo* blind = (RectGo*)FindGo("Blind");
+		blind->rectangle.setFillColor(sf::Color(0, 0, 0, 100));
+		UiButton* ui = (UiButton*)FindGo("OptionB");
+		ui->SetActive(true);
+		ui = (UiButton*)FindGo("ReplayB");
+		ui->SetActive(true);
+		ui = (UiButton*)FindGo("ExitB");
+		ui->SetActive(true);
+		SpriteGo* back = (SpriteGo*)FindGo("PauseBack");
+		back->SetActive(true);
+		TextGo* pauseT = (TextGo*)FindGo("PauseT");
+		pauseT->SetActive(true);
+		curSituation = Situation::Pause;
+	};
+
+	ui = (UiButton*)FindGo("OptionB");
+	ui->SetOrigin(Origins::MC);
+	ui->sprite.setScale(4.5f, 4.5f);
+	ui->SetPosition(FRAMEWORK.GetWindowSize().x/2.f - 150.f, FRAMEWORK.GetWindowSize().y/2.-20.f);
+	ui->sortLayer = 105;
+	ui->OnStay = [ui]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			ui->sprite.setScale(3.5f, 3.5f);
+		}
+		else
+		{
+			ui->sprite.setScale(4.5f, 4.5f);
+		}
+	};
+	ui->OnExit = [ui]() {
+		ui->sprite.setScale(4.5f, 4.5f);
+	};
+	ui->OnClick = [ui, this]() {
+
+	};
+	ui->SetActive(false);
+
+	ui = (UiButton*)FindGo("ReplayB");
+	ui->SetOrigin(Origins::MC);
+	ui->sprite.setScale(4.5f, 4.5f);
+	ui->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y / 2. - 20.f);
+	ui->sortLayer = 105;
+	ui->OnStay = [ui]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			ui->sprite.setScale(3.5f, 3.5f);
+		}
+		else
+		{
+			ui->sprite.setScale(4.5f, 4.5f);
+		}
+	};
+	ui->OnExit = [ui]() {
+		ui->sprite.setScale(4.5f, 4.5f);
+	};
+	ui->OnClick = [this]() {
+		isExit = true;
+		isReplay = true;
+		if (hp <= 0)
+		{
+			stageOut = true;
+			curSituation = Situation::NONE;
+			return;
+		}
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetActive(true);
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetActive(true);
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetActive(true);
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->SetActive(true);
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->SetActive(true);
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->SetActive(true);
+	};
+	ui->SetActive(false);
+
+	ui = (UiButton*)FindGo("ExitB");
+	ui->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/cancel.png"));
+	ui->SetOrigin(Origins::MC);
+	ui->sprite.setScale(4.5f, 4.5f);
+	ui->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f + 150.f, FRAMEWORK.GetWindowSize().y / 2.f - 20.f);
+	ui->sortLayer = 105;
+	ui->OnStay = [ui]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			ui->sprite.setScale(3.5f, 3.5f);
+		}
+		else
+		{
+			ui->sprite.setScale(4.5f, 4.5f);
+		}
+	};
+	ui->OnExit = [ui]() {
+		ui->sprite.setScale(4.5f, 4.5f);
+	};
+	ui->OnClick = [this]() {
+		isExit = true;
+		if (hp <= 0)
+		{
+			stageOut = true;
+			curSituation = Situation::NONE;
+			return;
+		}
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetActive(true);
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetActive(true);
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetActive(true);
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->SetActive(true);
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->SetActive(true);
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->SetActive(true);
+		isExit = true;
+	};
+	ui->SetActive(false);
+
+	UiButton* fUiButton = (UiButton*)FindGo("YesB");
+	fUiButton->SetOrigin(Origins::MC);
+	fUiButton->SetSize(2.5f, 2.5f);
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x / 2 - 250, FRAMEWORK.GetWindowSize().y / 2 + 70);
+	fUiButton->sortLayer = 111;
+	fUiButton->OnStay = [fUiButton]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thickp.png"));
+		}
+		else
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+		}
+	};
+	fUiButton->OnExit = [fUiButton]() {
+		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+	};
+	fUiButton->OnClick = [this]() {
+		stageOut = true;
+		curSituation = Situation::NONE;
+	};
+	fUiButton->SetActive(false);
+
+	fUiButton = (UiButton*)FindGo("NoB");
+	fUiButton->SetOrigin(Origins::MC);
+	fUiButton->SetSize(2.5f, 2.5f);
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 70);
+	fUiButton->sortLayer = 111;
+	fUiButton->OnStay = [fUiButton]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thickp.png"));
+		}
+		else
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+		}
+	};
+	fUiButton->OnExit = [fUiButton]() {
+		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+	};
+	fUiButton->OnClick = [this]() {
+		isExit = false;
+		isReplay = false;
+		msgBoxTimer = 0.f;
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetActive(false);
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetActive(false);
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetActive(false);
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->SetActive(false);
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->SetActive(false);
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->SetActive(false);
+	};
+	fUiButton->SetActive(false);
+
+
 	TextGo* findTGo = (TextGo*)FindGo("HpT");
 	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
 	findTGo->text.setString("20");
@@ -304,6 +620,15 @@ void SceneGame::Enter()
 	findTGo->SetPosition(1310, 862);
 	findTGo->sortLayer = 101;
 
+	findTGo = (TextGo*)FindGo("XpT");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
+	findTGo->text.setString("0");
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(20);
+	findTGo->SetOrigin(Origins::TL);
+	findTGo->SetPosition(1490, 13);
+	findTGo->sortLayer = 101;
+
 	findTGo = (TextGo*)FindGo("SellPrice");
 	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
 	findTGo->text.setFillColor(sf::Color::White);
@@ -311,6 +636,67 @@ void SceneGame::Enter()
 	findTGo->SetOrigin(Origins::MC);
 	findTGo->sortLayer = 100;
 	findTGo->sortOrder = -1;
+	findTGo->SetActive(false);
+
+	findTGo = (TextGo*)FindGo("GameStart");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	findTGo->text.setString(stringtable->GetW("START"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setOutlineColor(sf::Color::Black);
+	findTGo->text.setOutlineThickness(3.f);
+	findTGo->text.setCharacterSize(40);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.79);
+	findTGo->sortLayer = 101;
+	findTGo->SetActive(true);
+
+	findTGo = (TextGo*)FindGo("PauseT");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	findTGo->text.setString(stringtable->GetW("PAUSE"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setOutlineColor(sf::Color::Black);
+	findTGo->text.setOutlineThickness(3.f);
+	findTGo->text.setCharacterSize(40);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.36 - 30.f);
+	findTGo->sortLayer = 106;
+	findTGo->SetActive(false);
+
+	findTGo = (TextGo*)FindGo("EndGame");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	findTGo->text.setString(stringtable->GetW("EXIT_CHECK"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setOutlineColor(sf::Color::Black);
+	findTGo->text.setOutlineThickness(5.f);
+	findTGo->text.setCharacterSize(50);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f + 10.f, FRAMEWORK.GetWindowSize().y * 0.4f);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 110;
+	findTGo->SetActive(false);
+
+	findTGo = (TextGo*)FindGo("YesT");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	findTGo->text.setString(stringtable->GetW("YES"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(40);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 - 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 111;
+	findTGo->SetActive(false);
+
+	findTGo = (TextGo*)FindGo("NoT");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	findTGo->text.setString(stringtable->GetW("NO"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(40);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 111;
 	findTGo->SetActive(false);
 }
 
@@ -343,57 +729,50 @@ void SceneGame::Exit()
 void SceneGame::Update(float dt)
 {
 	Scene::Update(dt);
+	SceneChange(dt);
 	MouseMove();
 
 	TrapHandler(dt);
 
 	//트랩설치 취소
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape) ||
-		INPUT_MGR.GetMouseButtonDown(sf::Mouse::Right))
+	if ((INPUT_MGR.GetKeyDown(sf::Keyboard::Escape) ||
+		INPUT_MGR.GetMouseButtonDown(sf::Mouse::Right))&&
+		hp > 0)
 	{
 		curSituation = Situation::NONE;
+		CloseMenu();
 	}
 
-	if (isPause)
+	if (isReady)
 	{
 		RouteShower(dt);
 		return;
+	}
+
+	if (ouchTimer>0)
+	{
+		ouchTimer = std::max(ouchTimer - dt, 0.f);
+		RectGo* blind = (RectGo*)FindGo("OuchBlind");
+		blind->rectangle.setFillColor(sf::Color(255, 0, 0, 50*(ouchTimer/1)));
 	}
 
 	if (!isWaveEnd)
 	{
 		WaveHandler(dt);
 	}
-	else if (isWaveEnd && unitPool.GetUseList().size() == 0)
-	{
-		std::cout << "VICTORY!!" << std::endl;
-		SCENE_MGR.ChangeScene(SceneId::Game);
-	}
-	
 
-	if (isGameOver)
+	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num1))
 	{
-		std::cout << "GAMEOVER" << std::endl;
-		SCENE_MGR.ChangeScene(SceneId::Game);
+		GameEnd();
 	}
-
-	
+	else if (isWaveEnd && unitPool.GetUseList().size() == 0 &&
+		hp>0)
+	{
+		GameEnd();
+	}
 
 	//좌표찍기 테스트코드
 	//std::cout << INPUT_MGR.GetMousePos().x << "\t" << INPUT_MGR.GetMousePos().y << std::endl;
-	
-	//유닛생성/삭제 테스트코드
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num2))
-	{
-		ClearObjectPool(unitPool);
-	}
-
-	//스테이지로 돌아가기 테스트코드
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
-	{
-		SCENE_MGR.ChangeScene(SceneId::Stage);
-		return;
-	}
 }
 
 void SceneGame::Draw(sf::RenderWindow& window)
@@ -447,6 +826,18 @@ void SceneGame::TrapPalateSetting()
 	inTrapPalate = TRAP_MGR.GetTrapPalate();
 	upgradeInfo = TRAP_MGR.GetUpgrade();
 	availableTraps = TRAP_MGR.GetAvailable();
+
+	for (int i = 0; i < 9; i++)
+	{
+		std::stringstream ss;
+		ss << "Trap_Palate" << i << "Null";
+		SpriteGo* null = (SpriteGo*)FindGo(ss.str());
+		null->SetOrigin(Origins::TL);
+		null->sprite.setScale(3.3f, 3.3f);
+		null->SetPosition(391 + (null->GetSize().x * 3.f + 14.4f) * i, 796);
+		null->sortLayer = 101;
+	}
+
 	trapPrice = std::vector<int>(availableTraps);
 	for (int i = 0; i < availableTraps; i++)
 	{
@@ -460,7 +851,28 @@ void SceneGame::TrapPalateSetting()
 		tp->SetPosition(391+(tp->GetSize().x*3.f+15)*i, 796);
 		tp->sortLayer = 101;
 		tp->sprite.setColor(sf::Color::White);
+		tp->OnStay = [tp,this,i]() {
+			if (curSituation == Situation::Pause)
+			{
+				return;
+			}
+			if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+			{
+				tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 26,-5,26,26 });
+			}
+			else
+			{
+				tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 26,0,26,26 });
+			}
+		};
+		tp->OnExit = [tp, this, i]() {
+			tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 26,0,26,26 });
+		};
 		tp->OnClick = [i,this]() {
+			if (curSituation == Situation::Pause)
+			{
+				return;
+			}
 			if (money>=trapPrice[i])
 			{
 				MakeGhostTower(inTrapPalate.find(i)->second,i);
@@ -478,6 +890,10 @@ void SceneGame::TrapPalateSetting()
 		};
 		const TrapInfo& info = DATATABLE_MGR.Get<TrapTable>(DataTable::Ids::TrapGo)->Get((int)inTrapPalate.find(i)->second);
 		trapPrice[i] = info.price;
+
+		ss << "Null";
+		SpriteGo* blocked = (SpriteGo*)FindGo(ss.str());
+		blocked->SetActive(false);
 	}
 	if (availableTraps < 9)
 	{
@@ -487,6 +903,8 @@ void SceneGame::TrapPalateSetting()
 			ss << "Trap_Palate" << i;
 			UiButton* tp = (UiButton*)FindGo(ss.str());
 			tp->SetActive(false);
+			SpriteGo* blocked = (SpriteGo*)FindGo(ss.str());
+			blocked->SetActive(true);
 		}
 	}
 }
@@ -685,6 +1103,9 @@ void SceneGame::TrapHandler(float dt)
 		findTGo->SetPosition(sf::Vector2f(Scene::worldPosToScreen(findSGo->GetPosition()).x, Scene::worldPosToScreen(findSGo->GetPosition()).y + findSGo->GetSize().y *3 / 2.f + 5.f));
 	}
 		break;
+	case SceneGame::Situation::Pause:
+		SCENE_MGR.SetDtSpeed(0);
+		break;
 	default:
 		break;
 	}
@@ -710,6 +1131,7 @@ void SceneGame::OnDieUnit(UnitGo* unit)
 {
 	int a = unit->GetPrize();
 	money+=unit->GetPrize();
+	xp += unit->GetXp();
 	textMoneyUpdate();
 	RemoveGo(unit);
 	unitPool.Return(unit);
@@ -725,6 +1147,11 @@ void SceneGame::PlayerOuch(int damage, UnitGo* unit)
 	if (hp <= 0)
 	{
 		isGameOver = true;
+		GameEnd();
+	}
+	else
+	{
+		ouchTimer = 1.f;
 	}
 }
 
@@ -733,12 +1160,158 @@ const std::list<UnitGo*>* SceneGame::GetUnitList() const
 	return &unitPool.GetUseList();
 }
 
+void SceneGame::SceneChange(float dt)
+{
+	if (stageOut)
+	{
+		if (bounce)
+		{
+			blindTimer = std::max(blindTimer - dt * 4, 0.f);
+			bounce = blindTimer > 0;
+		}
+		else
+		{
+			doorDir -= dt * 70;
+			blindTimer = std::max(blindTimer + dt * doorDir, 0.f);
+			if (blindTimer <= 0.f)
+			{
+				if (isReplay)
+				{
+					SCENE_MGR.ChangeScene(SceneId::Game);
+				}
+				else
+				{
+					SCENE_MGR.ChangeScene(SceneId::Stage);
+				}
+				
+			}
+		}
+
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 * (1 - blindTimer), 0);
+		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + FRAMEWORK.GetWindowSize().x / 2 * (blindTimer / 1), 0);
+	}
+	else if (blindTimer < 1.f)
+	{
+		blindTimer = std::min(blindTimer + dt * 3, 1.f);
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 * (1 - blindTimer), 0);
+		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
+		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + FRAMEWORK.GetWindowSize().x / 2 * (blindTimer / 1), 0);
+	}
+}
+
+void SceneGame::ExitBox(float dt)
+{
+	if (isExit && msgBoxTimer < 1)
+	{
+		msgBoxTimer = std::min(msgBoxTimer + dt * 5, 1.f);
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
+	}
+}
+
+void SceneGame::GameEnd()
+{
+	RectGo* blind = (RectGo*)FindGo("Blind");
+	blind->rectangle.setFillColor(sf::Color(0, 0, 0, 100));
+	SpriteGo* findSGo = (SpriteGo*)FindGo("WinTitle");
+	findSGo->SetActive(true);
+	if (isGameOver)
+	{
+		findSGo->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/defeat.png"));
+	}
+	else
+	{
+		findSGo->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/victory.png"));
+		TextGo* findTGo = (TextGo*)FindGo("EndGame");
+		findTGo->SetActive(true);
+		findTGo->sortLayer = 112;
+		std::stringstream ss;
+		ss << "Xp: " << xp;
+		findTGo->text.setString(ss.str());
+		findTGo->SetOrigin(Origins::MC);
+		findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.73f);
+		if (hp >= maxHp-1)
+		{
+			TRAP_MGR.BonusJewel(3,(int)SCENE_MGR.GetStage());
+		}
+		else if (hp >= maxHp-5)
+		{
+			TRAP_MGR.BonusJewel(2, (int)SCENE_MGR.GetStage());
+		}
+		else if (hp >= maxHp/2)
+		{
+			TRAP_MGR.BonusJewel(1, (int)SCENE_MGR.GetStage());
+		}
+		TRAP_MGR.AddXp(xp);
+	}
+	hp = 0;
+	findSGo = (SpriteGo*)FindGo("WinMsgBox");
+	findSGo->SetActive(true);
+
+	UiButton* ui = (UiButton*)FindGo("ReplayB");
+	ui->SetActive(true);
+	ui->SetPosition(FRAMEWORK.GetWindowSize().x  / 2.f + 100.f, FRAMEWORK.GetWindowSize().y / 2.f - 20.f);
+	ui->sortLayer = 111;
+
+	ui = (UiButton*)FindGo("ExitB");
+	ui->SetActive(true);
+	ui->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/okay.png"));
+	ui->SetOrigin(Origins::MC);
+	ui->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f - 100.f, FRAMEWORK.GetWindowSize().y / 2.f - 20.f);
+	ui->sortLayer = 111;
+
+	curSituation = Situation::Pause;
+}
+
+void SceneGame::CloseMenu()
+{
+	RectGo* blind = (RectGo*)FindGo("Blind");
+	blind->rectangle.setFillColor(sf::Color(0, 0, 0, 0));
+	UiButton* ui = (UiButton*)FindGo("OptionB");
+	ui->SetActive(false);
+	ui = (UiButton*)FindGo("ReplayB");
+	ui->SetActive(false);
+	ui = (UiButton*)FindGo("ExitB");
+	ui->SetActive(false);
+	SpriteGo* back = (SpriteGo*)FindGo("PauseBack");
+	back->SetActive(false);
+	TextGo* pauseT = (TextGo*)FindGo("PauseT");
+	pauseT->SetActive(false);
+	SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+	fSpriteGo->SetActive(false);
+	UiButton* fUiButton = (UiButton*)FindGo("YesB");
+	fUiButton->SetActive(false);
+	fUiButton = (UiButton*)FindGo("NoB");
+	fUiButton->SetActive(false);
+	TextGo* fTextGo = (TextGo*)FindGo("YesT");
+	fTextGo->SetActive(false);
+	fTextGo = (TextGo*)FindGo("NoT");
+	fTextGo->SetActive(false);
+	fTextGo = (TextGo*)FindGo("EndGame");
+	fTextGo->SetActive(false);
+}
+
 void SceneGame::textMoneyUpdate()
 {
 	TextGo* mt = (TextGo*)FindGo("MoneyT");
 	std::stringstream ss;
 	ss << money;
 	mt->text.setString(ss.str());
+	mt = (TextGo*)FindGo("XpT");
+	mt->text.setString(std::to_string(xp));
 
 	for (int i = 0; i < availableTraps; i++)
 	{

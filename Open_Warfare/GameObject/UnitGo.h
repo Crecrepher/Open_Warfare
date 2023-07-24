@@ -70,6 +70,7 @@ public:
 	void SetType(Types t);
 	Types GetType() const;
 	int GetPrize() { return prize; }
+	int GetXp() { return xp; }
 
 	void OnHit(int damage);
 	void SetLoot(int lootNum);

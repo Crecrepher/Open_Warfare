@@ -37,6 +37,9 @@ void UiButton::Update(float dt)
 	bool prevHover = isHover;
 	isHover = sprite.getGlobalBounds().contains(uiMousePos);
 
+	bool prevHoverF = isHoverF;
+	isHoverF = sprite.getGlobalBounds().contains(SCENE_MGR.GetCurrScene()->ScreenToWorldPos(INPUT_MGR.GetMousePos()));
+
 	if (!prevHover && isHover)
 	{
 		if (OnEnter != nullptr)
@@ -65,8 +68,21 @@ void UiButton::Update(float dt)
 			OnClick();
 		}
 	}
-	if (sprite.getGlobalBounds().contains(SCENE_MGR.GetCurrScene()->ScreenToWorldPos(INPUT_MGR.GetMousePos()))
-		&& INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
+	if (!prevHoverF && isHoverF)
+	{
+		if (OnEnterField != nullptr)
+		{
+			OnEnterField();
+		}
+	}
+	if (prevHoverF && !isHoverF)
+	{
+		if (OnExitField != nullptr)
+		{
+			OnExitField();
+		}
+	}
+	if (isHoverF && INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
 	{
 		if (OnClickField != nullptr)
 		{

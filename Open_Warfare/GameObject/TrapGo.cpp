@@ -57,7 +57,7 @@ void TrapGo::Release()
 	{
 		SCENE_MGR.GetCurrScene()->RemoveGo(bullet);
 	}
-	poolBullets.Release();
+	poolBullets.Clear();
 }
 
 void TrapGo::Update(float dt)
@@ -115,6 +115,7 @@ void TrapGo::Shoot()
 	if (sceneGame != nullptr)
 	{
 		bullet->SetUnitList(sceneGame->GetUnitList());
+		bullet->sortLayer = 1;
 		sceneGame->AddGo(bullet);
 	}
 }

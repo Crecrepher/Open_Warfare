@@ -12,3 +12,7 @@ RESOURCE_TYPES 0.TEX 1.FONT 2.SOUND 3.ANI,RESOURCE_PATH
 0,graphics/stage_door.png
 0,graphics/upgrade.png
 0,graphics/option.png
+0,graphics/okay.png
+0,graphics/upgrades.png
+0,graphics/up_slot.png
+0,graphics/trap_icon.png

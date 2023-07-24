@@ -18,18 +18,31 @@ public:
 		SETPOS,
 		SETDIR,
 		POPMENU,
+		Pause,
 	};
 
 protected:
+	bool stageOut = false;
+	bool bounce = true;
+	bool isReplay = false;
+	float blindTimer = 0.f;
+	float doorDir = 4.f;
+	bool isDefeat = false;
+
+	bool isExit = false;
+	float msgBoxTimer = 0.f;
+
 	MapToolGo* map;
 	std::vector<int> mTrapInfo;
 	int mapWidth;
 	int mapHeight;
 
+	int xp = 0;
 	int maxHp = 20;
 	int hp = 0;
 	int startMoney = 2200;
 	int money = 0;
+	float ouchTimer = 0;
 
 	std::unordered_map<int, TrapGo::Types> inTrapPalate;
 	TrapGo* selectedTrap = nullptr;
@@ -64,7 +77,7 @@ protected:
 
 	bool isGameOver = false;
 	bool isWaveEnd = false;
-	bool isPause = true;
+	bool isReady = true;
 	bool waveTurn = false;
 	bool clickBlocker = true;
 	bool Pop = true;
@@ -108,7 +121,11 @@ public:
 
 	void textMoneyUpdate();
 
+	void SceneChange(float dt);
+	void ExitBox(float dt);
+	void GameEnd();
 	void MouseMove();
+	void CloseMenu();
 };
 
 template<typename T>

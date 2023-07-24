@@ -9,7 +9,9 @@ protected:
 	bool stageIn = false;
 	int bounce = 0;
 	float doorDir = 4.f;
-	float blindTimer = 0;
+	float blindTimer = 0.f;
+	float msgBoxTimer = 0.f;
+	bool isExit = false;
 public:
 	SceneStage();
 	virtual ~SceneStage() override;
@@ -23,7 +25,10 @@ public:
 	virtual void Update(float dt) override;
 	virtual void Draw(sf::RenderWindow& window) override;
 
+	void MakeUpgradeMenu();
+
 	void SceneChange(float dt);
 	void MouseMove();
+	void ExitBox(float dt);
 };
 

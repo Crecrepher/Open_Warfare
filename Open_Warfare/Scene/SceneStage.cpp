@@ -45,6 +45,15 @@ void SceneStage::Init()
 	AddGo(new SpriteGo("graphics/stage_door.png", "SceneDoorLeft"));
 	AddGo(new SpriteGo("graphics/stage_door.png", "SceneDoorRight"));
 	AddGo(new SpriteGo("graphics/msg_box_big.png", "MsgBox"));
+	AddGo(new SpriteGo("graphics/upgrades.png", "UpgradeBack"));
+	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	{
+		std::stringstream ss;
+		ss << "TrapImage"<<i;
+		AddGo(new SpriteGo("graphics/trap_icon.png", ss.str()));
+		ss << "Info";
+		AddGo(new SpriteGo("graphics/trap_icon.png", ss.str()));
+	}
 	AddGo(new UiButton("graphics/exit_box.png", "ExitGame"));
 	AddGo(new UiButton("graphics/option.png", "OptionB"));
 	AddGo(new UiButton("graphics/upgrade.png", "UpgradeB"));
@@ -52,10 +61,20 @@ void SceneStage::Init()
 	AddGo(new UiButton("graphics/stage_tower.png", "Stower1"));
 	AddGo(new UiButton("graphics/bt_thick.png", "YesB"));
 	AddGo(new UiButton("graphics/bt_thick.png", "NoB"));
+	AddGo(new UiButton("graphics/up_slot.png", "Upgrdae_Slot"));
+	AddGo(new UiButton("graphics/replay.png", "ReturnB"));
+	AddGo(new UiButton("graphics/okay.png", "OkayB"));
 	AddGo(new TextGo("PlayerLevel"));
 	AddGo(new TextGo("EndGame"));
 	AddGo(new TextGo("YesT"));
 	AddGo(new TextGo("NoT"));
+	for (int i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
+	{
+		std::stringstream ss;
+		ss << "StageName" << i;
+		AddGo(new TextGo(ss.str()));
+	}
+	AddGo(new TextGo("BigStageName"));
 	worldView.setSize(windowSize / 3.5f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
@@ -82,11 +101,15 @@ void SceneStage::Release()
 void SceneStage::Enter()
 {
 	Scene::Enter();
+	TRAP_MGR.XpCalculate();
 	RESOURCE_MGR.LoadFromCsv("tables/StageResourceList.csv");
 	doorDir = 4.f;
-	blindTimer = 0;
+	blindTimer = 0.f;
+	msgBoxTimer = 0.f;
 	stageIn = false;
+	isExit = false;
 	bounce = 0;
+
 
 	RectGo* fRectGo = (RectGo*)FindGo("Blind");
 	fRectGo->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
@@ -131,7 +154,7 @@ void SceneStage::Enter()
 
 	fSpriteGo = (SpriteGo*)FindGo("XpLiquid");
 	fSpriteGo->SetOrigin(Origins::TL);
-	fSpriteGo->SetSize(1, 3);
+	fSpriteGo->SetSize(1.485f* TRAP_MGR.GetXpValue(), 3.f);
 	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 4.f+43.f, FRAMEWORK.GetWindowSize().y - 62.f);
 	fSpriteGo->sortLayer = 103;
 
@@ -164,6 +187,7 @@ void SceneStage::Enter()
 	fSpriteGo->SetSize(2.5f, 2.5f);
 	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2+10.f, FRAMEWORK.GetWindowSize().y / 2);
 	fSpriteGo->sortLayer = 106;
+	fSpriteGo->SetActive(false);
 
 
 	UiButton* fUiButton = (UiButton*)FindGo("ExitGame");
@@ -184,8 +208,20 @@ void SceneStage::Enter()
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setColor(sf::Color(sf::Color::White));
 	};
-	fUiButton->OnClick = []() {
-		exit(0);
+	fUiButton->OnClick = [this]() {
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetActive(true);
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetActive(true);
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetActive(true);
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->SetActive(true);
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->SetActive(true);
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->SetActive(true);
+		isExit = true;
 	};
 
 	fUiButton = (UiButton*)FindGo("UpgradeB");
@@ -211,6 +247,16 @@ void SceneStage::Enter()
 	fUiButton->SetOrigin(Origins::BC);
 	fUiButton->SetPosition(100, 100);
 	fUiButton->sortLayer = 1;
+	fUiButton->OnEnterField = [this]() {
+		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		fTextGo->text.setString(stringtable->GetW("STAGE0"));
+		fTextGo->SetOrigin(Origins::MC);
+	};
+	fUiButton->OnExitField = [this]() {
+		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
+		fTextGo->text.setString("");
+	};
 	fUiButton->OnClickField = [this]() {
 		SCENE_MGR.SetStage(0);
 		stageIn = true;
@@ -220,6 +266,16 @@ void SceneStage::Enter()
 	fUiButton->SetOrigin(Origins::BC);
 	fUiButton->SetPosition(200, 100);
 	fUiButton->sortLayer = 1;
+	fUiButton->OnEnterField = [this]() {
+		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		fTextGo->text.setString(stringtable->GetW("STAGE1"));
+		fTextGo->SetOrigin(Origins::MC);
+	};
+	fUiButton->OnExitField = [this]() {
+		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
+		fTextGo->text.setString("");
+	};
 	fUiButton->OnClickField = [this]() {
 		SCENE_MGR.SetStage(1);
 		stageIn = true;
@@ -249,18 +305,59 @@ void SceneStage::Enter()
 	fUiButton->SetSize(2.5f, 2.5f);
 	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x /2-250, FRAMEWORK.GetWindowSize().y / 2+70);
 	fUiButton->sortLayer = 111;
-	fUiButton->OnClick = []() {
-
+	fUiButton->OnStay = [fUiButton]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thickp.png"));
+		}
+		else
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+		}
 	};
+	fUiButton->OnExit = [fUiButton]() {
+		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+	};
+	fUiButton->OnClick = [this]() {
+		exit(0);
+	};
+	fUiButton->SetActive(false);
 
 	fUiButton = (UiButton*)FindGo("NoB");
 	fUiButton->SetOrigin(Origins::MC);
 	fUiButton->SetSize(2.5f, 2.5f);
 	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 70);
 	fUiButton->sortLayer = 111;
-	fUiButton->OnClick = []() {
-
+	fUiButton->OnStay = [fUiButton]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thickp.png"));
+		}
+		else
+		{
+			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+		}
 	};
+	fUiButton->OnExit = [fUiButton]() {
+		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
+	};
+	fUiButton->OnClick = [this]() {
+		isExit = false;
+		msgBoxTimer = 0.f;
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetActive(false);
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetActive(false);
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetActive(false);
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->SetActive(false);
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->SetActive(false);
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->SetActive(false);
+	};
+	fUiButton->SetActive(false);
 
 
 	TextGo* fTextGo = (TextGo*)FindGo("PlayerLevel");
@@ -284,6 +381,7 @@ void SceneStage::Enter()
 	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f + 10.f, FRAMEWORK.GetWindowSize().y * 0.4f);
 	fTextGo->SetOrigin(Origins::MC);
 	fTextGo->sortLayer = 110;
+	fTextGo->SetActive(false);
 
 	fTextGo = (TextGo*)FindGo("YesT");
 	fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
@@ -294,6 +392,7 @@ void SceneStage::Enter()
 	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 - 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
 	fTextGo->SetOrigin(Origins::MC);
 	fTextGo->sortLayer = 111;
+	fTextGo->SetActive(false);
 
 	fTextGo = (TextGo*)FindGo("NoT");
 	fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
@@ -304,6 +403,35 @@ void SceneStage::Enter()
 	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
 	fTextGo->SetOrigin(Origins::MC);
 	fTextGo->sortLayer = 111;
+	fTextGo->SetActive(false);
+
+	for (int i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
+	{
+		std::stringstream ss;
+		ss << "StageName" << i;
+		fTextGo = (TextGo*)FindGo(ss.str());
+		ss.str("");
+		ss << "STAGE" << i;
+		fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		fTextGo->text.setString(stringtable->GetW(ss.str()));
+		fTextGo->text.setFillColor(sf::Color::White);
+		fTextGo->text.setOutlineColor(sf::Color::Black);
+		fTextGo->text.setOutlineThickness(2.f);
+		fTextGo->text.setCharacterSize(15);
+		fTextGo->SetOrigin(Origins::MC);
+		fTextGo->sortLayer = 100;
+	}
+
+	fTextGo = (TextGo*)FindGo("BigStageName");
+	fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	fTextGo->text.setFillColor(sf::Color::White);
+	fTextGo->text.setOutlineColor(sf::Color::Black);
+	fTextGo->text.setOutlineThickness(5.f);
+	fTextGo->text.setCharacterSize(40);
+	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.035f);
+	fTextGo->SetOrigin(Origins::MC);
+	fTextGo->sortLayer = 102;
 }
 
 void SceneStage::Exit()
@@ -321,12 +449,20 @@ void SceneStage::Update(float dt)
 	{
 		SCENE_MGR.ChangeScene(SceneId::Title);
 	}
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Enter))
-	{
-		SCENE_MGR.ChangeScene(SceneId::Game);
-	}
 
+	ExitBox(dt);
 	MouseMove();
+
+	for (int i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
+	{
+		std::stringstream ss;
+		ss << "StageName" << i;
+		TextGo* fTextGo = (TextGo*)FindGo(ss.str());
+		ss.str("");
+		ss << "Stower" << i;
+		UiButton* fUiButton = (UiButton*)FindGo(ss.str());
+		fTextGo->SetPosition(sf::Vector2f(Scene::worldPosToScreen(fUiButton->GetPosition())));
+	}
 }
 
 void SceneStage::Draw(sf::RenderWindow& window)
@@ -399,4 +535,25 @@ void SceneStage::MouseMove()
 		worldView.setCenter(
 			Utils::Clamp(mouseMove - INPUT_MGR.GetMousePos() / 3.f, worldView.getSize() / 2.f, sf::Vector2f{mapBounds.left+mapBounds.width,mapBounds.top+mapBounds.height} - worldView.getSize() / 2.f));
 	}
+}
+
+void SceneStage::ExitBox(float dt)
+{
+	if (isExit && msgBoxTimer < 1)
+	{
+		msgBoxTimer = std::min(msgBoxTimer + dt*5, 1.f);
+		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
+		fSpriteGo->SetSize(2.5f*(msgBoxTimer/1), 2.5f * (msgBoxTimer / 1));
+		UiButton* fUiButton = (UiButton*)FindGo("YesB");
+		fUiButton->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
+		fUiButton = (UiButton*)FindGo("NoB");
+		fUiButton->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
+		TextGo* fTextGo = (TextGo*)FindGo("YesT");
+		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
+		fTextGo = (TextGo*)FindGo("NoT");
+		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
+		fTextGo = (TextGo*)FindGo("EndGame");
+		fTextGo->text.setScale((msgBoxTimer / 1),(msgBoxTimer / 1));
+	}
+
 }

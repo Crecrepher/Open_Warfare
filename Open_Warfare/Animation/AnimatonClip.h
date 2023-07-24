@@ -10,7 +10,7 @@ struct AnimationFrame
 {
 	std::string textureId;
 	sf::IntRect texCoord;
-	std::function<void()> action;
+	//std::function<void()> action;
 };
 
 struct AnimationClip
@@ -21,4 +21,6 @@ struct AnimationClip
 
 	std::vector<AnimationFrame> frames;
 	bool LoadFromFile(const std::string path);
+
+	/*AnimationClip(const AnimationClip& other) = delete;*/
 };
