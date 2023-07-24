@@ -33,6 +33,7 @@ void SceneStage::Init()
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
 	AddGo(new RectGo("Blind"));
+	AddGo(new RectGo("Shade"));
 	AddGo(new SpriteGo("graphics/stage_back.png", "Map"));
 	AddGo(new SpriteGo("graphics/stage_edge.png", "EdgeUp"));
 	AddGo(new SpriteGo("graphics/stage_edge.png", "EdgeDown"));
@@ -51,9 +52,10 @@ void SceneStage::Init()
 		std::stringstream ss;
 		ss << "TrapImage"<<i;
 		AddGo(new SpriteGo("graphics/trap_icon.png", ss.str()));
-		ss << "Info";
-		AddGo(new SpriteGo("graphics/trap_icon.png", ss.str()));
+		ss << "T";
+		AddGo(new TextGo(ss.str()));
 	}
+	AddGo(new SpriteGo("graphics/trap_icon.png", "TrapInfoImg"));
 	AddGo(new UiButton("graphics/exit_box.png", "ExitGame"));
 	AddGo(new UiButton("graphics/option.png", "OptionB"));
 	AddGo(new UiButton("graphics/upgrade.png", "UpgradeB"));
@@ -61,7 +63,12 @@ void SceneStage::Init()
 	AddGo(new UiButton("graphics/stage_tower.png", "Stower1"));
 	AddGo(new UiButton("graphics/bt_thick.png", "YesB"));
 	AddGo(new UiButton("graphics/bt_thick.png", "NoB"));
-	AddGo(new UiButton("graphics/up_slot.png", "Upgrdae_Slot"));
+	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	{
+		std::stringstream ss;
+		ss << "Upgrdae_Slot" << i;
+		AddGo(new UiButton("graphics/up_slot.png", ss.str()));
+	}
 	AddGo(new UiButton("graphics/replay.png", "ReturnB"));
 	AddGo(new UiButton("graphics/okay.png", "OkayB"));
 	AddGo(new TextGo("PlayerLevel"));
@@ -75,6 +82,18 @@ void SceneStage::Init()
 		AddGo(new TextGo(ss.str()));
 	}
 	AddGo(new TextGo("BigStageName"));
+
+	AddGo(new TextGo("Upgrade"));
+	AddGo(new TextGo("TrapName"));
+	AddGo(new TextGo("CurLevel"));
+	AddGo(new TextGo("Grade"));
+	AddGo(new TextGo("NextLevel"));
+	AddGo(new TextGo("UpgradeVal"));
+	AddGo(new TextGo("NeedJewel"));
+	AddGo(new TextGo("CanUpgrade"));
+	AddGo(new TextGo("HowToUse"));
+	AddGo(new TextGo("CurJewel"));
+
 	worldView.setSize(windowSize / 3.5f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
@@ -110,6 +129,7 @@ void SceneStage::Enter()
 	isExit = false;
 	bounce = 0;
 
+	MakeUpgradeMenu();
 
 	RectGo* fRectGo = (RectGo*)FindGo("Blind");
 	fRectGo->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
@@ -468,6 +488,97 @@ void SceneStage::Update(float dt)
 void SceneStage::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+}
+
+void SceneStage::MakeUpgradeMenu()
+{
+	RectGo* shade = (RectGo*)FindGo("Shade");
+	shade->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
+	shade->SetSize(FRAMEWORK.GetWindowSize());
+	shade->SetOrigin(Origins::MC);
+	shade->rectangle.setFillColor(sf::Color(0, 0, 0, 150));
+	shade->sortLayer = 111;
+
+	SpriteGo* spGo = (SpriteGo*)FindGo("UpgradeBack");
+	spGo->SetSize(3.35, 3.35);
+	spGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, FRAMEWORK.GetWindowSize().y+23.f);
+	spGo->SetOrigin(Origins::BC);
+	spGo->sortLayer = 112;
+	TextGo* texGo;
+	UiButton* uiGo;
+	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	{
+		std::stringstream ss;
+		ss << "TrapImage" << i;
+		spGo = (SpriteGo*)FindGo(ss.str());
+		spGo->sprite.setTextureRect({ i * 26,0,26,26 });
+		spGo->SetSize(3.35, 3.35);
+		spGo->SetPosition(125 + (i * 150), 270);
+		spGo->SetOrigin(Origins::MC);
+		spGo->sortLayer = 114;
+		ss << "T";
+		texGo = (TextGo*)FindGo(ss.str());
+		texGo->text.setString(std::to_string(1));
+		texGo->SetPosition(125 + (i * 150), 340);
+		texGo->text.setCharacterSize(40);
+		texGo->sortLayer = 115;
+		texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/TMONBlack.ttf"));
+		texGo->text.setOutlineColor(sf::Color::Black);
+		texGo->text.setOutlineThickness(5.f);
+		texGo->SetOrigin(Origins::MC);
+
+		ss.str("");
+		ss << "Upgrdae_Slot" << i;
+		uiGo = (UiButton*)FindGo(ss.str());
+		uiGo->SetSize(3.35, 3.35);
+		uiGo->SetPosition(130 + (i * 150), 300);
+		uiGo->SetOrigin(Origins::MC);
+		uiGo->sortLayer = 113;
+	}
+
+	uiGo = (UiButton*)FindGo("ReturnB");
+	uiGo->SetOrigin(Origins::MC);
+	uiGo->sprite.setScale(3.35, 3.35);
+	uiGo->SetPosition(1057, 833);
+	uiGo->sortLayer = 115;
+	uiGo->OnStay = [uiGo]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			uiGo->sprite.setScale(3.f, 3.f);
+		}
+		else
+		{
+			uiGo->sprite.setScale(3.35, 3.35);
+		}
+	};
+	uiGo->OnExit = [uiGo]() {
+		uiGo->sprite.setScale(3.35, 3.35);
+	};
+	uiGo->OnClick = [this]() {
+
+	};
+
+	uiGo = (UiButton*)FindGo("OkayB");
+	uiGo->SetOrigin(Origins::MC);
+	uiGo->sprite.setScale(3.35, 3.35);
+	uiGo->SetPosition(966, 833);
+	uiGo->sortLayer = 115;
+	uiGo->OnStay = [uiGo]() {
+		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
+		{
+			uiGo->sprite.setScale(3.f, 3.f);
+		}
+		else
+		{
+			uiGo->sprite.setScale(3.35, 3.35);
+		}
+	};
+	uiGo->OnExit = [uiGo]() {
+		uiGo->sprite.setScale(3.35, 3.35);
+	};
+	uiGo->OnClick = [this]() {
+
+	};
 }
 
 void SceneStage::SceneChange(float dt)
