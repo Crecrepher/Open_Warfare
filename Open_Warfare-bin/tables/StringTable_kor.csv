@@ -9,3 +9,16 @@ EXIT_CHECK,현재 진행정보를 잃게됩니다.
 STAGE0,첫번째 전투
 STAGE1,교차로
 STAGE2,길 잃은 귀족
+UPGRADE,업그레이드
+TRAP_NAME1,다트 트랩
+TRAP_NAME2,스파이크 트랩
+CUR_LEVEL,현재 레벨:
+COOL_DOWN,쿨타임 감소
+CAN_USE_TIER,   등급 트랩 사용가능
+NEXT_LEVEL,다음 레벨:
+NEED_JEWEL,다음 레벨에 필요한 보석
+LESS_JEWEL,보석이 부족합니다
+UP_DISC1,클릭 - 레벨 1 증가
+UP_DISC2,우클릭 - 레벨1 감소
+TRAP_NAME3,푸쉬 트랩
+WAVE,웨이브

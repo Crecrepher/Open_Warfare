@@ -7,10 +7,12 @@
 #include "SoundGo.h"
 #include "DataTableMgr.h"
 #include "TrapTable.h"
+#include "TrapMgr.h"
 
 #include "MapToolGo.h"
 #include "UnitGo.h"
 #include "Bullet.h"
+
 
 //특징별 성능을 블록처리하듯 모듈러 가능한 디자인을 하기
 
@@ -47,6 +49,7 @@ void TrapGo::Reset()
 	poolBullets.Clear();
 	hp = maxHp;
 	attackRate = 0.f;
+	upgrade = 0;
 }
 
 void TrapGo::Release()
@@ -81,6 +84,10 @@ void TrapGo::Update(float dt)
 					break;
 				case TrapGo::Types::Spike:
 					unit->OnHit(damage);
+					attackRate = maxCooldown;
+					break;
+				case TrapGo::Types::Push:
+					unit->OnPush(direction);
 					attackRate = maxCooldown;
 					break;
 				default:
@@ -138,9 +145,10 @@ void TrapGo::SetType(Types t)
 	}
 	SetOrigin(Origins::BC);
 	needDir = (NeedDirection)info.needDir;
-	maxCooldown = info.cooldown;
+	maxCooldown = info.cooldown * (1.f-(float)TRAP_MGR.upgrade[(int)t]/100.f);
 	price = info.price;
 	sortLayer = info.sortlayer;
+	damage = info.damage;
 }
 
 void TrapGo::SetRange()
@@ -166,4 +174,10 @@ void TrapGo::SetRange()
 TrapGo::Types TrapGo::GetType() const
 {
 	return trapType;
+}
+
+void TrapGo::Upgrade() 
+{ 
+	upgrade++; 
+	maxCooldown = maxCooldown * 0.6f;
 }

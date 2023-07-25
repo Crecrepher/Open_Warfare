@@ -61,6 +61,7 @@ void SceneGame::Init()
 	AddGo(new SpriteGo("graphics/victory.png", "WinTitle"));
 	AddGo(new SpriteGo("graphics/msg_box.png", "WinMsgBox"));
 	AddGo(new UiButton("graphics/sell.png", "SellBox"));
+	AddGo(new UiButton("graphics/upgrade_trap.png", "UpgradeBox"));
 	AddGo(new UiButton("graphics/bt_long.png", "StartB"));
 	for (int i = 0; i < 9; i++)
 	{
@@ -88,11 +89,14 @@ void SceneGame::Init()
 	AddGo(new TextGo("MoneyT"));
 	AddGo(new TextGo("XpT"));
 	AddGo(new TextGo("SellPrice"));
+	AddGo(new TextGo("UpgradePrice"));
 	AddGo(new TextGo("GameStart"));
 	AddGo(new TextGo("PauseT"));
 	AddGo(new TextGo("YesT"));
 	AddGo(new TextGo("NoT"));
 	AddGo(new TextGo("EndGame"));
+	AddGo(new TextGo("WaveCounter"));
+	AddGo(new TextGo("WaveCounterNum"));
 	AddGo(new RectGo("Blind"));
 	AddGo(new RectGo("OuchBlind"));
 	for (auto go : gameObjects)
@@ -354,12 +358,27 @@ void SceneGame::Enter()
 				break;
 			}
 		}
-		money += sellPrice;
+		money += sellPrice + (selectedTrap->upgrade* selectedTrap->upgradePrice*0.6);
 		textMoneyUpdate();
 		mTrapInfo[selectPos.x / 24 + selectPos.y / 24 * mapWidth] = map->GetMap()[selectPos.x / 24 + selectPos.y / 24 * mapWidth];
 		curSituation = Situation::NONE;
 		RemoveGo(selectedTrap);
 		trapPool.Return(selectedTrap);
+	};
+	ui->SetActive(false);
+
+	ui = (UiButton*)FindGo("UpgradeBox");
+	ui->SetOrigin(Origins::MC);
+	ui->sortLayer = 51;
+	ui->OnClickField = [this]() {
+		if (selectedTrap->upgradePrice > money)
+		{
+			return;
+		}
+		money -= selectedTrap->upgradePrice;
+		textMoneyUpdate();
+		selectedTrap->Upgrade();
+		curSituation = Situation::NONE;
 	};
 	ui->SetActive(false);
 
@@ -386,9 +405,9 @@ void SceneGame::Enter()
 	ui->OnClick = [ui, this]() {
 		ui->sprite.setColor(sf::Color::White);
 		SCENE_MGR.SetDtSpeed(2.5);
+		currSpeed = 2.5;
 		UiButton* ui2 = (UiButton*)FindGo("Speed1x");
 		ui2->sprite.setColor(sf::Color(0,0,0,0));
-		currSpeed = 2.5;
 	};
 	ui->SetActive(true);
 
@@ -427,7 +446,7 @@ void SceneGame::Enter()
 		back->SetActive(true);
 		TextGo* pauseT = (TextGo*)FindGo("PauseT");
 		pauseT->SetActive(true);
-		curSituation = Situation::Pause;
+		curSituation = Situation::PAUSE;
 	};
 
 	ui = (UiButton*)FindGo("OptionB");
@@ -449,7 +468,39 @@ void SceneGame::Enter()
 		ui->sprite.setScale(4.5f, 4.5f);
 	};
 	ui->OnClick = [ui, this]() {
-
+		if (Variables::CurrntLang == Languages::ENG)
+		{
+			Variables::CurrntLang = Languages::KOR;
+		}
+		else
+		{
+			Variables::CurrntLang = Languages::ENG;
+		}
+		TextGo* findTGo = (TextGo*)FindGo("GameStart");
+		findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		findTGo->text.setString(stringtable->GetW("START"));
+		findTGo->SetOrigin(Origins::MC);
+		findTGo = (TextGo*)FindGo("PauseT");
+		findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		findTGo->text.setString(stringtable->GetW("PAUSE"));
+		findTGo->SetOrigin(Origins::MC);
+		findTGo = (TextGo*)FindGo("EndGame");
+		findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		findTGo->text.setString(stringtable->GetW("EXIT_CHECK"));
+		findTGo->SetOrigin(Origins::MC);
+		findTGo = (TextGo*)FindGo("YesT");
+		findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		findTGo->text.setString(stringtable->GetW("YES"));
+		findTGo->SetOrigin(Origins::MC);
+		findTGo = (TextGo*)FindGo("NoT");
+		findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		findTGo->text.setString(stringtable->GetW("NO"));
+		findTGo->SetOrigin(Origins::MC);
 	};
 	ui->SetActive(false);
 
@@ -559,6 +610,8 @@ void SceneGame::Enter()
 	fUiButton->OnClick = [this]() {
 		stageOut = true;
 		curSituation = Situation::NONE;
+		SCENE_MGR.SetDtSpeed(1);
+		currSpeed = 1;
 	};
 	fUiButton->SetActive(false);
 
@@ -638,6 +691,15 @@ void SceneGame::Enter()
 	findTGo->sortOrder = -1;
 	findTGo->SetActive(false);
 
+	findTGo = (TextGo*)FindGo("UpgradePrice");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(25);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 100;
+	findTGo->sortOrder = -1;
+	findTGo->SetActive(false);
+
 	findTGo = (TextGo*)FindGo("GameStart");
 	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
 	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
@@ -697,6 +759,27 @@ void SceneGame::Enter()
 	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 250, FRAMEWORK.GetWindowSize().y / 2 + 60);
 	findTGo->SetOrigin(Origins::MC);
 	findTGo->sortLayer = 111;
+	findTGo->SetActive(false);
+
+	findTGo = (TextGo*)FindGo("WaveCounter");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	findTGo->text.setString(stringtable->GetW("WAVE"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(40);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, FRAMEWORK.GetWindowSize().y *0.8f);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 101;
+	findTGo->SetActive(false);
+
+	findTGo = (TextGo*)FindGo("WaveCounterNum");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	findTGo->text.setString("0");
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(40);
+	findTGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2+100.f, FRAMEWORK.GetWindowSize().y * 0.8f);
+	findTGo->SetOrigin(Origins::MC);
+	findTGo->sortLayer = 101;
 	findTGo->SetActive(false);
 }
 
@@ -852,7 +935,7 @@ void SceneGame::TrapPalateSetting()
 		tp->sortLayer = 101;
 		tp->sprite.setColor(sf::Color::White);
 		tp->OnStay = [tp,this,i]() {
-			if (curSituation == Situation::Pause)
+			if (curSituation == Situation::PAUSE)
 			{
 				return;
 			}
@@ -869,7 +952,7 @@ void SceneGame::TrapPalateSetting()
 			tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 26,0,26,26 });
 		};
 		tp->OnClick = [i,this]() {
-			if (curSituation == Situation::Pause)
+			if (curSituation == Situation::PAUSE)
 			{
 				return;
 			}
@@ -922,6 +1005,22 @@ void SceneGame::WaveHandler(float dt)
 		TextGo* count = (TextGo*)FindGo(ss.str());
 		count->SetPosition(wc->GetPosition().x + 25.f, wc->GetPosition().y - 35.f);
 	}
+	if (WaveCountText > 0.f)
+	{
+		WaveCountText -= dt;
+		TextGo* findTGo = (TextGo*)FindGo("WaveCounter");
+		findTGo->SetActive(true);
+		findTGo = (TextGo*)FindGo("WaveCounterNum");
+		findTGo->SetActive(true);
+		findTGo->text.setString(std::to_string(curWave + 1));
+	}
+	else
+	{
+		TextGo* findTGo = (TextGo*)FindGo("WaveCounter");
+		findTGo->SetActive(false);
+		findTGo = (TextGo*)FindGo("WaveCounterNum");
+		findTGo->SetActive(false);
+	}
 
 	//½ºÆù
 	if (spawnTimer <= 0.f)
@@ -937,8 +1036,11 @@ void SceneGame::WaveHandler(float dt)
 			ss << "t";
 			TextGo* count = (TextGo*)FindGo(ss.str());
 			count->SetActive(false);
+			WaveCountText = 6.f;
 			waveTurn = false;
 		}
+		
+
 		spawnTimer = 0.5f;
 		if (spawnUintNum[0] < waveInfo[curWaveIndex].count)
 		{
@@ -1074,6 +1176,16 @@ void SceneGame::TrapHandler(float dt)
 			findSGo = (SpriteGo*)FindGo("SellBox");
 			findSGo->SetActive(true);
 			findSGo->SetPosition(selectPos.x, selectPos.y - radius+5.f);
+			findSGo = (SpriteGo*)FindGo("UpgradeBox");
+			if (selectedTrap->upgrade < std::min(TRAP_MGR.upgrade[(int)selectedTrap->GetType()]/5,3))
+			{
+				findSGo->SetActive(true);
+				findSGo->SetPosition(selectPos.x, selectPos.y + radius - 5.f);
+				TextGo* upPrice = (TextGo*)FindGo("UpgradePrice");
+				upPrice->SetActive(true);
+				upPrice->text.setString(std::to_string(selectedTrap->upgradePrice));
+				upPrice->SetOrigin(Origins::TC);
+			}
 			TextGo* findTGo = (TextGo*)FindGo("SellPrice");
 			findTGo->SetActive(true);
 			int sellPrice = 0;
@@ -1086,7 +1198,7 @@ void SceneGame::TrapHandler(float dt)
 				}
 			}
 			std::stringstream ss;
-			ss << sellPrice;
+			ss << sellPrice + (selectedTrap->upgrade * selectedTrap->upgradePrice * 0.6);
 			findTGo->text.setString(ss.str());
 			findTGo->SetOrigin(Origins::TC);
 			Pop = false;
@@ -1101,9 +1213,12 @@ void SceneGame::TrapHandler(float dt)
 		TextGo* findTGo = (TextGo*)FindGo("SellPrice");
 		SpriteGo* findSGo = (SpriteGo*)FindGo("SellBox");
 		findTGo->SetPosition(sf::Vector2f(Scene::worldPosToScreen(findSGo->GetPosition()).x, Scene::worldPosToScreen(findSGo->GetPosition()).y + findSGo->GetSize().y *3 / 2.f + 5.f));
+		findSGo = (SpriteGo*)FindGo("UpgradeBox");
+		findTGo = (TextGo*)FindGo("UpgradePrice");
+		findTGo->SetPosition(sf::Vector2f(Scene::worldPosToScreen(findSGo->GetPosition()).x, Scene::worldPosToScreen(findSGo->GetPosition()).y + findSGo->GetSize().y * 3 / 2.f + 5.f));
 	}
 		break;
-	case SceneGame::Situation::Pause:
+	case SceneGame::Situation::PAUSE:
 		SCENE_MGR.SetDtSpeed(0);
 		break;
 	default:
@@ -1251,7 +1366,7 @@ void SceneGame::GameEnd()
 		{
 			TRAP_MGR.BonusJewel(2, (int)SCENE_MGR.GetStage());
 		}
-		else if (hp >= maxHp/2)
+		else
 		{
 			TRAP_MGR.BonusJewel(1, (int)SCENE_MGR.GetStage());
 		}
@@ -1273,7 +1388,7 @@ void SceneGame::GameEnd()
 	ui->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f - 100.f, FRAMEWORK.GetWindowSize().y / 2.f - 20.f);
 	ui->sortLayer = 111;
 
-	curSituation = Situation::Pause;
+	curSituation = Situation::PAUSE;
 }
 
 void SceneGame::CloseMenu()
@@ -1368,7 +1483,11 @@ void SceneGame::CancelBuilding()
 		findSGo->SetActive(false);
 		findSGo = (SpriteGo*)FindGo("SellBox");
 		findSGo->SetActive(false);
+		findSGo = (SpriteGo*)FindGo("UpgradeBox");
+		findSGo->SetActive(false);
 		TextGo* findSGo = (TextGo*)FindGo("SellPrice");
+		findSGo->SetActive(false);
+		findSGo = (TextGo*)FindGo("UpgradePrice");
 		findSGo->SetActive(false);
 		SCENE_MGR.SetDtSpeed(currSpeed);
 		Pop = true;

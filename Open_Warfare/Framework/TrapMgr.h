@@ -14,23 +14,33 @@ protected:
 	virtual	~TrapMgr() = default;
 
 	std::unordered_map<int, TrapGo::Types> trapPalate;
-	std::vector<int> upgrade;
 	std::vector<int> clearMap;
-	int availableNum = 2;
+	int availableNum = 3;
 	int playerLevel = 1;
-	int xpNeed = 5000;
+	int xpNeed = 1000;
 	int xpCur = 0;
 	int jewel = 0;
-	int jewelUsed = 0;
-
 public:
+	int jewelUsed = 0;
+	std::vector<int> upgrade;
+
 	void Init();
+	void Release();
+
 	std::unordered_map<int, TrapGo::Types> GetTrapPalate() { return trapPalate; }
 	std::vector<int> GetUpgrade();
 	int GetAvailable() { return availableNum; }
 	int GetPlayerLevel() { return playerLevel; }
+	int GetCurJewel() { return jewel - jewelUsed; }
+	int GetNeedXp() { return xpNeed; }
+	int GetCurXp() { return xpCur; }
 	void AddXp(int xpVal) { xpCur += xpVal; }
 	void BonusJewel(int jewelNum, int stageNum);
+
+	void Upgrade(int trapNum);
+	void Downgrade(int trapNum);
+	void UpgradeReset();
+
 	void XpCalculate();
 	float GetXpValue();
 };

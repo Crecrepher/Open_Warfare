@@ -15,6 +15,7 @@ public:
 		None = -1,
 		Dart,
 		Spike,
+		Push,
 		TypeCount,
 	};
 
@@ -34,7 +35,6 @@ protected:
 	float maxCooldown = 3.f;
 	float attackRate = 0.f;
 	int price = 100;
-	int upgrade = 0;
 	sf::FloatRect rangeRect;
 	sf::RectangleShape test;
 	int damage = 2;
@@ -50,6 +50,8 @@ protected:
 	const std::list<UnitGo*>* unitList;
 	
 public:
+	int upgrade = 0;
+	int upgradePrice = 700;
 	sf::Vector2f direction = { 0,0 };
 	int range = 0;
 
@@ -71,6 +73,6 @@ public:
 	void SetRange();
 	Types GetType() const;
 	
-
+	void Upgrade();;
 };
 

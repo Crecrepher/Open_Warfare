@@ -23,6 +23,7 @@ void Framework::Init(int width, int height, const std::string& title)
 
 void Framework::Release()
 {
+    TRAP_MGR.Release();
     DATATABLE_MGR.ReleaseAll();
     SCENE_MGR.Release();
 }

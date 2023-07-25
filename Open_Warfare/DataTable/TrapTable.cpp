@@ -12,9 +12,10 @@ bool TrapTable::Load()
 	std::vector<int> layer = doc.GetColumn<int>(4);
 	std::vector<int> place = doc.GetColumn<int>(5);
 	std::vector<int> needDir = doc.GetColumn<int>(6);
+	std::vector<int> damage = doc.GetColumn<int>(7);
 	for (int i = 0; i < ids.size(); ++i)
 	{
-		table.insert({ ids[i],{texture[i],cool[i],price[i],layer[i],place[i],needDir[i]}});
+		table.insert({ ids[i],{texture[i],cool[i],price[i],layer[i],place[i],needDir[i],damage[i]}});
 	}
 
 	return true;

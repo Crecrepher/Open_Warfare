@@ -34,11 +34,11 @@ public:
 
 	Scene* GetCurrScene()const;
 
-	void SaveLoad();
 	void SetDtSpeed(float doubleSpeed) { dtSpeed = doubleSpeed; }
 
 	void SetStage(int stage) { enterStage = (MapToolGo::Stages)stage; }
 	MapToolGo::Stages GetStage() { return enterStage; }
+
 };
 
 #define SCENE_MGR (SceneMgr::Instance())

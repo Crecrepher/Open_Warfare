@@ -18,7 +18,7 @@ public:
 		SETPOS,
 		SETDIR,
 		POPMENU,
-		Pause,
+		PAUSE,
 	};
 
 protected:
@@ -31,6 +31,7 @@ protected:
 
 	bool isExit = false;
 	float msgBoxTimer = 0.f;
+	float WaveCountText = 0.f;
 
 	MapToolGo* map;
 	std::vector<int> mTrapInfo;

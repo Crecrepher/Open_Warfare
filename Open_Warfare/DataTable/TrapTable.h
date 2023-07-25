@@ -10,6 +10,7 @@ struct TrapInfo
 	int sortlayer;
 	int placeOn;
 	int needDir;
+	int damage;
 };
 
 class TrapTable : public DataTable

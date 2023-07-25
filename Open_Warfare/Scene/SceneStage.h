@@ -26,6 +26,9 @@ public:
 	virtual void Draw(sf::RenderWindow& window) override;
 
 	void MakeUpgradeMenu();
+	void UpgradeMenuOn(bool on);
+	void UpdateUpgrade(int type);
+	void UpgradeStatusOn(bool on);
 
 	void SceneChange(float dt);
 	void MouseMove();

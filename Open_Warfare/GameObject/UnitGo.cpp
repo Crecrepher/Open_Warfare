@@ -42,6 +42,8 @@ void UnitGo::Reset()
 	boundBox = { 0,0,5,5 };
 	mTileSize = { 0,0 };
 	curPos = { 0,0 };
+	airborn = 0.f;
+	fallDieTime = 1.f;
 }
 
 void UnitGo::Release()
@@ -52,6 +54,27 @@ void UnitGo::Release()
 void UnitGo::Update(float dt)
 {
 	UiButton::Update(dt);
+	
+	//낙사
+	if (map->GetMap()[((int)GetPosition().x)/24 + ((int)GetPosition().y) / 24 * map->width] == 2
+		&& !IsAirborned())
+	{
+		std::cout << (GetPosition().x) / 24 << "  " << (GetPosition().y) / 24 << std::endl;
+		fallDieTime = std::max(fallDieTime - dt, 0.f);
+		SetSize(fallDieTime, fallDieTime);
+		if (fallDieTime <= 0)
+		{
+			Scene* scene = SCENE_MGR.GetCurrScene();
+			SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
+			if (sceneGame != nullptr)
+			{
+				sceneGame->OnDieUnit(this);
+			}
+		}
+		return;
+	}
+
+	//경로지정
 	boundBox.left = GetPosition().x - 2;
 	boundBox.top = GetPosition().y - 2;
 	if (destination.intersects(boundBox)
@@ -84,8 +107,21 @@ void UnitGo::Update(float dt)
 	}
 	direction = Utils::Normalize(sf::Vector2f(destination.left+destination.width/2,destination.top+ destination.height / 2) - GetPosition());
 
+	if (IsAirborned())
+	{
+		airborn -= dt*(2+weight);
+		direction = pushedDir;
+		SetSize(1.f+ 0.3* airborn,1.f + 0.3 *airborn);
+	}
 	map->WallBoundChecker(*this);
-	position += direction * (float)speed * dt*10.f;
+	if (IsAirborned())
+	{
+		position += direction * airborn * 6.f * dt * 10.f;
+	}
+	else
+	{
+		position += direction * (float)speed * dt * 10.f;
+	}
 	SetPosition(position);
 	if (unitType == Types::RouteShow)
 	{
@@ -119,27 +155,30 @@ void UnitGo::Update(float dt)
 		}
 	}
 
-	//바라보는 각도
-	float targetAngle = Utils::Angle(direction);
+	if (!IsAirborned())
+	{
+		//바라보는 각도
+		float targetAngle = Utils::Angle(direction);
 
-	// 현재각도와 목표각도의 차이계산 및 최대/최솟값 고정
-	float angleDiff = targetAngle - currentAngle;
-	if (angleDiff > 180.f)
-		angleDiff -= 360.f;
-	else if (angleDiff < -180.f)
-		angleDiff += 360.f;
+		// 현재각도와 목표각도의 차이계산 및 최대/최솟값 고정
+		float angleDiff = targetAngle - currentAngle;
+		if (angleDiff > 180.f)
+			angleDiff -= 360.f;
+		else if (angleDiff < -180.f)
+			angleDiff += 360.f;
 
-	// 초당 회전속도
-	float angleChangePerSecond = 90 * dt;
+		// 초당 회전속도
+		float angleChangePerSecond = 90 * dt;
 
-	// 각도차이 경우에 따른 회전 방향 지정 + 등속도회전 적용
-	if (abs(angleDiff) <= angleChangePerSecond)
-		currentAngle = targetAngle;
-	else if (angleDiff > 0.f)
-		currentAngle += angleChangePerSecond;
-	else
-		currentAngle -= angleChangePerSecond;
-	sprite.setRotation(currentAngle-90);
+		// 각도차이 경우에 따른 회전 방향 지정 + 등속도회전 적용
+		if (abs(angleDiff) <= angleChangePerSecond)
+			currentAngle = targetAngle;
+		else if (angleDiff > 0.f)
+			currentAngle += angleChangePerSecond;
+		else
+			currentAngle -= angleChangePerSecond;
+		sprite.setRotation(currentAngle - 90);
+	}
 
 	//hp
 	maxHpBar.setPosition(GetPosition().x, GetPosition().y - 7);
@@ -199,6 +238,12 @@ UnitGo::Types UnitGo::GetType() const
 void UnitGo::OnHit(int damage)
 {
 	hp -= damage;
+}
+
+void UnitGo::OnPush(sf::Vector2f dir)
+{
+	pushedDir = dir;
+	airborn = 1.f;
 }
 
 void UnitGo::SetLoot(int lootNum)

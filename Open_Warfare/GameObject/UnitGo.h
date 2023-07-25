@@ -34,6 +34,10 @@ protected:
 	sf::FloatRect boundBox = {0,0,5,5};
 	float currentAngle = 0.f;
 
+	float airborn = 0.f;
+	sf::Vector2f pushedDir = { 0.f,0.f };
+	float fallDieTime = 1.f;
+
 	int hp = 0;
 	float attackRate = 0.f;
 	float attackTimer = 3.f;
@@ -73,6 +77,8 @@ public:
 	int GetXp() { return xp; }
 
 	void OnHit(int damage);
+	void OnPush(sf::Vector2f dir);
 	void SetLoot(int lootNum);
+	bool IsAirborned() { return airborn > 0.f; }
 };
 

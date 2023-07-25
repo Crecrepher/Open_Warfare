@@ -1,5 +1,24 @@
 ID,ENGLISH
-HELLO,Hello
-BYE,Bye
-YOUDIE,AMOGUS.
-TITLE,PRESS ENTER TO START
+PRESS_START,PRESS START
+CLOSE_GAME,Do you really close the game?
+YES,Yes
+NO,No
+START,Game Start
+PAUSE,Pause
+EXIT_CHECK,You will lost the current information
+STAGE0,First Battle
+STAGE1,Cross Roads
+STAGE2,Lost Riches
+UPGRADE,Upgrades
+TRAP_NAME1,Dart Trap
+TRAP_NAME2,Spike Trap
+CUR_LEVEL,Levels:
+COOL_DOWN,Cool Down
+CAN_USE_TIER,   tier has been unlocked
+NEXT_LEVEL,Next Lv:
+NEED_JEWEL,Next level remainings
+LESS_JEWEL,Need More Jewels!
+UP_DISC1,Lclick - 1 level Up
+UP_DISC2,Rclick - 1 level Down
+TRAP_NAME3,Push Trap
+WAVE,Wave

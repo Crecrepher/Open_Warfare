@@ -39,7 +39,6 @@ void SceneStage::Init()
 	AddGo(new SpriteGo("graphics/stage_edge.png", "EdgeDown"));
 	AddGo(new SpriteGo("graphics/stage_name.png", "StageName"));
 	AddGo(new SpriteGo("graphics/xp_bar.png", "XpCaseBack"));
-	AddGo(new SpriteGo("graphics/xp_bar_f.png", "XpCaseFront"));
 	AddGo(new SpriteGo("graphics/xp_liquid.png", "XpLiquid"));
 	AddGo(new SpriteGo("graphics/level_cir.png", "LevelBack"));
 	AddGo(new SpriteGo("graphics/stage_palate.png", "OptionCase"));
@@ -71,6 +70,7 @@ void SceneStage::Init()
 	}
 	AddGo(new UiButton("graphics/replay.png", "ReturnB"));
 	AddGo(new UiButton("graphics/okay.png", "OkayB"));
+	AddGo(new UiButton("graphics/xp_bar_f.png", "XpCaseFront"));
 	AddGo(new TextGo("PlayerLevel"));
 	AddGo(new TextGo("EndGame"));
 	AddGo(new TextGo("YesT"));
@@ -88,11 +88,20 @@ void SceneStage::Init()
 	AddGo(new TextGo("CurLevel"));
 	AddGo(new TextGo("Grade"));
 	AddGo(new TextGo("NextLevel"));
-	AddGo(new TextGo("UpgradeVal"));
+	AddGo(new TextGo("UpgradeVal1"));
+	AddGo(new TextGo("UpgradeVal2"));
 	AddGo(new TextGo("NeedJewel"));
 	AddGo(new TextGo("CanUpgrade"));
-	AddGo(new TextGo("HowToUse"));
+	AddGo(new TextGo("HowToUse1"));
+	AddGo(new TextGo("HowToUse2"));
 	AddGo(new TextGo("CurJewel"));
+	AddGo(new TextGo("CurLevelNum"));
+	AddGo(new TextGo("UpgradeVal1Num"));
+	AddGo(new TextGo("GradeNum"));
+	AddGo(new TextGo("NextLevelNum"));
+	AddGo(new TextGo("UpgradeVal2Num"));
+	AddGo(new TextGo("NeedJewelNum"));
+	AddGo(new TextGo("Xp"));
 
 	worldView.setSize(windowSize / 3.5f);
 	uiView.setSize(windowSize);
@@ -130,6 +139,8 @@ void SceneStage::Enter()
 	bounce = 0;
 
 	MakeUpgradeMenu();
+	UpgradeMenuOn(false);
+	UpgradeStatusOn(false);
 
 	RectGo* fRectGo = (RectGo*)FindGo("Blind");
 	fRectGo->SetPosition(FRAMEWORK.GetWindowSize() / 2.f);
@@ -262,7 +273,9 @@ void SceneStage::Enter()
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 	};
-
+	fUiButton->OnClick = [this]() {
+		UpgradeMenuOn(true);
+	};
 	fUiButton = (UiButton*)FindGo("Stower0");
 	fUiButton->SetOrigin(Origins::BC);
 	fUiButton->SetPosition(100, 100);
@@ -319,6 +332,17 @@ void SceneStage::Enter()
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 	};
+	fUiButton->OnClick = [fUiButton,this]() {
+		if (Variables::CurrntLang == Languages::ENG)
+		{
+			Variables::CurrntLang = Languages::KOR;
+		}
+		else
+		{
+			Variables::CurrntLang = Languages::ENG;
+		}
+		UpgradeStatusOn(false);
+	};
 
 	fUiButton = (UiButton*)FindGo("YesB");
 	fUiButton->SetOrigin(Origins::MC);
@@ -339,7 +363,7 @@ void SceneStage::Enter()
 		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
 	};
 	fUiButton->OnClick = [this]() {
-		exit(0);
+		FRAMEWORK.GetWindow().close();
 	};
 	fUiButton->SetActive(false);
 
@@ -378,6 +402,17 @@ void SceneStage::Enter()
 		fTextGo->SetActive(false);
 	};
 	fUiButton->SetActive(false);
+
+	fUiButton = (UiButton*)FindGo("XpCaseFront");
+	fUiButton->OnStay = [this]() {
+		TextGo* findTGo = (TextGo*)FindGo("Xp");
+		findTGo->SetActive(true);
+		findTGo->SetPosition(INPUT_MGR.GetMousePos().x+20.f, INPUT_MGR.GetMousePos().y);
+	};
+	fUiButton->OnExit = [this]() {
+		TextGo* findTGo = (TextGo*)FindGo("Xp");
+		findTGo->SetActive(false);
+	};
 
 
 	TextGo* fTextGo = (TextGo*)FindGo("PlayerLevel");
@@ -441,6 +476,7 @@ void SceneStage::Enter()
 		fTextGo->text.setCharacterSize(15);
 		fTextGo->SetOrigin(Origins::MC);
 		fTextGo->sortLayer = 100;
+		fTextGo->sortOrder = -1;
 	}
 
 	fTextGo = (TextGo*)FindGo("BigStageName");
@@ -452,6 +488,19 @@ void SceneStage::Enter()
 	fTextGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y * 0.035f);
 	fTextGo->SetOrigin(Origins::MC);
 	fTextGo->sortLayer = 102;
+
+	TextGo* findTGo = (TextGo*)FindGo("Xp");
+	findTGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/Galmuri11.ttf"));
+	findTGo->text.setFillColor(sf::Color::White);
+	findTGo->text.setCharacterSize(20);
+	findTGo->sortLayer = 105;
+	{
+		std::stringstream ss;
+		ss << TRAP_MGR.GetCurXp() << " / " << TRAP_MGR.GetNeedXp();
+		findTGo->text.setString(ss.str());
+	}
+	findTGo->SetOrigin(Origins::BL);
+	findTGo->SetActive(false);
 }
 
 void SceneStage::Exit()
@@ -504,6 +553,14 @@ void SceneStage::MakeUpgradeMenu()
 	spGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, FRAMEWORK.GetWindowSize().y+23.f);
 	spGo->SetOrigin(Origins::BC);
 	spGo->sortLayer = 112;
+
+	spGo = (SpriteGo*)FindGo("TrapInfoImg");
+	spGo->sprite.setTextureRect({ 0,0,26,26 });
+	spGo->SetSize(3.35, 3.35);
+	spGo->SetPosition(1170, 140);
+	spGo->SetOrigin(Origins::MC);
+	spGo->sortLayer = 113;
+
 	TextGo* texGo;
 	UiButton* uiGo;
 	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
@@ -518,7 +575,7 @@ void SceneStage::MakeUpgradeMenu()
 		spGo->sortLayer = 114;
 		ss << "T";
 		texGo = (TextGo*)FindGo(ss.str());
-		texGo->text.setString(std::to_string(1));
+		texGo->text.setString(std::to_string(TRAP_MGR.upgrade[i]));
 		texGo->SetPosition(125 + (i * 150), 340);
 		texGo->text.setCharacterSize(40);
 		texGo->sortLayer = 115;
@@ -534,6 +591,34 @@ void SceneStage::MakeUpgradeMenu()
 		uiGo->SetPosition(130 + (i * 150), 300);
 		uiGo->SetOrigin(Origins::MC);
 		uiGo->sortLayer = 113;
+		uiGo->OnEnter = [i,this]() {
+			UpgradeStatusOn(true);
+			UpdateUpgrade(i);
+		};
+		uiGo->OnExit= [i, spGo,this]() {
+			UpgradeStatusOn(false);
+			spGo->sprite.setTextureRect({ i * 26,0,26,26 });
+		};
+		uiGo->OnStay = [uiGo, spGo,i,this]() {
+			if (INPUT_MGR.GetMouseButton(sf::Mouse::Left)||
+				INPUT_MGR.GetMouseButton(sf::Mouse::Right))
+			{
+				spGo->sprite.setTextureRect({ i * 26,-5,26,26 });
+			}
+			else
+			{
+				spGo->sprite.setTextureRect({ i * 26,0,26,26 });
+			}
+			if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Right))
+			{
+				TRAP_MGR.Downgrade(i);
+				UpdateUpgrade(i);
+			}
+		};
+		uiGo->OnClick = [i,this]() {
+			TRAP_MGR.Upgrade(i);
+			UpdateUpgrade(i);
+		};
 	}
 
 	uiGo = (UiButton*)FindGo("ReturnB");
@@ -555,7 +640,8 @@ void SceneStage::MakeUpgradeMenu()
 		uiGo->sprite.setScale(3.35, 3.35);
 	};
 	uiGo->OnClick = [this]() {
-
+		TRAP_MGR.UpgradeReset();
+		UpdateUpgrade(0);
 	};
 
 	uiGo = (UiButton*)FindGo("OkayB");
@@ -577,8 +663,416 @@ void SceneStage::MakeUpgradeMenu()
 		uiGo->sprite.setScale(3.35, 3.35);
 	};
 	uiGo->OnClick = [this]() {
-
+		UpgradeMenuOn(false);
+		UpgradeStatusOn(false);
 	};
+
+	texGo = (TextGo*)FindGo("Upgrade");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("UPGRADE"));
+	texGo->text.setOutlineColor(sf::Color::Black);
+	texGo->text.setOutlineThickness(3.f);
+	texGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, 40);
+	texGo->SetOrigin(Origins::TC);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(40);
+	texGo->SetOrigin(Origins::MC);
+
+	texGo = (TextGo*)FindGo("TrapName");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("TRAP_NAME1"));
+	texGo->SetPosition(1240, 110);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(40);
+
+	texGo = (TextGo*)FindGo("CurLevel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("CUR_LEVEL"));
+	texGo->SetPosition(1125, 190);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+
+	texGo = (TextGo*)FindGo("UpgradeVal1");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("COOL_DOWN"));
+	texGo->SetPosition(1125, 230);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(150, 255, 150,255));
+
+	texGo = (TextGo*)FindGo("Grade");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("CAN_USE_TIER"));
+	texGo->SetPosition(1125, 270);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(96, 142, 190));
+
+	texGo = (TextGo*)FindGo("NextLevel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("NEXT_LEVEL"));
+	texGo->SetPosition(1125, 350);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(150, 150, 150));
+
+	texGo = (TextGo*)FindGo("UpgradeVal2");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("COOL_DOWN"));
+	texGo->SetPosition(1125, 390);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(150, 150, 150));
+
+	texGo = (TextGo*)FindGo("NeedJewel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("NEED_JEWEL"));
+	texGo->SetPosition(1125, 470);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(200, 30, 30));
+
+	texGo = (TextGo*)FindGo("CanUpgrade");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("LESS_JEWEL"));
+	texGo->SetPosition(1125, 510);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(255, 0, 0));
+
+	texGo = (TextGo*)FindGo("HowToUse1");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("UP_DISC1"));
+	texGo->SetPosition(1125, 720);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(200, 200, 200));
+
+	texGo = (TextGo*)FindGo("HowToUse2");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("UP_DISC2"));
+	texGo->SetPosition(1125, 760);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(200, 200, 200));
+
+	texGo = (TextGo*)FindGo("CurJewel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	texGo->text.setOutlineColor(sf::Color::Black);
+	texGo->text.setOutlineThickness(3.f);
+	texGo->text.setString(std::to_string(TRAP_MGR.GetCurJewel()));
+	texGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f- 260.f, FRAMEWORK.GetWindowSize().y - 85.f);
+	texGo->SetOrigin(Origins::MC);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(40);
+	
+	texGo = (TextGo*)FindGo("CurLevelNum");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[0]));
+	texGo->SetPosition(1270, 190);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+
+	texGo = (TextGo*)FindGo("UpgradeVal1Num");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	{
+		std::stringstream ss;
+		ss << TRAP_MGR.upgrade[0]-1 << "%";
+		texGo->text.setString(ss.str());
+	}
+	texGo->SetPosition(1285, 230);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+
+	texGo = (TextGo*)FindGo("GradeNum");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	{
+		std::stringstream ss;
+		ss << std::min(TRAP_MGR.upgrade[0]/5,3)+1;
+		texGo->text.setString(ss.str());
+	}
+	texGo->SetPosition(1125, 270);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+
+	texGo = (TextGo*)FindGo("NextLevelNum");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[0]+1));
+	texGo->SetPosition(1270, 350);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(200, 200, 200));
+
+	texGo = (TextGo*)FindGo("UpgradeVal2Num");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	{
+		std::stringstream ss;
+		ss << TRAP_MGR.upgrade[0] << "%";
+		texGo->text.setString(ss.str());
+	}
+	texGo->SetPosition(1285, 390);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+	texGo->text.setFillColor(sf::Color(200, 200, 200));
+
+	texGo = (TextGo*)FindGo("NeedJewelNum");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[0]));
+	texGo->SetPosition(1460, 470);
+	texGo->SetOrigin(Origins::TL);
+	texGo->sortLayer = 112;
+	texGo->text.setCharacterSize(30);
+}
+
+void SceneStage::UpgradeMenuOn(bool on)
+{
+	RectGo* shade = (RectGo*)FindGo("Shade");
+	shade->SetActive(on);
+
+
+	SpriteGo* spGo = (SpriteGo*)FindGo("UpgradeBack");
+	spGo->SetActive(on);
+
+	TextGo* texGo;
+	UiButton* uiGo;
+	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	{
+		std::stringstream ss;
+		ss << "TrapImage" << i;
+		spGo = (SpriteGo*)FindGo(ss.str());
+		spGo->SetActive(on);
+		ss << "T";
+		texGo = (TextGo*)FindGo(ss.str());
+		texGo->SetActive(on);
+		ss.str("");
+		ss << "Upgrdae_Slot" << i;
+		uiGo = (UiButton*)FindGo(ss.str());
+		uiGo->SetActive(on);
+	}
+
+	uiGo = (UiButton*)FindGo("ReturnB");
+	uiGo->SetActive(on);
+
+	uiGo = (UiButton*)FindGo("OkayB");
+	uiGo->SetActive(on);
+	texGo = (TextGo*)FindGo("Upgrade");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("HowToUse1");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("HowToUse2");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("CurJewel");
+	texGo->SetActive(on);
+}
+
+void SceneStage::UpdateUpgrade(int type)
+{
+	SpriteGo* spGo = (SpriteGo*)FindGo("TrapInfoImg");
+	spGo->sprite.setTextureRect({ 26*type,0,26,26 });
+	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	{
+		std::stringstream ss;
+		ss << "TrapImage" << i<< "T";
+		TextGo* texGo = (TextGo*)FindGo(ss.str());
+		texGo->text.setString(std::to_string(TRAP_MGR.upgrade[i]));
+	}
+
+	TextGo* texGo = (TextGo*)FindGo("TrapName");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	{
+		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		std::stringstream ss;
+		ss << "TRAP_NAME" << type+1;
+		texGo->text.setString(stringtable->GetW(ss.str()));
+	}
+	texGo = (TextGo*)FindGo("CurJewel");
+	texGo->text.setString(std::to_string(TRAP_MGR.GetCurJewel()));
+
+	texGo = (TextGo*)FindGo("CurLevelNum");
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[type]));
+
+	texGo = (TextGo*)FindGo("UpgradeVal1Num");
+	{
+		std::stringstream ss;
+		ss << TRAP_MGR.upgrade[type] - 1 << "%";
+		texGo->text.setString(ss.str());
+	}
+
+	texGo = (TextGo*)FindGo("GradeNum");
+	{
+		std::stringstream ss;
+		ss << std::min(TRAP_MGR.upgrade[type] / 5, 3) + 1;
+		texGo->text.setString(ss.str());
+	}
+
+	texGo = (TextGo*)FindGo("NextLevelNum");
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[type] + 1));
+
+	texGo = (TextGo*)FindGo("UpgradeVal2Num");
+	{
+		std::stringstream ss;
+		ss << TRAP_MGR.upgrade[type] << "%";
+		texGo->text.setString(ss.str());
+	}
+
+	texGo = (TextGo*)FindGo("NeedJewelNum");
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[type]));
+
+	texGo = (TextGo*)FindGo("CanUpgrade");
+	if (TRAP_MGR.GetCurJewel() < TRAP_MGR.upgrade[type]
+		&& spGo->GetActive())
+	{
+		texGo->SetActive(true);
+	}
+	else
+	{
+		texGo->SetActive(false);
+	}
+}
+
+void SceneStage::UpgradeStatusOn(bool on)
+{
+	SpriteGo* spGo = (SpriteGo*)FindGo("TrapInfoImg");
+	spGo->SetActive(on);
+
+	TextGo* texGo = (TextGo*)FindGo("TrapName");
+	texGo->SetActive(on);
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("TRAP_NAME1"));
+
+
+	texGo = (TextGo*)FindGo("Upgrade");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("UPGRADE"));
+
+	texGo = (TextGo*)FindGo("CurLevel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("CUR_LEVEL"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("UpgradeVal1");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("COOL_DOWN"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("Grade");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("CAN_USE_TIER"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("NextLevel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("NEXT_LEVEL"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("UpgradeVal2");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("COOL_DOWN"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("NeedJewel");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("NEED_JEWEL"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("CanUpgrade");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("LESS_JEWEL"));
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("HowToUse1");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("UP_DISC1"));
+
+	texGo = (TextGo*)FindGo("HowToUse2");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("UP_DISC2"));
+
+	texGo = (TextGo*)FindGo("EndGame");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("CLOSE_GAME"));
+
+	texGo = (TextGo*)FindGo("YesT");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("YES"));
+
+	texGo = (TextGo*)FindGo("NoT");
+	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+	stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+	texGo->text.setString(stringtable->GetW("NO"));
+
+	for (int i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
+	{
+		std::stringstream ss;
+		ss << "StageName" << i;
+		texGo = (TextGo*)FindGo(ss.str());
+		ss.str("");
+		ss << "STAGE" << i;
+		texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
+		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+		texGo->text.setString(stringtable->GetW(ss.str()));
+		texGo->SetOrigin(Origins::MC);
+	}
+
+	texGo = (TextGo*)FindGo("CurLevelNum");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("UpgradeVal1Num");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("GradeNum");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("NextLevelNum");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("UpgradeVal2Num");
+	texGo->SetActive(on);
+
+	texGo = (TextGo*)FindGo("NeedJewelNum");
+	texGo->SetActive(on);
 }
 
 void SceneStage::SceneChange(float dt)
