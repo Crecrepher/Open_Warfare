@@ -959,7 +959,7 @@ void SceneGame::Update(float dt)
 		std::stringstream ss;
 		ss << "PortalFlame" << i;
 		SpriteGo* findSGo = (SpriteGo*)FindGo(ss.str());
-		findSGo->sprite.rotate((i + 1) * dt);
+		findSGo->sprite.rotate((14 - i*2) * dt);
 	}
 
 	if (isReady)
