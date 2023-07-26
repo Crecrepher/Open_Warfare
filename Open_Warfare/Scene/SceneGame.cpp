@@ -44,8 +44,6 @@ void SceneGame::Init()
 	uiView.setCenter(centerPos);
 
 	map = (MapToolGo*)AddGo(new MapToolGo("graphics/tile.png", "Map"));
-	//map->GroundVA.SetName("GroundVA");
-	//map->WallVA.SetName("WallVA");
 	AddGo(&map->GroundVA);
 	AddGo(&map->WallVA);
 	AddGo(new SpriteGo("graphics/hp_ui.png", "HpUi"));
@@ -203,7 +201,7 @@ void SceneGame::Release()
 {
 	unitPool.Release();
 	trapPool.Release();
-	ReleaseMapVAGo();//질문 - 맵의 할당과 해제위치 및 총알 해제
+	ReleaseMapVAGo();
 	for (auto go : gameObjects)
 	{
 		delete go;
@@ -245,7 +243,6 @@ void SceneGame::Enter()
 	leftoverUnit = leftoverCalculator();
 	
 	map->WallVA.sortLayer = 10;
-	//map->GroundVA.sortLayer = -11;
 	mTrapInfo = map->GetMap();
 	mapWidth = map->width;
 	mapHeight = map->height;
@@ -309,8 +306,8 @@ void SceneGame::Enter()
 		count->text.setString(std::to_string(i+1));
 		count->text.setFillColor(sf::Color::White);
 		count->text.setCharacterSize(40);
-		count->SetOrigin(Origins::BL);
-		count->SetPosition(findSGo->GetPosition().x+25.f, findSGo->GetPosition().y - 35.f);
+		count->SetOrigin(Origins::MC);
+		count->SetPosition(findSGo->GetPosition().x+30.f, findSGo->GetPosition().y - 55.f);
 		count->sortLayer = 102;
 		count->SetActive(true);
 	}
@@ -1033,6 +1030,7 @@ void SceneGame::SetWave(MapToolGo::Stages stage)
 			thisCounterT->Init();
 			thisCounterT->Reset();
 			thisCounter->SetActive(false);
+			thisCounter->SetOrigin(Origins::MC);
 		}
 	}
 }
@@ -1138,7 +1136,7 @@ void SceneGame::WaveHandler(float dt)
 		wc->SetPosition(wc->GetPosition().x, wc->GetPosition().y + ((wc->GetSize().y * 3.5f)*dt) / ((leftoverUnit+20)*0.5f));
 		ss << "t";
 		TextGo* count = (TextGo*)FindGo(ss.str());
-		count->SetPosition(wc->GetPosition().x + 25.f, wc->GetPosition().y - 35.f);
+		count->SetPosition(wc->GetPosition().x + 30.f, wc->GetPosition().y - 55.f);
 	}
 	if (WaveCountText > 0.f)
 	{
