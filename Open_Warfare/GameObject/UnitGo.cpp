@@ -81,7 +81,7 @@ void UnitGo::Update(float dt)
 			SceneGame* sceneGame = dynamic_cast<SceneGame*>(scene);
 			if (sceneGame != nullptr)
 			{
-				sceneGame->OnDieUnit(this);
+				sceneGame->OnDieUnit(this,true);
 			}
 		}
 		return;
@@ -220,7 +220,7 @@ void UnitGo::Draw(sf::RenderWindow& window)
 	/*window.draw(test);*/
 }
 
-void UnitGo::SetType(Types t)
+void UnitGo::SetType(Types t,bool init)
 {
 	unitType = t;
 	if (unitType == Types::RouteShow)
@@ -246,26 +246,30 @@ void UnitGo::SetType(Types t)
 	speed = info.speed;
 	damage = info.damage;
 	weight = info.weight;
-	switch (unitType)
+	if (!init)
 	{
-	case UnitGo::Types::Farmer:
-		animation.Play("farmer");
-		break;
-	case UnitGo::Types::Adventurer:
-		animation.Play("adventurer");
-		break;
-	case UnitGo::Types::Warrior:
-		animation.Play("warrior");
-		break;
-	case UnitGo::Types::Knight:
-		animation.Play("knight");
-		break;
-	case UnitGo::Types::Rich:
-		animation.Play("rich");
-		break;
-	default:
-		break;
+		switch (unitType)
+		{
+		case UnitGo::Types::Farmer:
+			animation.Play("farmer");
+			break;
+		case UnitGo::Types::Adventurer:
+			animation.Play("adventurer");
+			break;
+		case UnitGo::Types::Warrior:
+			animation.Play("warrior");
+			break;
+		case UnitGo::Types::Knight:
+			animation.Play("knight");
+			break;
+		case UnitGo::Types::Rich:
+			animation.Play("rich");
+			break;
+		default:
+			break;
+		}
 	}
+	
 	SetOrigin(Origins::MC);
 }
 

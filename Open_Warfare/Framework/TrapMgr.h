@@ -34,6 +34,7 @@ public:
 	int GetCurJewel() { return jewel - jewelUsed; }
 	int GetNeedXp() { return xpNeed; }
 	int GetCurXp() { return xpCur; }
+	std::vector<int> GetClearMap() { return clearMap; }
 	void AddXp(int xpVal) { xpCur += xpVal; }
 	void BonusJewel(int jewelNum, int stageNum);
 

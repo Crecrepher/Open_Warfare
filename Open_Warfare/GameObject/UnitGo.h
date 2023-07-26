@@ -77,7 +77,7 @@ public:
 	virtual void Draw(sf::RenderWindow& window)override;
 
 	void SetMap(MapToolGo* map) { this->map = map; }
-	void SetType(Types t);
+	void SetType(Types t, bool init = false);
 	void SetSound(SoundGo* onHitS, SoundGo* hurtS, SoundGo* FallS);
 	Types GetType() const;
 	int GetPrize() { return prize; }

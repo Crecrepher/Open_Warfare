@@ -8,6 +8,7 @@
 class MapToolGo;
 class UnitGo;
 class TrapGo;
+class SpriteEffect;
 
 class SceneGame : public Scene
 {
@@ -83,6 +84,8 @@ protected:
 	bool clickBlocker = true;
 	bool Pop = true;
 	float popAnimate = 0;
+
+	ObjectPool<SpriteEffect> BodyPool;
 
 public:
 	ObjectPool<UnitGo> unitPool;

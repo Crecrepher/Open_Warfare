@@ -18,6 +18,7 @@
 #include "UnitGo.h"
 #include "TrapGo.h"
 #include "RectGo.h"
+#include "SpriteEffect.h"
 
 
 SceneGame::SceneGame() : Scene(SceneId::Game)
@@ -60,6 +61,14 @@ void SceneGame::Init()
 	AddGo(new SpriteGo("graphics/blocked_one_trap.png", "OneTrapFix"));
 	AddGo(new SpriteGo("graphics/victory.png", "WinTitle"));
 	AddGo(new SpriteGo("graphics/msg_box.png", "WinMsgBox"));
+	for (size_t i = 1; i < 8; i++)
+	{
+		std::stringstream ss;
+		ss << "graphics/p"<< i<< ".png";
+		std::stringstream ss2;
+		ss2 << "PortalFlame" << i;
+		AddGo(new SpriteGo(ss.str(), ss2.str()));
+	}
 	AddGo(new UiButton("graphics/sell.png", "SellBox"));
 	AddGo(new UiButton("graphics/upgrade_trap.png", "UpgradeBox"));
 	AddGo(new UiButton("graphics/bt_long.png", "StartB"));
@@ -157,7 +166,7 @@ void SceneGame::Init()
 
 	unitPool.OnCreate = [this](UnitGo* unit) {
 		UnitGo::Types unitType = (UnitGo::Types)Utils::RandomRange(0, (int)UnitGo::Types::TypeCount- 1);
-		unit->SetType(unitType);
+		unit->SetType(unitType,true);
 		unit->SetMap(map);
 	};
 	unitPool.Init();
@@ -180,6 +189,13 @@ void SceneGame::Init()
 		};
 	};
 	trapPool.Init();
+
+	BodyPool.OnCreate = [this](SpriteEffect* effect) {
+		effect->textureId = "graphics/fdead.png";
+		effect->SetDuration(3.f);
+		effect->SetPool(&BodyPool);
+	};
+	BodyPool.Init();
 
 }
 
@@ -360,6 +376,20 @@ void SceneGame::Enter()
 	findSGo->sortLayer = 110;
 	findSGo->SetActive(false);
 
+	for (size_t i = 6; i > 0; i--)
+	{
+		std::stringstream ss;
+		ss << "PortalFlame" << i;
+		findSGo = (SpriteGo*)FindGo(ss.str());
+		findSGo->SetPosition(map->portal.x * 24.f + 12.f, map->portal.y * 24.f + 12.f);
+		findSGo->SetOrigin(Origins::MC);
+		findSGo->sortOrder = 7 - i;
+	}
+	findSGo = (SpriteGo*)FindGo("PortalFlame7");
+	findSGo->SetPosition(map->portal.x * 24.f + 12.f, map->portal.y * 24.f + 12.f);
+	findSGo->SetOrigin(Origins::MC);
+	findSGo->sortOrder = 8;
+
 	UiButton* ui = (UiButton*)FindGo("StartB");
 	ui->SetActive(true);
 	ui->SetOrigin(Origins::MC);
@@ -429,6 +459,7 @@ void SceneGame::Enter()
 		money += sellPrice + (selectedTrap->upgrade* selectedTrap->upgradePrice*0.6);
 		textMoneyUpdate();
 		mTrapInfo[selectPos.x / 24 + selectPos.y / 24 * mapWidth] = map->GetMap()[selectPos.x / 24 + selectPos.y / 24 * mapWidth];
+		trapPrice[(int)curType] -= 100;
 		curSituation = Situation::NONE;
 		RemoveGo(selectedTrap);
 		trapPool.Return(selectedTrap);
@@ -889,6 +920,7 @@ void SceneGame::Exit()
 		it->Release();
 	}
 	ClearObjectPool(trapPool);
+	ClearObjectPool(BodyPool);
 	SCENE_MGR.SetDtSpeed(1);
 
 	for (int i = 0; i < MaxWave + 1; i++)
@@ -924,6 +956,15 @@ void SceneGame::Update(float dt)
 		CloseMenu();
 	}
 
+	//Æ÷Å» ÀÌÆåÆ®
+	for (size_t i = 6; i > 0; i--)
+	{
+		std::stringstream ss;
+		ss << "PortalFlame" << i;
+		SpriteGo* findSGo = (SpriteGo*)FindGo(ss.str());
+		findSGo->sprite.rotate((i + 1) * dt);
+	}
+
 	if (isReady)
 	{
 		RouteShower(dt);
@@ -947,6 +988,7 @@ void SceneGame::Update(float dt)
 	{
 		GameEnd();
 	}
+
 }
 
 void SceneGame::Draw(sf::RenderWindow& window)
@@ -1357,12 +1399,47 @@ void SceneGame::MakeGhostTower(TrapGo::Types type, int index)
 
 void SceneGame::OnDieUnit(UnitGo* unit,bool fall)
 {
+	
+
 	int a = unit->GetPrize();
 	money+=unit->GetPrize();
 	xp += unit->GetXp();
 	textMoneyUpdate();
 	if (!fall && unit->GetType() != UnitGo::Types::RouteShow)
 	{
+		SpriteEffect* body = BodyPool.Get();
+		body->SetPosition(unit->GetPosition());
+		AddGo(body);
+		std::string bodyType;
+		switch (unit->GetType())
+		{
+		case UnitGo::Types::Farmer:
+			bodyType = "graphics/fdead.png";
+			break;
+		case UnitGo::Types::Adventurer:
+			bodyType = "graphics/adead.png";
+			break;
+		case UnitGo::Types::Warrior:
+			bodyType = "graphics/wdead.png";
+			break;
+		case UnitGo::Types::Knight:
+			bodyType = "graphics/kdead.png";
+			break;
+		case UnitGo::Types::Rich:
+			bodyType = "graphics/rdead.png";
+			break;
+		default:
+			break;
+		}
+		body->sprite.setTexture(*RESOURCE_MGR.GetTexture(bodyType));
+		sf::IntRect tRect = { 0,0,(int)RESOURCE_MGR.GetTexture(bodyType)->getSize().x ,(int)RESOURCE_MGR.GetTexture(bodyType)->getSize().y };
+		body->sprite.setTextureRect(tRect);
+		body->SetSize(0.7f, 0.7f);
+		float rot = Utils::RandomRange(0, 270);
+		body->sprite.setRotation(rot);
+		body->sortLayer = 1;
+
+
 		switch (unit->GetType())
 		{
 		case UnitGo::Types::Knight:

@@ -82,7 +82,7 @@ void SceneStage::Init()
 		AddGo(new TextGo(ss.str()));
 		ss.str("");
 		ss << "StageClearMark" << i;
-		AddGo(new TextGo(ss.str()));
+		AddGo(new SpriteGo("graphics/cl0.png", ss.str()));
 	}
 	AddGo(new TextGo("BigStageName"));
 
@@ -502,6 +502,9 @@ void SceneStage::Enter()
 		ss << "StageName" << i;
 		fTextGo = (TextGo*)FindGo(ss.str());
 		ss.str("");
+		ss << "StageClearMark" << i;
+		SpriteGo* clear = (SpriteGo*)FindGo(ss.str());
+		ss.str("");
 		ss << "STAGE" << i;
 		fTextGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
 		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
@@ -513,6 +516,15 @@ void SceneStage::Enter()
 		fTextGo->SetOrigin(Origins::MC);
 		fTextGo->sortLayer = 100;
 		fTextGo->sortOrder = -1;
+
+		ss.str("");
+		ss << "graphics/cl" << TRAP_MGR.GetClearMap()[i]<<".png";
+		clear->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
+		ss.str("");
+		ss << "Stower" << i;
+		UiButton* tower = (UiButton*)FindGo(ss.str());
+		clear->SetOrigin(Origins::TC);
+		clear->SetPosition(tower->GetPosition());
 	}
 
 	fTextGo = (TextGo*)FindGo("BigStageName");
