@@ -1,0 +1,8 @@
+ID,FPS,LOOPTYPE,,
+knight,7,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/knight.png,0,0,21,14
+graphics/knight.png,20,0,21,14
+graphics/knight.png,41,0,21,14
+graphics/knight.png,62,0,21,14

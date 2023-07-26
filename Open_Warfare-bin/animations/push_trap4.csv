@@ -1,0 +1,6 @@
+ID,FPS,LOOPTYPE,,
+push_trap4,1,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/push_trap_a.png,24,144,24,48
+graphics/push_trap_a.png,0,144,24,48

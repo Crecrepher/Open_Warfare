@@ -1,0 +1,10 @@
+ID,FPS,LOOPTYPE,,
+spike_trap3,30,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/spike_trap_a.png,0,60,30,30
+graphics/spike_trap_a.png,30,60,30,30
+graphics/spike_trap_a.png,60,60,30,30
+graphics/spike_trap_a.png,90,60,30,30
+graphics/spike_trap_a.png,120,60,30,30
+graphics/spike_trap_a.png,150,60,30,30

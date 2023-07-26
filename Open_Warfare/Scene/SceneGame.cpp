@@ -123,6 +123,7 @@ void SceneGame::Init()
 				selectedTrap = trap;
 				sf::Vector2i mouseIndex = (sf::Vector2i)Scene::ScreenToWorldPos(INPUT_MGR.GetMousePos()) / 24;
 				selectPos = { mouseIndex.x * 24+ 12, mouseIndex.y * 24+ 12 };
+				clickBlocker = false;
 			}
 			
 		};
@@ -1165,6 +1166,10 @@ void SceneGame::TrapHandler(float dt)
 	case SceneGame::Situation::POPMENU:
 	{
 		CancelBuilding();
+		if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Left))
+		{
+			clickBlocker = true;
+		}
 		if (Pop)
 		{
 			popAnimate = 0;

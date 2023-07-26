@@ -1,6 +1,7 @@
 #pragma once
 #include "UiButton.h"
 #include "ObjectPool.h"
+#include "AnimatioControler.h"
 
 class SoundGo;
 class MapToolGo;
@@ -28,6 +29,7 @@ public:
 	};
 
 protected:
+	AnimatioControler animation;
 	Types trapType = Types::None;
 	NeedDirection needDir = NeedDirection::NO;
 	ObjectPool<Bullet> poolBullets;
@@ -73,6 +75,6 @@ public:
 	void SetRange();
 	Types GetType() const;
 	
-	void Upgrade();;
+	void Upgrade();
 };
 

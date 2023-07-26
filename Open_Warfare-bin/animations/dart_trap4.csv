@@ -1,0 +1,7 @@
+ID,FPS,LOOPTYPE,,
+dart_trap4,20,0,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/dart_trap_a.png,0,81,24,27
+graphics/dart_trap_a.png,24,81,24,27
+graphics/dart_trap_a.png,48,81,24,27

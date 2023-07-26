@@ -1,0 +1,8 @@
+ID,FPS,LOOPTYPE,,
+adventurer,15,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/adventurer.png,0,0,11,11
+graphics/adventurer.png,11,0,11,11
+graphics/adventurer.png,22,0,11,11
+graphics/adventurer.png,33,0,11,11

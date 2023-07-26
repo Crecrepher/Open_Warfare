@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+farmer,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/farmer.png,0,0,14,18
+graphics/farmer.png,14,0,14,18
+graphics/farmer.png,28,0,14,18
+graphics/farmer.png,42,0,14,18
+graphics/farmer.png,56,0,14,18
+graphics/farmer.png,70,0,14,18
+graphics/farmer.png,84,0,14,18
+graphics/farmer.png,98,0,14,18

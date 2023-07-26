@@ -24,6 +24,13 @@ UnitGo::~UnitGo()
 void UnitGo::Init()
 {
 	UiButton::Init();
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/farmer.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/adventurer.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/warrior.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/knight.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/rich.csv"));
+
+	animation.SetTarget(&sprite);
 	SetOrigin(Origins::MC);
 	
 	maxHpBar.setFillColor(sf::Color(0,0,0,75));
@@ -37,6 +44,8 @@ void UnitGo::Init()
 void UnitGo::Reset()
 {
 	UiButton::Reset();
+	SetOrigin(origin);
+	SetPosition(0, 0);
 	hp = maxHp;
 	attackTimer = attackRate;
 	boundBox = { 0,0,5,5 };
@@ -111,7 +120,7 @@ void UnitGo::Update(float dt)
 	{
 		airborn -= dt*(2+weight);
 		direction = pushedDir;
-		SetSize(1.f+ 0.3* airborn,1.f + 0.3 *airborn);
+		SetSize(0.7f + 0.3* airborn, 0.7f + 0.3 *airborn);
 	}
 	map->WallBoundChecker(*this);
 	if (IsAirborned())
@@ -168,7 +177,7 @@ void UnitGo::Update(float dt)
 			angleDiff += 360.f;
 
 		// 초당 회전속도
-		float angleChangePerSecond = 90 * dt;
+		float angleChangePerSecond = 120 * dt;
 
 		// 각도차이 경우에 따른 회전 방향 지정 + 등속도회전 적용
 		if (abs(angleDiff) <= angleChangePerSecond)
@@ -184,6 +193,12 @@ void UnitGo::Update(float dt)
 	maxHpBar.setPosition(GetPosition().x, GetPosition().y - 7);
 	hpBar.setPosition(maxHpBar.getGlobalBounds().left, maxHpBar.getGlobalBounds().top);
 	hpBar.setSize({ 10.f*((float)hp / (float)maxHp), 1.f});
+
+	//animate
+	if (!IsAirborned())
+	{
+		animation.Update(dt);
+	}
 }
 
 void UnitGo::Draw(sf::RenderWindow& window)
@@ -216,7 +231,7 @@ void UnitGo::SetType(Types t)
 		Utils::SetOrigin(routePicker, Origins::MC);
 		return;
 	}
-	sprite.setScale(1.f, 1.f);
+	sprite.setScale(0.7f, 0.7f);
 	boundBox = { 0,0,5,5 };
 	const UnitInfo& info = DATATABLE_MGR.Get<UnitTable>(DataTable::Ids::UnitGo)->Get((int)t);
 	textureId = info.textureId;
@@ -227,6 +242,27 @@ void UnitGo::SetType(Types t)
 	speed = info.speed;
 	damage = info.damage;
 	weight = info.weight;
+	switch (unitType)
+	{
+	case UnitGo::Types::Farmer:
+		animation.Play("farmer");
+		break;
+	case UnitGo::Types::Adventurer:
+		animation.Play("adventurer");
+		break;
+	case UnitGo::Types::Warrior:
+		animation.Play("warrior");
+		break;
+	case UnitGo::Types::Knight:
+		animation.Play("knight");
+		break;
+	case UnitGo::Types::Rich:
+		animation.Play("rich");
+		break;
+	default:
+		break;
+	}
+	SetOrigin(Origins::MC);
 }
 
 UnitGo::Types UnitGo::GetType() const

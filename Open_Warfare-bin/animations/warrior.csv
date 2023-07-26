@@ -1,0 +1,8 @@
+ID,FPS,LOOPTYPE,,
+warrior,7,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/warrior.png,0,0,13,16
+graphics/warrior.png,13,0,13,16
+graphics/warrior.png,26,0,13,16
+graphics/warrior.png,39,0,13,16

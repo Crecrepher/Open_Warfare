@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE,,
+rich,10,1,,
+,,,,
+TEXTUREID,LEFT,TOP,WIDTH,HEIGHT
+graphics/rich.png,0,0,13,16
+graphics/rich.png,13,0,14,16
+graphics/rich.png,27,0,14,16
+graphics/rich.png,41,0,14,16
+graphics/rich.png,55,0,14,16
+graphics/rich.png,69,0,14,16
+graphics/rich.png,83,0,14,16
+graphics/rich.png,97,0,14,16

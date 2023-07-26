@@ -28,6 +28,20 @@ TrapGo::~TrapGo()
 void TrapGo::Init()
 {
 	UiButton::Init();
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/spike_trap1.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/spike_trap2.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/spike_trap3.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/spike_trap4.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/dart_trap1.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/dart_trap2.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/dart_trap3.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/dart_trap4.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/push_trap1.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/push_trap2.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/push_trap3.csv"));
+	animation.AddClip(*RESOURCE_MGR.GetAnimationClip("animations/push_trap4.csv"));
+	
+	animation.SetTarget(&sprite);
 	SetOrigin(Origins::BC);
 	rangeRect.height = 24;
 	rangeRect.width = 24;
@@ -79,16 +93,39 @@ void TrapGo::Update(float dt)
 					break;
 				case TrapGo::Types::Dart:
 					Shoot();
+					{
+						std::stringstream ss;
+						ss << "dart_trap" << upgrade + 1;
+						animation.Play(ss.str());
+					}
 					attackRate = maxCooldown;
+					SetOrigin(origin);
 					return;
 					break;
 				case TrapGo::Types::Spike:
 					unit->OnHit(damage);
 					attackRate = maxCooldown;
+					{
+						std::stringstream ss;
+						ss << "spike_trap" << upgrade + 1;
+						animation.Play(ss.str());
+					}
+					if (origin != Origins::MC)
+					{
+						SetOrigin(Origins::MC);
+						SetPosition(GetPosition().x, GetPosition().y - 12.f);
+					}
 					break;
 				case TrapGo::Types::Push:
 					unit->OnPush(direction);
+					{
+						std::stringstream ss;
+						ss << "push_trap" << upgrade + 1;
+						animation.Play(ss.str());
+					}
+
 					attackRate = maxCooldown;
+					SetOrigin(origin);
 					break;
 				default:
 					break;
@@ -98,9 +135,12 @@ void TrapGo::Update(float dt)
 	}
 	if (attackRate > 0)
 	{
-		sprite.setColor(sf::Color(255, 255 * (1-attackRate/maxCooldown), 255 * (1 - attackRate / maxCooldown)));
+		/*sprite.setColor(sf::Color(255, 255 * (1-attackRate/maxCooldown), 255 * (1 - attackRate / maxCooldown)));*/
 		attackRate = std::max(attackRate - dt, 0.f);
 	}
+
+	animation.Update(dt);
+
 	test.setFillColor(sf::Color::White);
 	test.setPosition({ rangeRect.left,rangeRect.top });
 	test.setSize({ rangeRect.width,rangeRect.height });
@@ -176,8 +216,41 @@ TrapGo::Types TrapGo::GetType() const
 	return trapType;
 }
 
-void TrapGo::Upgrade() 
-{ 
-	upgrade++; 
-	maxCooldown = maxCooldown * 0.6f;
+void TrapGo::Upgrade()
+{
+	upgrade++;
+	switch (trapType)
+	{
+	case TrapGo::Types::Dart:
+	{
+		sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/dart_trap_a.png"));
+		sf::IntRect tRect = { 48,upgrade * 27,24,27 };
+		sprite.setTextureRect(tRect);
+		maxCooldown = maxCooldown * 0.6f;
+		SetOrigin(origin);
+	}
+	break;
+	case TrapGo::Types::Spike:
+	{
+		sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/spike_trap_a.png"));
+		sf::IntRect tRect = { 150,upgrade * 30,30,30 };
+		sprite.setTextureRect(tRect);
+		maxCooldown = maxCooldown * 0.8f;
+		if (origin != Origins::MC)
+		{
+			SetOrigin(Origins::MC);
+			SetPosition(GetPosition().x, GetPosition().y - 12.f);
+		}
+	}
+	break;
+	case TrapGo::Types::Push:
+	{
+		sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/push_trap_a.png"));
+		sf::IntRect tRect = { 0,upgrade * 48,24,48 };
+		sprite.setTextureRect(tRect);
+		maxCooldown = maxCooldown * 0.90f;
+		SetOrigin(origin);
+	}
+	break;
+	}
 }

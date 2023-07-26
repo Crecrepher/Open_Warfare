@@ -1,6 +1,6 @@
 #pragma once
 #include "UiButton.h"
-#include "ObjectPool.h"
+#include "AnimatioControler.h"
 
 class SoundGo;
 class MapToolGo;
@@ -21,6 +21,8 @@ public:
 	};
 
 protected:
+	AnimatioControler animation;
+
 	Types unitType;
 
 	int maxHp = 100;
