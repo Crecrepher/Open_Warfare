@@ -12,6 +12,7 @@ protected:
 	float blindTimer = 0.f;
 	float msgBoxTimer = 0.f;
 	bool isExit = false;
+	bool inStageSound = true;
 public:
 	SceneStage();
 	virtual ~SceneStage() override;

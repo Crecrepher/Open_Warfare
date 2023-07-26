@@ -19,7 +19,7 @@ protected:
 	Scene* currentScene = nullptr;
 	MapToolGo::Stages enterStage = MapToolGo::Stages::First;
 
-	SceneId startSceneId = SceneId::Stage;
+	SceneId startSceneId = SceneId::Title;
 	float dtSpeed = 1.f;
 public:
 	int hiScore = 0;

@@ -1547,6 +1547,7 @@ void SceneGame::GameEnd()
 	blind->rectangle.setFillColor(sf::Color(0, 0, 0, 100));
 	SpriteGo* findSGo = (SpriteGo*)FindGo("WinTitle");
 	findSGo->SetActive(true);
+	SoundGo* sound;
 	if (isGameOver)
 	{
 		findSGo->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/defeat.png"));
@@ -1575,6 +1576,10 @@ void SceneGame::GameEnd()
 			TRAP_MGR.BonusJewel(1, (int)SCENE_MGR.GetStage());
 		}
 		TRAP_MGR.AddXp(xp);
+		sound = (SoundGo*)FindGo("WinBgm");
+		sound->Play();
+		sound = (SoundGo*)FindGo("VicVoice");
+		sound->Play();
 	}
 	hp = 0;
 	findSGo = (SpriteGo*)FindGo("WinMsgBox");
@@ -1592,16 +1597,13 @@ void SceneGame::GameEnd()
 	ui->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f - 100.f, FRAMEWORK.GetWindowSize().y / 2.f - 20.f);
 	ui->sortLayer = 111;
 
-	SoundGo* sound = (SoundGo*)FindGo("Bgm1");
+	sound = (SoundGo*)FindGo("Bgm1");
 	sound->sound.stop();
 	sound = (SoundGo*)FindGo("Bgm2");
 	sound->sound.stop();
 	sound = (SoundGo*)FindGo("Bgm3");
 	sound->sound.stop();
-	sound = (SoundGo*)FindGo("WinBgm");
-	sound->Play();
-	sound = (SoundGo*)FindGo("VicVoice");
-	sound->Play();
+
 	curSituation = Situation::PAUSE;
 }
 
@@ -1794,6 +1796,8 @@ void SceneGame::BuildTrap(sf::Vector2i index, int dir)
 	trapPrice[(int)curType] += 100;
 	textMoneyUpdate();
 	curSituation = Situation::NONE;
+	sound = (SoundGo*)FindGo("Cash");
+	sound->Play();
 }
 
 void SceneGame::ChoiceDir()
@@ -1844,8 +1848,6 @@ void SceneGame::ChoiceDir()
 			ui->SetPosition(findSGo->GetPosition().x + (25 * (i % 2) * (2 - i)), findSGo->GetPosition().y + (25 * ((i + 1) % 2) * (-1 + i)));
 			ui->OnClickField = [mouseIndex, i, this]()
 			{
-				SoundGo* sound = (SoundGo*)FindGo("Cash");
-				sound->Play();
 				BuildTrap(mouseIndex, 90 * i);
 			};
 		}

@@ -147,6 +147,7 @@ void SceneStage::Enter()
 	blindTimer = 0.f;
 	msgBoxTimer = 0.f;
 	stageIn = false;
+	inStageSound = true;
 	isExit = false;
 	bounce = 0;
 
@@ -1159,8 +1160,12 @@ void SceneStage::SceneChange(float dt)
 	else if (stageIn)
 	{
 		blindTimer = std::max(blindTimer - dt * 4, 0.f);
-		SoundGo* sound = (SoundGo*)FindGo("Smash");
-		sound->Play();
+		if (inStageSound)
+		{
+			SoundGo* sound = (SoundGo*)FindGo("Smash");
+			sound->Play();
+			inStageSound = false;
+		}
 		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
 		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 * (1 - blindTimer), 0);
 		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");

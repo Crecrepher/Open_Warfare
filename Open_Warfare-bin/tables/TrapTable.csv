@@ -1,4 +1,4 @@
 ID,TEXTURE,COOLDOWN,PRICE,SORTLAYER,PLACE_ON,NEED_DIR,DAMAGE
 0,graphics/dart_trap.png,0.6,500,11,0,2,2
-1,graphics/spike_trap.png,2,650,1,1,0,2
+1,graphics/spike_trap.png,2,650,1,1,0,3
 2,graphics/push_trap.png,5,500,11,0,2,1
