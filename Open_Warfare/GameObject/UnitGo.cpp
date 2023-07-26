@@ -68,7 +68,11 @@ void UnitGo::Update(float dt)
 	if (map->GetMap()[((int)GetPosition().x)/24 + ((int)GetPosition().y) / 24 * map->width] == 2
 		&& !IsAirborned())
 	{
-		std::cout << (GetPosition().x) / 24 << "  " << (GetPosition().y) / 24 << std::endl;
+		if (!fallOn)
+		{
+			fallOn = true;
+			FallS->Play();
+		}
 		fallDieTime = std::max(fallDieTime - dt, 0.f);
 		SetSize(fallDieTime, fallDieTime);
 		if (fallDieTime <= 0)
@@ -265,6 +269,13 @@ void UnitGo::SetType(Types t)
 	SetOrigin(Origins::MC);
 }
 
+void UnitGo::SetSound(SoundGo* onHitS, SoundGo* hurtS, SoundGo* FallS)
+{
+	this->onHitS = onHitS;
+	this->hurtS = hurtS;
+	this->FallS = FallS;
+}
+
 UnitGo::Types UnitGo::GetType() const
 {
 	return unitType;
@@ -274,6 +285,11 @@ UnitGo::Types UnitGo::GetType() const
 void UnitGo::OnHit(int damage)
 {
 	hp -= damage;
+	onHitS->Play();
+	if (Utils::RandomRange(0,10) == 0)
+	{
+		hurtS->Play();
+	}
 }
 
 void UnitGo::OnPush(sf::Vector2f dir)

@@ -87,6 +87,7 @@ void TrapGo::Update(float dt)
 		{
 			if (rangeRect.intersects(unit->sprite.getGlobalBounds()))
 			{
+				sound->Play();
 				switch (trapType)
 				{
 				case TrapGo::Types::None:

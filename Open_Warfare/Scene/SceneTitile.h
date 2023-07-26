@@ -7,6 +7,7 @@ class Player2;
 class SceneTitile : public Scene
 {
 protected:
+	bool sound = true;
 	float timer = 0;
 	int titleSort = 0;
 	bool sceneChangeStart = false;

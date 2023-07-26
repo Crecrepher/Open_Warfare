@@ -99,6 +99,57 @@ void SceneGame::Init()
 	AddGo(new TextGo("WaveCounterNum"));
 	AddGo(new RectGo("Blind"));
 	AddGo(new RectGo("OuchBlind"));
+	AddGo(new SoundGo("sound/metal_lock.wav", "Lock"));
+	AddGo(new SoundGo("sound/boulder_smash.wav", "Smash"));
+	AddGo(new SoundGo("sound/shaker.wav", "Shaker"));
+	AddGo(new SoundGo("sound/equip.wav", "Equip"));
+	AddGo(new SoundGo("sound/UI_Chain.wav", "Chain"));
+	AddGo(new SoundGo("sound/UI_Levelup.wav", "LvUp"));
+	AddGo(new SoundGo("sound/UI_GemImpact.wav", "Gem"));
+	AddGo(new SoundGo("sound/UI_Hover.wav", "None"));
+	AddGo(new SoundGo("sound/battle1.wav", "Bgm1"));
+	AddGo(new SoundGo("sound/battle2.wav", "Bgm2"));
+	AddGo(new SoundGo("sound/battle3.wav", "Bgm3"));
+	AddGo(new SoundGo("sound/cashregister.wav", "Cash"));
+	AddGo(new SoundGo("sound/Dart.wav", "DartS"));
+	AddGo(new SoundGo("sound/death_knight_1.wav", "DeadK1"));
+	AddGo(new SoundGo("sound/death_knight_2.wav", "DeadK2"));
+	AddGo(new SoundGo("sound/death_warrior_1.wav", "DeadW1"));
+	AddGo(new SoundGo("sound/death_warrior_2.wav", "DeadW2"));
+	AddGo(new SoundGo("sound/death_warrior_3.wav", "DeadW3"));
+	AddGo(new SoundGo("sound/death_warrior_4.wav", "DeadW4"));
+	AddGo(new SoundGo("sound/fall1.wav", "Fall1"));
+	AddGo(new SoundGo("sound/fall2.wav", "Fall2"));
+	AddGo(new SoundGo("sound/fall3.wav", "Fall3"));
+	AddGo(new SoundGo("sound/fall4.wav", "Fall4"));
+	AddGo(new SoundGo("sound/fall5.wav", "Fall5"));
+	AddGo(new SoundGo("sound/fall6.wav", "Fall6"));
+	AddGo(new SoundGo("sound/hit0.wav", "Hit0"));
+	AddGo(new SoundGo("sound/hit1.wav", "Hit1"));
+	AddGo(new SoundGo("sound/hit2.wav", "Hit2"));
+	AddGo(new SoundGo("sound/hit3.wav", "Hit3"));
+	AddGo(new SoundGo("sound/hit4.wav", "Hit4"));
+	AddGo(new SoundGo("sound/hit5.wav", "Hit5"));
+	AddGo(new SoundGo("sound/hit6.wav", "Hit6"));
+	AddGo(new SoundGo("sound/hit7.wav", "Hit7"));
+	AddGo(new SoundGo("sound/hit8.wav", "Hit8"));
+	AddGo(new SoundGo("sound/hit9.wav", "Hit9"));
+	AddGo(new SoundGo("sound/hit10.wav", "Hit10"));
+	AddGo(new SoundGo("sound/hurt1.wav", "Hurt1"));
+	AddGo(new SoundGo("sound/hurt2.wav", "Hurt2"));
+	AddGo(new SoundGo("sound/hurt3.wav", "Hurt3"));
+	AddGo(new SoundGo("sound/hurt4.wav", "Hurt4"));
+	AddGo(new SoundGo("sound/hurt5.wav", "Hurt5"));
+	AddGo(new SoundGo("sound/setup.wav", "SetBgm"));
+	AddGo(new SoundGo("sound/sinisterbell.wav", "Ouch"));
+	AddGo(new SoundGo("sound/Spike.wav", "SpikeS"));
+	AddGo(new SoundGo("sound/Spring.wav", "PushS"));
+	AddGo(new SoundGo("sound/UI_Speedtick.wav", "SpeedBSound"));
+	AddGo(new SoundGo("sound/Victory #23692.wav", "WinBgm"));
+	AddGo(new SoundGo("sound/victory.wav", "VicVoice"));
+	AddGo(new SoundGo("sound/warcry.wav", "Warcry"));
+
+
 	for (auto go : gameObjects)
 	{
 		go->Init();
@@ -147,6 +198,10 @@ void SceneGame::Enter()
 {
 	Scene::Enter();
 	TrapPalateSetting();
+
+	SoundGo* sound = (SoundGo*)FindGo("SetBgm");
+	sound->sound.setLoop(true);
+	sound->Play();
 
 	stageOut = false;
 	bounce = true;
@@ -325,6 +380,18 @@ void SceneGame::Enter()
 		ui->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_long.png"));
 	};
 	ui->OnClick = [ui,this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Warcry");
+		sound->Play();
+		sound = (SoundGo*)FindGo("Smash");
+		sound->Play();
+		sound = (SoundGo*)FindGo("SetBgm");
+		sound->sound.stop();
+		std::stringstream ss;
+		ss << "Bgm" << Utils::RandomRange(1, 3);
+		sound = (SoundGo*)FindGo(ss.str());
+		sound->sound.setLoop(true);
+		sound->Play();
+
 		isReady = false;
 		ui->SetActive(false);
 		SpriteGo* firstB = (SpriteGo*)FindGo("Wave_Counter0");
@@ -365,6 +432,8 @@ void SceneGame::Enter()
 		curSituation = Situation::NONE;
 		RemoveGo(selectedTrap);
 		trapPool.Return(selectedTrap);
+		SoundGo* sound = (SoundGo*)FindGo("Cash");
+		sound->Play();
 	};
 	ui->SetActive(false);
 
@@ -380,6 +449,8 @@ void SceneGame::Enter()
 		textMoneyUpdate();
 		selectedTrap->Upgrade();
 		curSituation = Situation::NONE;
+		SoundGo* sound = (SoundGo*)FindGo("Gem");
+		sound->Play();
 	};
 	ui->SetActive(false);
 
@@ -394,6 +465,8 @@ void SceneGame::Enter()
 		UiButton* ui2 = (UiButton*)FindGo("Speed2x");
 		ui2->sprite.setColor(sf::Color(0, 0, 0, 0));
 		currSpeed = 1;
+		SoundGo* sound = (SoundGo*)FindGo("SpeedBSound");
+		sound->Play();
 	};
 	ui->SetActive(true);
 
@@ -409,6 +482,8 @@ void SceneGame::Enter()
 		currSpeed = 2.5;
 		UiButton* ui2 = (UiButton*)FindGo("Speed1x");
 		ui2->sprite.setColor(sf::Color(0,0,0,0));
+		SoundGo* sound = (SoundGo*)FindGo("SpeedBSound");
+		sound->Play();
 	};
 	ui->SetActive(true);
 
@@ -448,6 +523,8 @@ void SceneGame::Enter()
 		TextGo* pauseT = (TextGo*)FindGo("PauseT");
 		pauseT->SetActive(true);
 		curSituation = Situation::PAUSE;
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 	};
 
 	ui = (UiButton*)FindGo("OptionB");
@@ -502,6 +579,8 @@ void SceneGame::Enter()
 		stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 		findTGo->text.setString(stringtable->GetW("NO"));
 		findTGo->SetOrigin(Origins::MC);
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 	};
 	ui->SetActive(false);
 
@@ -544,6 +623,8 @@ void SceneGame::Enter()
 		fTextGo->SetActive(true);
 		fTextGo = (TextGo*)FindGo("EndGame");
 		fTextGo->SetActive(true);
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 	};
 	ui->SetActive(false);
 
@@ -568,6 +649,8 @@ void SceneGame::Enter()
 	};
 	ui->OnClick = [this]() {
 		isExit = true;
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 		if (hp <= 0)
 		{
 			stageOut = true;
@@ -613,6 +696,10 @@ void SceneGame::Enter()
 		curSituation = Situation::NONE;
 		SCENE_MGR.SetDtSpeed(1);
 		currSpeed = 1;
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
+		sound = (SoundGo*)FindGo("Chain");
+		sound->Play();
 	};
 	fUiButton->SetActive(false);
 
@@ -650,6 +737,8 @@ void SceneGame::Enter()
 		fTextGo->SetActive(false);
 		fTextGo = (TextGo*)FindGo("EndGame");
 		fTextGo->SetActive(false);
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 	};
 	fUiButton->SetActive(false);
 
@@ -786,6 +875,14 @@ void SceneGame::Enter()
 
 void SceneGame::Exit()
 {
+	SoundGo* sound = (SoundGo*)FindGo("SetBgm");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("Bgm1");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("Bgm2");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("Bgm3");
+	sound->sound.stop();
 	ClearObjectPool(unitPool);
 	for (auto it : trapPool.GetUseList())
 	{
@@ -845,18 +942,11 @@ void SceneGame::Update(float dt)
 		WaveHandler(dt);
 	}
 
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Num1))
-	{
-		GameEnd();
-	}
 	else if (isWaveEnd && unitPool.GetUseList().size() == 0 &&
 		hp>0)
 	{
 		GameEnd();
 	}
-
-	//ÁÂÇ¥Âï±â Å×½ºÆ®ÄÚµå
-	//std::cout << INPUT_MGR.GetMousePos().x << "\t" << INPUT_MGR.GetMousePos().y << std::endl;
 }
 
 void SceneGame::Draw(sf::RenderWindow& window)
@@ -953,6 +1043,8 @@ void SceneGame::TrapPalateSetting()
 			tp->sprite.setTextureRect({ (int)inTrapPalate.find(i)->second * 26,0,26,26 });
 		};
 		tp->OnClick = [i,this]() {
+			SoundGo* sound = (SoundGo*)FindGo("Equip");
+			sound->Play();
 			if (curSituation == Situation::PAUSE)
 			{
 				return;
@@ -1039,6 +1131,10 @@ void SceneGame::WaveHandler(float dt)
 			count->SetActive(false);
 			WaveCountText = 6.f;
 			waveTurn = false;
+			SoundGo* sound = (SoundGo*)FindGo("Smash");
+			sound->Play();
+			sound = (SoundGo*)FindGo("Warcry");
+			sound->Play();
 		}
 		
 
@@ -1115,6 +1211,18 @@ void SceneGame::SpawnUnit(UnitGo::Types type, int spawnDoor)
 	unit->SetPosition(map->GetSpawnPoint(spawnDoor));
 	unit->sortLayer = 2;
 	unit->SetLoot(spawnDoor);
+	{
+		std::stringstream ss;
+		ss << "Hit" << Utils::RandomRange(0, 10);
+		SoundGo* onHit = (SoundGo*)FindGo(ss.str());
+		ss.str("");
+		ss<<"Hurt"<< Utils::RandomRange(1, 5);
+		SoundGo * hert = (SoundGo*)FindGo(ss.str());
+		ss.str("");
+		ss << "Fall" << Utils::RandomRange(1, 6);
+		SoundGo* fall = (SoundGo*)FindGo(ss.str());
+		unit->SetSound(onHit, hert, fall);
+	}
 	AddGo(unit);
 }
 
@@ -1247,12 +1355,34 @@ void SceneGame::MakeGhostTower(TrapGo::Types type, int index)
 	curTrapPrice = trapPrice[index];
 }
 
-void SceneGame::OnDieUnit(UnitGo* unit)
+void SceneGame::OnDieUnit(UnitGo* unit,bool fall)
 {
 	int a = unit->GetPrize();
 	money+=unit->GetPrize();
 	xp += unit->GetXp();
 	textMoneyUpdate();
+	if (!fall && unit->GetType() != UnitGo::Types::RouteShow)
+	{
+		switch (unit->GetType())
+		{
+		case UnitGo::Types::Knight:
+		{
+			std::stringstream ss;
+			ss << "DeadK" << Utils::RandomRange(1, 2);
+			SoundGo* sound = (SoundGo*)FindGo(ss.str());
+			sound->Play();
+		}
+		break;
+		default:
+		{
+			std::stringstream ss;
+			ss << "DeadW" << Utils::RandomRange(1, 4);
+			SoundGo* sound = (SoundGo*)FindGo(ss.str());
+			sound->Play();
+		}
+		break;
+		}
+	}
 	RemoveGo(unit);
 	unitPool.Return(unit);
 }
@@ -1273,6 +1403,8 @@ void SceneGame::PlayerOuch(int damage, UnitGo* unit)
 	{
 		ouchTimer = 1.f;
 	}
+	SoundGo* sound = (SoundGo*)FindGo("Ouch");
+	sound->Play();
 }
 
 const std::list<UnitGo*>* SceneGame::GetUnitList() const
@@ -1284,27 +1416,19 @@ void SceneGame::SceneChange(float dt)
 {
 	if (stageOut)
 	{
-		if (bounce)
+		blindTimer = std::max(blindTimer - dt * 4, 0.f);
+
+		if (blindTimer <= 0.f)
 		{
-			blindTimer = std::max(blindTimer - dt * 4, 0.f);
-			bounce = blindTimer > 0;
-		}
-		else
-		{
-			doorDir -= dt * 70;
-			blindTimer = std::max(blindTimer + dt * doorDir, 0.f);
-			if (blindTimer <= 0.f)
+			if (isReplay)
 			{
-				if (isReplay)
-				{
-					SCENE_MGR.ChangeScene(SceneId::Game);
-				}
-				else
-				{
-					SCENE_MGR.ChangeScene(SceneId::Stage);
-				}
-				
+				SCENE_MGR.ChangeScene(SceneId::Game);
 			}
+			else
+			{
+				SCENE_MGR.ChangeScene(SceneId::Stage);
+			}
+
 		}
 
 		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
@@ -1393,6 +1517,16 @@ void SceneGame::GameEnd()
 	ui->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f - 100.f, FRAMEWORK.GetWindowSize().y / 2.f - 20.f);
 	ui->sortLayer = 111;
 
+	SoundGo* sound = (SoundGo*)FindGo("Bgm1");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("Bgm2");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("Bgm3");
+	sound->sound.stop();
+	sound = (SoundGo*)FindGo("WinBgm");
+	sound->Play();
+	sound = (SoundGo*)FindGo("VicVoice");
+	sound->Play();
 	curSituation = Situation::PAUSE;
 }
 
@@ -1446,6 +1580,15 @@ void SceneGame::textMoneyUpdate()
 		{
 			tp->sprite.setColor(sf::Color(255, 255, 255));
 		}
+	}
+	UiButton* tp = (UiButton*)FindGo("UpgradeBox");
+	if (money < 700)
+	{
+		tp->sprite.setColor(sf::Color(50, 50, 50));
+	}
+	else
+	{
+		tp->sprite.setColor(sf::Color(255, 255, 255));
 	}
 }
 
@@ -1553,8 +1696,27 @@ void SceneGame::BuildTrap(sf::Vector2i index, int dir)
 	}
 	trap->SetType(curType);
 	trap->SetRange();
+	SoundGo* sound;
+	switch (curType)
+	{
+	case TrapGo::Types::Dart:
+	{
+		sound = (SoundGo*)FindGo("DartS");
+		trap->SetSound(sound);
+	}
+	break;
+	case TrapGo::Types::Spike:
+		sound = (SoundGo*)FindGo("SpikeS");
+		trap->SetSound(sound);
+		break;
+	case TrapGo::Types::Push:
+		sound = (SoundGo*)FindGo("PushS");
+		trap->SetSound(sound);
+		break;
+	}
 	AddGo(trap);
 	money -= curTrapPrice;
+	trapPrice[(int)curType] += 100;
 	textMoneyUpdate();
 	curSituation = Situation::NONE;
 }
@@ -1576,6 +1738,8 @@ void SceneGame::ChoiceDir()
 			ui->SetActive(true);
 			ui->OnClickField = [mouseIndex,i, this]()
 			{
+				SoundGo* sound = (SoundGo*)FindGo("Cash");
+				sound->Play();
 				BuildTrap(mouseIndex,90 * i);
 			};
 			ui->SetPosition(findSGo->GetPosition().x + (25 * (i % 2) * (2 - i)), findSGo->GetPosition().y + (25 * ((i + 1) % 2) * (-1 + i)));
@@ -1605,6 +1769,8 @@ void SceneGame::ChoiceDir()
 			ui->SetPosition(findSGo->GetPosition().x + (25 * (i % 2) * (2 - i)), findSGo->GetPosition().y + (25 * ((i + 1) % 2) * (-1 + i)));
 			ui->OnClickField = [mouseIndex, i, this]()
 			{
+				SoundGo* sound = (SoundGo*)FindGo("Cash");
+				sound->Play();
 				BuildTrap(mouseIndex, 90 * i);
 			};
 		}

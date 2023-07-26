@@ -80,6 +80,9 @@ void SceneStage::Init()
 		std::stringstream ss;
 		ss << "StageName" << i;
 		AddGo(new TextGo(ss.str()));
+		ss.str("");
+		ss << "StageClearMark" << i;
+		AddGo(new TextGo(ss.str()));
 	}
 	AddGo(new TextGo("BigStageName"));
 
@@ -103,6 +106,15 @@ void SceneStage::Init()
 	AddGo(new TextGo("NeedJewelNum"));
 	AddGo(new TextGo("Xp"));
 
+	AddGo(new SoundGo("sound/metal_lock.wav", "Lock"));
+	AddGo(new SoundGo("sound/Trap Dungeon - Main Theme.wav", "Bgm"));
+	AddGo(new SoundGo("sound/boulder_smash.wav", "Smash"));
+	AddGo(new SoundGo("sound/shaker.wav", "Shaker"));
+	AddGo(new SoundGo("sound/equip.wav", "Equip"));
+	AddGo(new SoundGo("sound/UI_Chain.wav", "Chain"));
+	AddGo(new SoundGo("sound/UI_Levelup.wav", "LvUp"));
+	AddGo(new SoundGo("sound/UI_GemImpact.wav", "Gem"));
+	AddGo(new SoundGo("sound/UI_Hover.wav", "None"));
 	worldView.setSize(windowSize / 3.5f);
 	uiView.setSize(windowSize);
 	uiView.setCenter(centerPos);
@@ -137,6 +149,10 @@ void SceneStage::Enter()
 	stageIn = false;
 	isExit = false;
 	bounce = 0;
+
+	SoundGo* sound = (SoundGo*)FindGo("Bgm");
+	sound->sound.setLoop(true);
+	sound->Play();
 
 	MakeUpgradeMenu();
 	UpgradeMenuOn(false);
@@ -253,6 +269,8 @@ void SceneStage::Enter()
 		fTextGo = (TextGo*)FindGo("EndGame");
 		fTextGo->SetActive(true);
 		isExit = true;
+		SoundGo* sound = (SoundGo*)FindGo("Shaker");
+		sound->Play();
 	};
 
 	fUiButton = (UiButton*)FindGo("UpgradeB");
@@ -274,6 +292,10 @@ void SceneStage::Enter()
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 	};
 	fUiButton->OnClick = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Gem");
+		sound->Play();
+		sound = (SoundGo*)FindGo("Chain");
+		sound->Play();
 		UpgradeMenuOn(true);
 	};
 	fUiButton = (UiButton*)FindGo("Stower0");
@@ -291,6 +313,10 @@ void SceneStage::Enter()
 		fTextGo->text.setString("");
 	};
 	fUiButton->OnClickField = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
+		sound = (SoundGo*)FindGo("Chain");
+		sound->Play();
 		SCENE_MGR.SetStage(0);
 		stageIn = true;
 	};
@@ -310,6 +336,10 @@ void SceneStage::Enter()
 		fTextGo->text.setString("");
 	};
 	fUiButton->OnClickField = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
+		sound = (SoundGo*)FindGo("Chain");
+		sound->Play();
 		SCENE_MGR.SetStage(1);
 		stageIn = true;
 	};
@@ -333,6 +363,8 @@ void SceneStage::Enter()
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 	};
 	fUiButton->OnClick = [fUiButton,this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Equip");
+		sound->Play();
 		if (Variables::CurrntLang == Languages::ENG)
 		{
 			Variables::CurrntLang = Languages::KOR;
@@ -363,6 +395,8 @@ void SceneStage::Enter()
 		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
 	};
 	fUiButton->OnClick = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 		FRAMEWORK.GetWindow().close();
 	};
 	fUiButton->SetActive(false);
@@ -386,6 +420,8 @@ void SceneStage::Enter()
 		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
 	};
 	fUiButton->OnClick = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Lock");
+		sound->Play();
 		isExit = false;
 		msgBoxTimer = 0.f;
 		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
@@ -505,6 +541,8 @@ void SceneStage::Enter()
 
 void SceneStage::Exit()
 {
+	SoundGo* sound = (SoundGo*)FindGo("Bgm");
+	sound->sound.stop();
 	Scene::Exit();
 }
 
@@ -513,15 +551,14 @@ void SceneStage::Update(float dt)
 	Scene::Update(dt);
 	SceneChange(dt);
 
-	// Title Back
-	if (INPUT_MGR.GetKeyDown(sf::Keyboard::Escape))
-	{
-		SCENE_MGR.ChangeScene(SceneId::Title);
-	}
-
 	ExitBox(dt);
 	MouseMove();
 
+	if (INPUT_MGR.GetMouseButtonDown(sf::Mouse::Left))
+	{
+		SoundGo* sound = (SoundGo*)FindGo("None");
+		sound->Play();
+	}
 	for (int i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
 	{
 		std::stringstream ss;
@@ -537,6 +574,10 @@ void SceneStage::Update(float dt)
 void SceneStage::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+	if (blindTimer <= 0 && stageIn)
+	{
+		SCENE_MGR.ChangeScene(SceneId::Game);
+	}
 }
 
 void SceneStage::MakeUpgradeMenu()
@@ -611,11 +652,15 @@ void SceneStage::MakeUpgradeMenu()
 			}
 			if (INPUT_MGR.GetMouseButtonUp(sf::Mouse::Right))
 			{
+				SoundGo* sound = (SoundGo*)FindGo("Gem");
+				sound->Play();
 				TRAP_MGR.Downgrade(i);
 				UpdateUpgrade(i);
 			}
 		};
 		uiGo->OnClick = [i,this]() {
+			SoundGo* sound = (SoundGo*)FindGo("LvUp");
+			sound->Play();
 			TRAP_MGR.Upgrade(i);
 			UpdateUpgrade(i);
 		};
@@ -640,6 +685,8 @@ void SceneStage::MakeUpgradeMenu()
 		uiGo->sprite.setScale(3.35, 3.35);
 	};
 	uiGo->OnClick = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Shaker");
+		sound->Play();
 		TRAP_MGR.UpgradeReset();
 		UpdateUpgrade(0);
 	};
@@ -663,6 +710,10 @@ void SceneStage::MakeUpgradeMenu()
 		uiGo->sprite.setScale(3.35, 3.35);
 	};
 	uiGo->OnClick = [this]() {
+		SoundGo* sound = (SoundGo*)FindGo("Equip");
+		sound->Play();
+		sound = (SoundGo*)FindGo("Chain");
+		sound->Play();
 		UpgradeMenuOn(false);
 		UpgradeStatusOn(false);
 	};
@@ -904,6 +955,7 @@ void SceneStage::UpdateUpgrade(int type)
 		ss << "TrapImage" << i<< "T";
 		TextGo* texGo = (TextGo*)FindGo(ss.str());
 		texGo->text.setString(std::to_string(TRAP_MGR.upgrade[i]));
+		texGo->SetOrigin(Origins::MC);
 	}
 
 	TextGo* texGo = (TextGo*)FindGo("TrapName");
@@ -1094,24 +1146,9 @@ void SceneStage::SceneChange(float dt)
 	}
 	else if (stageIn)
 	{
-		switch (bounce)
-		{
-		case 0:
-			blindTimer = std::max(blindTimer - dt * 4, 0.f);
-			if (blindTimer <= 0)
-			{
-				bounce++;
-			}
-			break;
-		default:
-			doorDir -= dt*70;
-			blindTimer = std::max(blindTimer + dt * doorDir, 0.f);
-			if (blindTimer <= 0.f)
-			{
-				SCENE_MGR.ChangeScene(SceneId::Game);
-			}
-			break;
-		}
+		blindTimer = std::max(blindTimer - dt * 4, 0.f);
+		SoundGo* sound = (SoundGo*)FindGo("Smash");
+		sound->Play();
 		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
 		fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 * (1 - blindTimer), 0);
 		fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");

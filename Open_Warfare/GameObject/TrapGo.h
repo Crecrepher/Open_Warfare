@@ -41,6 +41,7 @@ protected:
 	sf::RectangleShape test;
 	int damage = 2;
 	int weightPower = 0;
+	SoundGo* sound;
 
 	int maxHp = 0;
 	int hp = 0;
@@ -56,6 +57,7 @@ public:
 	int upgradePrice = 700;
 	sf::Vector2f direction = { 0,0 };
 	int range = 0;
+	
 
 	TrapGo(const std::string n = "");
 	virtual~TrapGo()override;
@@ -74,6 +76,7 @@ public:
 	void SetType(Types t);
 	void SetRange();
 	Types GetType() const;
+	void SetSound(SoundGo* sound) { this->sound = sound; }
 	
 	void Upgrade();
 };

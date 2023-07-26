@@ -40,6 +40,8 @@ void SceneTitile::Init()
 	AddGo(new RectGo("Blind"));
 	AddGo(new RectGo("Back"));
 	AddGo(new TextGo("PressStart"));
+	AddGo(new SoundGo("sound/bomb_tss.wav", "Tss"));
+	AddGo(new SoundGo("sound/battle1.wav", "Bgm"));
 	for (auto go : gameObjects)
 	{
 		go->Init();
@@ -60,6 +62,7 @@ void SceneTitile::Enter()
 	RESOURCE_MGR.LoadFromCsv("tables/TitleResourceList.csv");
 	timer = 0;
 	titleSort = 0;
+	sound = true;
 
 	SpriteGo* findSGo = (SpriteGo*)FindGo("Developer");
 	findSGo->SetOrigin(Origins::MC);
@@ -112,6 +115,8 @@ void SceneTitile::Enter()
 void SceneTitile::Exit()
 {
 	Scene::Exit();
+	SoundGo* tss = (SoundGo*)FindGo("Bgm");
+	tss->sound.stop();
 }
 
 void SceneTitile::Update(float dt)
@@ -121,6 +126,12 @@ void SceneTitile::Update(float dt)
 	{
 	case 0:
 	{
+		if (sound)
+		{
+			SoundGo* tss = (SoundGo*)FindGo("Tss");
+			tss->Play();
+			sound = false;
+		}
 		timer = std::min(timer + dt, 1.f);
 		SpriteGo* findSGo = (SpriteGo*)FindGo("Developer");
 		findSGo->sprite.setColor(sf::Color(255, 255, 255, 255 * timer / 1));
@@ -128,6 +139,7 @@ void SceneTitile::Update(float dt)
 		{
 			titleSort++;
 			timer = 0;
+			sound = true;
 		}
 	}
 		break;
@@ -165,6 +177,13 @@ void SceneTitile::Update(float dt)
 	break;
 	case 4:
 	{
+		if (sound)
+		{
+			SoundGo* tss = (SoundGo*)FindGo("Bgm");
+			tss->sound.setLoop(true);
+			tss->Play();
+			sound = false;
+		}
 		timer += dt, 1.f;
 		SpriteGo* findSGo = (SpriteGo*)FindGo("Title");
 		findSGo->sprite.setColor(sf::Color(255, 255, 255, std::min(255 * timer / 0.33f,255.f)));

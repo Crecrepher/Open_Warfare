@@ -57,6 +57,10 @@ protected:
 
 	int prevRotate = 0;
 
+	SoundGo* onHitS;
+	SoundGo* hurtS;
+	SoundGo* FallS;
+	bool fallOn = false;
 public:
 	sf::RectangleShape routePicker;
 	sf::Vector2f direction = { 0,0 };
@@ -74,6 +78,7 @@ public:
 
 	void SetMap(MapToolGo* map) { this->map = map; }
 	void SetType(Types t);
+	void SetSound(SoundGo* onHitS, SoundGo* hurtS, SoundGo* FallS);
 	Types GetType() const;
 	int GetPrize() { return prize; }
 	int GetXp() { return xp; }

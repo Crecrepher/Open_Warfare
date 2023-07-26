@@ -116,7 +116,7 @@ public:
 	void MakeGhostTower(TrapGo::Types type,int index);
 	void CancelBuilding();
 
-	void OnDieUnit(UnitGo* unit);
+	void OnDieUnit(UnitGo* unit, bool fall = false);
 	void PlayerOuch(int damage, UnitGo* unit);
 	const std::list<UnitGo*>* GetUnitList()const;
 
