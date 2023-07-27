@@ -31,9 +31,6 @@ void TrapMgr::Init()
 	{
 		is.read((char*)&upgrade[i], sizeof(int));
 	}
-	upgrade[0] = 20;
-	upgrade[1] = 20;
-	upgrade[2] = 20;
 	return;
 	
 }
