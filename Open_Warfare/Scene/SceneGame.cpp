@@ -174,7 +174,7 @@ void SceneGame::Init()
 		trap->textureId = "graphics/spike_trap.png";
 		trap->SetMap(map);
 		trap->OnClickField = [this, trap]() {
-			if (clickBlocker)
+			if (clickBlocker && curSituation != Situation::POPMENU)
 			{
 				Pop = true;
 				curSituation = Situation::POPMENU;
@@ -469,7 +469,7 @@ void SceneGame::Enter()
 	ui->SetOrigin(Origins::MC);
 	ui->sortLayer = 51;
 	ui->OnClickField = [this]() {
-		if (selectedTrap->upgradePrice > money)
+		if (selectedTrap->upgradePrice > money || !clickBlocker)
 		{
 			return;
 		}
@@ -479,6 +479,7 @@ void SceneGame::Enter()
 		curSituation = Situation::NONE;
 		SoundGo* sound = (SoundGo*)FindGo("Gem");
 		sound->Play();
+		clickBlocker = false;
 	};
 	ui->SetActive(false);
 
