@@ -115,8 +115,8 @@ void TrapMgr::XpCalculate()
 	{
 		xpCur -= xpNeed;
 		playerLevel++;
-		xpNeed += 1000;
-		jewel++;
+		xpNeed += 500;
+		jewel += 3;
 	}
 }
 
