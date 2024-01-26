@@ -22,3 +22,12 @@ UP_DISC1,Lclick - 1 level Up
 UP_DISC2,Rclick - 1 level Down
 TRAP_NAME3,Push Trap
 WAVE,Wave
+STAGE3,Hook
+STAGE4,Mine
+STAGE5,Double Slit
+STAGE6,Storage
+STAGE7,Tunnel
+STAGE8,Boundary
+STAGE9,Gateway
+STAGE10,Rock Cave
+STAGE11,Echo

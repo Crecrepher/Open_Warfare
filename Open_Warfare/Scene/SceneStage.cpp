@@ -58,8 +58,12 @@ void SceneStage::Init()
 	AddGo(new UiButton("graphics/exit_box.png", "ExitGame"));
 	AddGo(new UiButton("graphics/option.png", "OptionB"));
 	AddGo(new UiButton("graphics/upgrade.png", "UpgradeB"));
-	AddGo(new UiButton("graphics/stage_tower.png", "Stower0"));
-	AddGo(new UiButton("graphics/stage_tower.png", "Stower1"));
+	for (int i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
+	{
+		std::stringstream ss;
+		ss << "Stower" << i;
+		AddGo(new UiButton("graphics/stage_tower.png", ss.str()));
+	}
 	AddGo(new UiButton("graphics/bt_thick.png", "YesB"));
 	AddGo(new UiButton("graphics/bt_thick.png", "NoB"));
 	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
@@ -299,51 +303,36 @@ void SceneStage::Enter()
 		sound->Play();
 		UpgradeMenuOn(true);
 	};
-	fUiButton = (UiButton*)FindGo("Stower0");
-	fUiButton->SetOrigin(Origins::BC);
-	fUiButton->SetPosition(100, 100);
-	fUiButton->sortLayer = 1;
-	fUiButton->OnEnterField = [this]() {
-		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
-		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
-		fTextGo->text.setString(stringtable->GetW("STAGE0"));
-		fTextGo->SetOrigin(Origins::MC);
-	};
-	fUiButton->OnExitField = [this]() {
-		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
-		fTextGo->text.setString("");
-	};
-	fUiButton->OnClickField = [this]() {
-		SoundGo* sound = (SoundGo*)FindGo("Lock");
-		sound->Play();
-		sound = (SoundGo*)FindGo("Chain");
-		sound->Play();
-		SCENE_MGR.SetStage(0);
-		stageIn = true;
-	};
 
-	fUiButton = (UiButton*)FindGo("Stower1");
-	fUiButton->SetOrigin(Origins::BC);
-	fUiButton->SetPosition(200, 100);
-	fUiButton->sortLayer = 1;
-	fUiButton->OnEnterField = [this]() {
-		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
-		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
-		fTextGo->text.setString(stringtable->GetW("STAGE1"));
-		fTextGo->SetOrigin(Origins::MC);
-	};
-	fUiButton->OnExitField = [this]() {
-		TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
-		fTextGo->text.setString("");
-	};
-	fUiButton->OnClickField = [this]() {
-		SoundGo* sound = (SoundGo*)FindGo("Lock");
-		sound->Play();
-		sound = (SoundGo*)FindGo("Chain");
-		sound->Play();
-		SCENE_MGR.SetStage(1);
-		stageIn = true;
-	};
+	for (size_t i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
+	{
+		std::stringstream ss;
+		ss << "Stower" << i;
+		fUiButton = (UiButton*)FindGo(ss.str());
+		fUiButton->SetOrigin(Origins::BC);
+		fUiButton->SetPosition(((i / 4) + 1) * 100, ((i % 4) + 1) * 100);
+		fUiButton->sortLayer = 1;
+		fUiButton->OnEnterField = [this,i]() {
+			TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
+			auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
+			std::stringstream ss2;
+			ss2 << "STAGE" << i;
+			fTextGo->text.setString(stringtable->GetW(ss2.str()));
+			fTextGo->SetOrigin(Origins::MC);
+		};
+		fUiButton->OnExitField = [this]() {
+			TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
+			fTextGo->text.setString("");
+		};
+		fUiButton->OnClickField = [this,i]() {
+			SoundGo* sound = (SoundGo*)FindGo("Lock");
+			sound->Play();
+			sound = (SoundGo*)FindGo("Chain");
+			sound->Play();
+			SCENE_MGR.SetStage(i);
+			stageIn = true;
+		};
+	}
 
 	fUiButton = (UiButton*)FindGo("OptionB");
 	fUiButton->SetOrigin(Origins::BR);

@@ -78,7 +78,10 @@ std::vector<int> TrapMgr::GetUpgrade()
 void TrapMgr::BonusJewel(int jewelNum,int stageNum)
 {
 	jewel += jewelNum - clearMap[stageNum];
-	clearMap[stageNum] = jewelNum;
+	if (clearMap[stageNum] < jewelNum)
+	{
+		clearMap[stageNum] = jewelNum;
+	}
 }
 
 void TrapMgr::Upgrade(int trapNum)

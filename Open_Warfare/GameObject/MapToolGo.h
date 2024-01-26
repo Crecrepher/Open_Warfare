@@ -13,6 +13,16 @@ public:
 		None = -1,
 		First,
 		Second,
+		Third,
+		Four,
+		Five,
+		Six,
+		Seven,
+		Eight,
+		Nine,
+		Ten,
+		Eleven,
+		Twelve,
 		MapCount,
 	};
 

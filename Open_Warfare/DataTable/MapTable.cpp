@@ -1,12 +1,17 @@
 #include "stdafx.h"
 #include "MapTable.h"
 #include "rapidcsv.h"
+#include "TrapGo.h"
 
 bool MapTable::Load()
 {
 	std::vector< std::string >filenames;
-	filenames.push_back("maps/map0.csv");
-	filenames.push_back("maps/map1.csv");
+	for (size_t i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	{
+		std::stringstream ss;
+		ss << "maps/map" << i << ".csv";
+		filenames.push_back(ss.str());
+	}
 	
 	for (int i = 0; i < tables.size(); ++i)
 	{
