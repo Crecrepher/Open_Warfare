@@ -5,8 +5,13 @@
 bool WaveTable::Load()
 {
 	std::vector< std::string >filenames;
-	filenames.push_back("waves/map0.csv");
-	filenames.push_back("waves/map1.csv");
+	for (size_t i = 0; i < tables.size(); i++)
+	{
+		std::stringstream ss;
+		ss << "waves/map" << i << ".csv";
+		filenames.push_back(ss.str());
+	}
+	
 	for (int i = 0; i < tables.size(); ++i)
 	{
 		rapidcsv::Document doc(filenames[i]);

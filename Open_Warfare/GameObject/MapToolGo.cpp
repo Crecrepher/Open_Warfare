@@ -737,9 +737,9 @@ std::vector<std::vector<int>> MapToolGo::GetLoot(sf::Vector2i start)
 {
 	std::vector<std::vector<int>> twoDArray;
 	int dataIndex = 0;
-	for (int i = 0; i < width; ++i) {
+	for (int i = 0; i < height; ++i) {
 		std::vector<int> row;
-		for (int j = 0; j < height; ++j) {
+		for (int j = 0; j < width; ++j) {
 			if (mapInfo[dataIndex] == 0 ||
 				mapInfo[dataIndex] == 3 ||
 				mapInfo[dataIndex] == 2)
@@ -760,18 +760,23 @@ std::vector<std::vector<int>> MapToolGo::GetLoot(sf::Vector2i start)
 			{
 				row.push_back(mapInfo[dataIndex]);
 			}
+
 			++dataIndex;
 		}
 		twoDArray.push_back(row);
 	}
 
 	AS as;
-	as.ROW = width;
-	as.COL = height;
+	as.ROW = height;
+	as.COL = width;
 	AS::Pair src = { start.y,start.x };
 	AS::Pair dst = { portal.y,portal.x };
 	if (as.aStarSearch(twoDArray, src, dst));
-	else std::cout << "실패.";
+	else
+	{
+		as.PrintMap();
+		std::cout << "실패.";
+	}
 
 	return twoDArray;
 }

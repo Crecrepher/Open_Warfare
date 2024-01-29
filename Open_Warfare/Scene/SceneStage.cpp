@@ -28,7 +28,7 @@ SceneStage::~SceneStage()
 void SceneStage::Init()
 {
 	Release();
-	
+
 	sf::Vector2f windowSize = FRAMEWORK.GetWindowSize();
 	sf::Vector2f centerPos = windowSize * 0.5f;
 
@@ -49,7 +49,7 @@ void SceneStage::Init()
 	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
 	{
 		std::stringstream ss;
-		ss << "TrapImage"<<i;
+		ss << "TrapImage" << i;
 		AddGo(new SpriteGo("graphics/trap_icon.png", ss.str()));
 		ss << "T";
 		AddGo(new TextGo(ss.str()));
@@ -171,8 +171,8 @@ void SceneStage::Enter()
 
 	SpriteGo* fSpriteGo = (SpriteGo*)FindGo("Map");
 	fSpriteGo->SetOrigin(Origins::TL);
-	fSpriteGo->SetPosition(0,0);
-	worldView.setCenter(fSpriteGo->GetSize()/2.f);
+	fSpriteGo->SetPosition(0, 0);
+	worldView.setCenter(fSpriteGo->GetSize() / 2.f);
 
 	fSpriteGo = (SpriteGo*)FindGo("EdgeUp");
 	fSpriteGo->SetOrigin(Origins::TL);
@@ -182,20 +182,20 @@ void SceneStage::Enter()
 
 	fSpriteGo = (SpriteGo*)FindGo("EdgeDown");
 	fSpriteGo->SetOrigin(Origins::TR);
-	fSpriteGo->SetSize(FRAMEWORK.GetWindowSize().x /fSpriteGo->GetSize().x, -FRAMEWORK.GetWindowSize().x / fSpriteGo->GetSize().x);
+	fSpriteGo->SetSize(FRAMEWORK.GetWindowSize().x / fSpriteGo->GetSize().x, -FRAMEWORK.GetWindowSize().x / fSpriteGo->GetSize().x);
 	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x, FRAMEWORK.GetWindowSize().y);
 	fSpriteGo->sortLayer = 100;
 
 	fSpriteGo = (SpriteGo*)FindGo("StageName");
 	fSpriteGo->SetOrigin(Origins::TC);
-	fSpriteGo->SetSize(3,3);
-	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x/2.f,0);
+	fSpriteGo->SetSize(3, 3);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, 0);
 	fSpriteGo->sortLayer = 101;
 
 	fSpriteGo = (SpriteGo*)FindGo("XpCaseBack");
 	fSpriteGo->SetOrigin(Origins::TC);
 	fSpriteGo->SetSize(3, 3);
-	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y-70.f);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f, FRAMEWORK.GetWindowSize().y - 70.f);
 	fSpriteGo->sortLayer = 102;
 
 	fSpriteGo = (SpriteGo*)FindGo("XpCaseFront");
@@ -206,8 +206,8 @@ void SceneStage::Enter()
 
 	fSpriteGo = (SpriteGo*)FindGo("XpLiquid");
 	fSpriteGo->SetOrigin(Origins::TL);
-	fSpriteGo->SetSize(1.485f* TRAP_MGR.GetXpValue(), 3.f);
-	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 4.f+43.f, FRAMEWORK.GetWindowSize().y - 62.f);
+	fSpriteGo->SetSize(1.485f * TRAP_MGR.GetXpValue(), 3.f);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 4.f + 43.f, FRAMEWORK.GetWindowSize().y - 62.f);
 	fSpriteGo->sortLayer = 103;
 
 	fSpriteGo = (SpriteGo*)FindGo("LevelBack");
@@ -225,7 +225,7 @@ void SceneStage::Enter()
 	fSpriteGo = (SpriteGo*)FindGo("SceneDoorLeft");
 	fSpriteGo->SetOrigin(Origins::TR);
 	fSpriteGo->SetSize(FRAMEWORK.GetWindowSize().y / fSpriteGo->GetSize().y, FRAMEWORK.GetWindowSize().y / fSpriteGo->GetSize().y);
-	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, 0);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, 0);
 	fSpriteGo->sortLayer = 105;
 
 	fSpriteGo = (SpriteGo*)FindGo("SceneDoorRight");
@@ -237,7 +237,7 @@ void SceneStage::Enter()
 	fSpriteGo = (SpriteGo*)FindGo("MsgBox");
 	fSpriteGo->SetOrigin(Origins::MC);
 	fSpriteGo->SetSize(2.5f, 2.5f);
-	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2+10.f, FRAMEWORK.GetWindowSize().y / 2);
+	fSpriteGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2 + 10.f, FRAMEWORK.GetWindowSize().y / 2);
 	fSpriteGo->sortLayer = 106;
 	fSpriteGo->SetActive(false);
 
@@ -245,7 +245,7 @@ void SceneStage::Enter()
 	UiButton* fUiButton = (UiButton*)FindGo("ExitGame");
 	fUiButton->SetOrigin(Origins::TR);
 	fUiButton->SetSize(3, 3);
-	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x-25.f,25.f );
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x - 25.f, 25.f);
 	fUiButton->sortLayer = 101;
 	fUiButton->OnStay = [fUiButton]() {
 		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
@@ -256,10 +256,10 @@ void SceneStage::Enter()
 		{
 			fUiButton->sprite.setColor(sf::Color(sf::Color::White));
 		}
-	};
+		};
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setColor(sf::Color(sf::Color::White));
-	};
+		};
 	fUiButton->OnClick = [this]() {
 		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
 		fSpriteGo->SetActive(true);
@@ -276,33 +276,33 @@ void SceneStage::Enter()
 		isExit = true;
 		SoundGo* sound = (SoundGo*)FindGo("Shaker");
 		sound->Play();
-	};
+		};
 
 	fUiButton = (UiButton*)FindGo("UpgradeB");
 	fUiButton->SetOrigin(Origins::BR);
 	fUiButton->SetSize(3, 3);
-	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x - 117.f, FRAMEWORK.GetWindowSize().y-17.f);
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x - 117.f, FRAMEWORK.GetWindowSize().y - 17.f);
 	fUiButton->sortLayer = 103;
 	fUiButton->OnStay = [fUiButton]() {
 		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
 		{
-			fUiButton->sprite.setTextureRect({0,-5,24,24});
+			fUiButton->sprite.setTextureRect({ 0,-5,24,24 });
 		}
 		else
 		{
 			fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 		}
-	};
+		};
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
-	};
+		};
 	fUiButton->OnClick = [this]() {
 		SoundGo* sound = (SoundGo*)FindGo("Gem");
 		sound->Play();
 		sound = (SoundGo*)FindGo("Chain");
 		sound->Play();
 		UpgradeMenuOn(true);
-	};
+		};
 
 	for (size_t i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
 	{
@@ -310,28 +310,28 @@ void SceneStage::Enter()
 		ss << "Stower" << i;
 		fUiButton = (UiButton*)FindGo(ss.str());
 		fUiButton->SetOrigin(Origins::BC);
-		fUiButton->SetPosition(((i / 4) + 1) * 100, ((i % 4) + 1) * 100);
+		fUiButton->SetPosition(((i % 4)) * 120 + 100, ((i / 4) + 1) * 80 + 20);
 		fUiButton->sortLayer = 1;
-		fUiButton->OnEnterField = [this,i]() {
+		fUiButton->OnEnterField = [this, i]() {
 			TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
 			auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 			std::stringstream ss2;
 			ss2 << "STAGE" << i;
 			fTextGo->text.setString(stringtable->GetW(ss2.str()));
 			fTextGo->SetOrigin(Origins::MC);
-		};
+			};
 		fUiButton->OnExitField = [this]() {
 			TextGo* fTextGo = (TextGo*)FindGo("BigStageName");
 			fTextGo->text.setString("");
-		};
-		fUiButton->OnClickField = [this,i]() {
+			};
+		fUiButton->OnClickField = [this, i]() {
 			SoundGo* sound = (SoundGo*)FindGo("Lock");
 			sound->Play();
 			sound = (SoundGo*)FindGo("Chain");
 			sound->Play();
 			SCENE_MGR.SetStage(i);
 			stageIn = true;
-		};
+			};
 	}
 
 	fUiButton = (UiButton*)FindGo("OptionB");
@@ -348,11 +348,11 @@ void SceneStage::Enter()
 		{
 			fUiButton->sprite.setTextureRect({ 0,0,24,24 });
 		}
-	};
+		};
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setTextureRect({ 0,0,24,24 });
-	};
-	fUiButton->OnClick = [fUiButton,this]() {
+		};
+	fUiButton->OnClick = [fUiButton, this]() {
 		SoundGo* sound = (SoundGo*)FindGo("Equip");
 		sound->Play();
 		if (Variables::CurrntLang == Languages::ENG)
@@ -364,12 +364,12 @@ void SceneStage::Enter()
 			Variables::CurrntLang = Languages::ENG;
 		}
 		UpgradeStatusOn(false);
-	};
+		};
 
 	fUiButton = (UiButton*)FindGo("YesB");
 	fUiButton->SetOrigin(Origins::MC);
 	fUiButton->SetSize(2.5f, 2.5f);
-	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x /2-250, FRAMEWORK.GetWindowSize().y / 2+70);
+	fUiButton->SetPosition(FRAMEWORK.GetWindowSize().x / 2 - 250, FRAMEWORK.GetWindowSize().y / 2 + 70);
 	fUiButton->sortLayer = 111;
 	fUiButton->OnStay = [fUiButton]() {
 		if (INPUT_MGR.GetMouseButton(sf::Mouse::Left))
@@ -380,15 +380,15 @@ void SceneStage::Enter()
 		{
 			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
 		}
-	};
+		};
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
-	};
+		};
 	fUiButton->OnClick = [this]() {
 		SoundGo* sound = (SoundGo*)FindGo("Lock");
 		sound->Play();
 		FRAMEWORK.GetWindow().close();
-	};
+		};
 	fUiButton->SetActive(false);
 
 	fUiButton = (UiButton*)FindGo("NoB");
@@ -405,10 +405,10 @@ void SceneStage::Enter()
 		{
 			fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
 		}
-	};
+		};
 	fUiButton->OnExit = [fUiButton]() {
 		fUiButton->sprite.setTexture(*RESOURCE_MGR.GetTexture("graphics/bt_thick.png"));
-	};
+		};
 	fUiButton->OnClick = [this]() {
 		SoundGo* sound = (SoundGo*)FindGo("Lock");
 		sound->Play();
@@ -426,19 +426,19 @@ void SceneStage::Enter()
 		fTextGo->SetActive(false);
 		fTextGo = (TextGo*)FindGo("EndGame");
 		fTextGo->SetActive(false);
-	};
+		};
 	fUiButton->SetActive(false);
 
 	fUiButton = (UiButton*)FindGo("XpCaseFront");
 	fUiButton->OnStay = [this]() {
 		TextGo* findTGo = (TextGo*)FindGo("Xp");
 		findTGo->SetActive(true);
-		findTGo->SetPosition(INPUT_MGR.GetMousePos().x+20.f, INPUT_MGR.GetMousePos().y);
-	};
+		findTGo->SetPosition(INPUT_MGR.GetMousePos().x + 20.f, INPUT_MGR.GetMousePos().y);
+		};
 	fUiButton->OnExit = [this]() {
 		TextGo* findTGo = (TextGo*)FindGo("Xp");
 		findTGo->SetActive(false);
-	};
+		};
 
 
 	TextGo* fTextGo = (TextGo*)FindGo("PlayerLevel");
@@ -508,7 +508,7 @@ void SceneStage::Enter()
 		fTextGo->sortOrder = -1;
 
 		ss.str("");
-		ss << "graphics/cl" << TRAP_MGR.GetClearMap()[i]<<".png";
+		ss << "graphics/cl" << TRAP_MGR.GetClearMap()[i] << ".png";
 		clear->sprite.setTexture(*RESOURCE_MGR.GetTexture(ss.str()));
 		ss.str("");
 		ss << "Stower" << i;
@@ -593,7 +593,7 @@ void SceneStage::MakeUpgradeMenu()
 
 	SpriteGo* spGo = (SpriteGo*)FindGo("UpgradeBack");
 	spGo->SetSize(3.35, 3.35);
-	spGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, FRAMEWORK.GetWindowSize().y+23.f);
+	spGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, FRAMEWORK.GetWindowSize().y + 23.f);
 	spGo->SetOrigin(Origins::BC);
 	spGo->sortLayer = 112;
 
@@ -634,16 +634,16 @@ void SceneStage::MakeUpgradeMenu()
 		uiGo->SetPosition(130 + (i * 150), 300);
 		uiGo->SetOrigin(Origins::MC);
 		uiGo->sortLayer = 113;
-		uiGo->OnEnter = [i,this]() {
+		uiGo->OnEnter = [i, this]() {
 			UpgradeStatusOn(true);
 			UpdateUpgrade(i);
-		};
-		uiGo->OnExit= [i, spGo,this]() {
+			};
+		uiGo->OnExit = [i, spGo, this]() {
 			UpgradeStatusOn(false);
 			spGo->sprite.setTextureRect({ i * 26,0,26,26 });
-		};
-		uiGo->OnStay = [uiGo, spGo,i,this]() {
-			if (INPUT_MGR.GetMouseButton(sf::Mouse::Left)||
+			};
+		uiGo->OnStay = [uiGo, spGo, i, this]() {
+			if (INPUT_MGR.GetMouseButton(sf::Mouse::Left) ||
 				INPUT_MGR.GetMouseButton(sf::Mouse::Right))
 			{
 				spGo->sprite.setTextureRect({ i * 26,-5,26,26 });
@@ -659,13 +659,13 @@ void SceneStage::MakeUpgradeMenu()
 				TRAP_MGR.Downgrade(i);
 				UpdateUpgrade(i);
 			}
-		};
-		uiGo->OnClick = [i,this]() {
+			};
+		uiGo->OnClick = [i, this]() {
 			SoundGo* sound = (SoundGo*)FindGo("LvUp");
 			sound->Play();
 			TRAP_MGR.Upgrade(i);
 			UpdateUpgrade(i);
-		};
+			};
 	}
 
 	uiGo = (UiButton*)FindGo("ReturnB");
@@ -682,16 +682,16 @@ void SceneStage::MakeUpgradeMenu()
 		{
 			uiGo->sprite.setScale(3.35, 3.35);
 		}
-	};
+		};
 	uiGo->OnExit = [uiGo]() {
 		uiGo->sprite.setScale(3.35, 3.35);
-	};
+		};
 	uiGo->OnClick = [this]() {
 		SoundGo* sound = (SoundGo*)FindGo("Shaker");
 		sound->Play();
 		TRAP_MGR.UpgradeReset();
 		UpdateUpgrade(0);
-	};
+		};
 
 	uiGo = (UiButton*)FindGo("OkayB");
 	uiGo->SetOrigin(Origins::MC);
@@ -707,10 +707,10 @@ void SceneStage::MakeUpgradeMenu()
 		{
 			uiGo->sprite.setScale(3.35, 3.35);
 		}
-	};
+		};
 	uiGo->OnExit = [uiGo]() {
 		uiGo->sprite.setScale(3.35, 3.35);
-	};
+		};
 	uiGo->OnClick = [this]() {
 		SoundGo* sound = (SoundGo*)FindGo("Equip");
 		sound->Play();
@@ -718,7 +718,7 @@ void SceneStage::MakeUpgradeMenu()
 		sound->Play();
 		UpgradeMenuOn(false);
 		UpgradeStatusOn(false);
-	};
+		};
 
 	texGo = (TextGo*)FindGo("Upgrade");
 	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
@@ -726,7 +726,7 @@ void SceneStage::MakeUpgradeMenu()
 	texGo->text.setString(stringtable->GetW("UPGRADE"));
 	texGo->text.setOutlineColor(sf::Color::Black);
 	texGo->text.setOutlineThickness(3.f);
-	texGo->SetPosition(FRAMEWORK.GetWindowSize().x/2, 40);
+	texGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2, 40);
 	texGo->SetOrigin(Origins::TC);
 	texGo->sortLayer = 112;
 	texGo->text.setCharacterSize(40);
@@ -758,7 +758,7 @@ void SceneStage::MakeUpgradeMenu()
 	texGo->SetOrigin(Origins::TL);
 	texGo->sortLayer = 112;
 	texGo->text.setCharacterSize(30);
-	texGo->text.setFillColor(sf::Color(150, 255, 150,255));
+	texGo->text.setFillColor(sf::Color(150, 255, 150, 255));
 
 	texGo = (TextGo*)FindGo("Grade");
 	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
@@ -835,11 +835,11 @@ void SceneStage::MakeUpgradeMenu()
 	texGo->text.setOutlineColor(sf::Color::Black);
 	texGo->text.setOutlineThickness(3.f);
 	texGo->text.setString(std::to_string(TRAP_MGR.GetCurJewel()));
-	texGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f- 260.f, FRAMEWORK.GetWindowSize().y - 85.f);
+	texGo->SetPosition(FRAMEWORK.GetWindowSize().x / 2.f - 260.f, FRAMEWORK.GetWindowSize().y - 85.f);
 	texGo->SetOrigin(Origins::MC);
 	texGo->sortLayer = 112;
 	texGo->text.setCharacterSize(40);
-	
+
 	texGo = (TextGo*)FindGo("CurLevelNum");
 	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
 	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[0]));
@@ -852,7 +852,7 @@ void SceneStage::MakeUpgradeMenu()
 	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
 	{
 		std::stringstream ss;
-		ss << TRAP_MGR.upgrade[0]-1 << "%";
+		ss << TRAP_MGR.upgrade[0] - 1 << "%";
 		texGo->text.setString(ss.str());
 	}
 	texGo->SetPosition(1285, 230);
@@ -864,7 +864,7 @@ void SceneStage::MakeUpgradeMenu()
 	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
 	{
 		std::stringstream ss;
-		ss << std::min(TRAP_MGR.upgrade[0]/5,3)+1;
+		ss << std::min(TRAP_MGR.upgrade[0] / 5, 3) + 1;
 		texGo->text.setString(ss.str());
 	}
 	texGo->SetPosition(1125, 270);
@@ -874,7 +874,7 @@ void SceneStage::MakeUpgradeMenu()
 
 	texGo = (TextGo*)FindGo("NextLevelNum");
 	texGo->text.setFont(*RESOURCE_MGR.GetFont("fonts/BMDOHYEON.ttf"));
-	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[0]+1));
+	texGo->text.setString(std::to_string(TRAP_MGR.upgrade[0] + 1));
 	texGo->SetPosition(1270, 350);
 	texGo->SetOrigin(Origins::TL);
 	texGo->sortLayer = 112;
@@ -950,11 +950,11 @@ void SceneStage::UpgradeMenuOn(bool on)
 void SceneStage::UpdateUpgrade(int type)
 {
 	SpriteGo* spGo = (SpriteGo*)FindGo("TrapInfoImg");
-	spGo->sprite.setTextureRect({ 26*type,0,26,26 });
+	spGo->sprite.setTextureRect({ 26 * type,0,26,26 });
 	for (int i = 0; i < (int)TrapGo::Types::TypeCount; i++)
 	{
 		std::stringstream ss;
-		ss << "TrapImage" << i<< "T";
+		ss << "TrapImage" << i << "T";
 		TextGo* texGo = (TextGo*)FindGo(ss.str());
 		texGo->text.setString(std::to_string(TRAP_MGR.upgrade[i]));
 		texGo->SetOrigin(Origins::MC);
@@ -965,7 +965,7 @@ void SceneStage::UpdateUpgrade(int type)
 	{
 		auto stringtable = DATATABLE_MGR.Get<StringTable>(DataTable::Ids::String);
 		std::stringstream ss;
-		ss << "TRAP_NAME" << type+1;
+		ss << "TRAP_NAME" << type + 1;
 		texGo->text.setString(stringtable->GetW(ss.str()));
 	}
 	texGo = (TextGo*)FindGo("CurJewel");
@@ -1181,7 +1181,7 @@ void SceneStage::MouseMove()
 			mouseMove = INPUT_MGR.GetMousePos() / 3.f + worldView.getCenter();
 		}
 		worldView.setCenter(
-			Utils::Clamp(mouseMove - INPUT_MGR.GetMousePos() / 3.f, worldView.getSize() / 2.f, sf::Vector2f{mapBounds.left+mapBounds.width,mapBounds.top+mapBounds.height} - worldView.getSize() / 2.f));
+			Utils::Clamp(mouseMove - INPUT_MGR.GetMousePos() / 3.f, worldView.getSize() / 2.f, sf::Vector2f{ mapBounds.left + mapBounds.width,mapBounds.top + mapBounds.height } - worldView.getSize() / 2.f));
 	}
 }
 
@@ -1189,9 +1189,9 @@ void SceneStage::ExitBox(float dt)
 {
 	if (isExit && msgBoxTimer < 1)
 	{
-		msgBoxTimer = std::min(msgBoxTimer + dt*5, 1.f);
+		msgBoxTimer = std::min(msgBoxTimer + dt * 5, 1.f);
 		SpriteGo* fSpriteGo = (SpriteGo*)FindGo("MsgBox");
-		fSpriteGo->SetSize(2.5f*(msgBoxTimer/1), 2.5f * (msgBoxTimer / 1));
+		fSpriteGo->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
 		UiButton* fUiButton = (UiButton*)FindGo("YesB");
 		fUiButton->SetSize(2.5f * (msgBoxTimer / 1), 2.5f * (msgBoxTimer / 1));
 		fUiButton = (UiButton*)FindGo("NoB");
@@ -1201,7 +1201,7 @@ void SceneStage::ExitBox(float dt)
 		fTextGo = (TextGo*)FindGo("NoT");
 		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
 		fTextGo = (TextGo*)FindGo("EndGame");
-		fTextGo->text.setScale((msgBoxTimer / 1),(msgBoxTimer / 1));
+		fTextGo->text.setScale((msgBoxTimer / 1), (msgBoxTimer / 1));
 	}
 
 }

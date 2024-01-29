@@ -6,7 +6,7 @@
 bool MapTable::Load()
 {
 	std::vector< std::string >filenames;
-	for (size_t i = 0; i < (int)TrapGo::Types::TypeCount; i++)
+	for (size_t i = 0; i < (int)MapToolGo::Stages::MapCount; i++)
 	{
 		std::stringstream ss;
 		ss << "maps/map" << i << ".csv";
@@ -27,7 +27,7 @@ bool MapTable::Load()
 			std::vector<int> row = doc.GetRow<int>(j);
 			mInfo.insert(mInfo.end(), row.begin(), row.end());
 		}
-		tables[i].insert({ mapCode, {texId,mInfo,(int)doc.GetRowCount()-4,(int)doc.GetColumnCount()} });
+		tables[i].insert({ mapCode, {texId,mInfo,(int)doc.GetColumnCount(),(int)doc.GetRowCount() - 4} });
 	}
 
 	return true;
